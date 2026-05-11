@@ -1,0 +1,71 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "fullName": "Alonso Higa",
+      "email": "alonso@gmail.com",
+      "password": "123456",
+      "roleId": 1
+
+    },
+    {
+      "id": 2,
+      "fullName": "Sergio Higa",
+      "email": "sergio@gmail.com",
+      "password": "123456",
+      "roleId": 2
+    }
+  ,
+    {
+      "id": 3,
+      "fullName": "Carlos Perez",
+      "email": "carlos@gmail.com",
+      "password": "123456",
+      "roleId": 3
+    }
+  ],
+  "role": [
+    {
+      "id": 1,
+      "name": "Visitor"
+    },
+    {
+      "id": 2,
+      "name": "Administrator"
+    },{
+      "id": 3,
+      "name": "Worker"
+    }
+  ],
+  "subscriptionPlans": [
+    {
+      "id": "1111-2222-3333-4444",
+      "name": "Free",
+      "price": {
+        "amount": 0.0,
+        "currency": "USD"
+      },
+      "warehouseLimit": 1
+    },
+    {
+      "id": "5555-6666-7777-8888",
+      "name": "Premium",
+      "price": {
+        "amount": 29.99,
+        "currency": "USD"
+      },
+      "warehouseLimit": 10
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": "9999-aaaa-bbbb-cccc",
+      "userId": 1,
+      "planId": "1111-2222-3333-4444",
+      "status": "ACTIVE",
+      "startDate": "2026-05-01T00:00:00Z",
+      "endDate": "2026-06-01T00:00:00Z"
+    }
+  ]
+
+}
