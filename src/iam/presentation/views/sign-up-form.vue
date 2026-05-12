@@ -1,10 +1,12 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useIamStore } from '../../application/iam.store.js';
 import { User } from '../../domain/model/user.entity.js';
 import ToolbarContent from "../components/toolbar-content.vue";
 
+const { t } = useI18n();
 const router = useRouter();
 const store = useIamStore();
 const { signUp } = store;
@@ -22,13 +24,13 @@ const onSignUp = () => {
   errorMessage.value = '';
 
   if (!fullName.value || !companyName.value || !email.value || !password.value) {
-    errorMessage.value = 'All fields are required.';
+    errorMessage.value = t('iam.signUp.errors.required');
     isSubmitting.value = false;
     return;
   }
 
   if (password.value.length < 6) {
-    errorMessage.value = 'Password must be at least 6 characters long.';
+    errorMessage.value = t('iam.signUp.errors.passwordLength');
     isSubmitting.value = false;
     return;
   }
@@ -46,7 +48,7 @@ const onSignUp = () => {
       })
       .catch(error => {
         console.error(error);
-        errorMessage.value = 'An error occurred while creating your account.';
+        errorMessage.value = t('iam.signUp.errors.creationFailed');
       })
       .finally(() => {
         isSubmitting.value = false;
@@ -66,8 +68,8 @@ const navigateBack = () => {
     <div class="left-side">
       <div class="brand-text-container">
         <h1>LOCKSIGHT</h1>
-        <h2>Smart enterprise security</h2>
-        <p>Monitor all your warehouses, manage access and receive alerts in real time.</p>
+        <h2>{{ t('iam.brand.sloganSignup') }}</h2>
+        <p>{{ t('iam.brand.descSignup') }}</p>
       </div>
     </div>
 
@@ -79,17 +81,17 @@ const navigateBack = () => {
         </router-link>
 
         <div class="signup-content">
-          <h2>Create Account</h2>
-          <p class="subtitle">Protect your warehouses today.</p>
+          <h2>{{ t('iam.signUp.title') }}</h2>
+          <p class="subtitle">{{ t('iam.signUp.subtitle') }}</p>
 
           <form @submit.prevent="onSignUp">
 
             <div class="field">
-              <label>Full Name</label>
+              <label>{{ t('iam.signUp.fullNameLabel') }}</label>
               <pv-input-text
                   v-model="fullName"
                   type="text"
-                  placeholder="First and Last name"
+                  :placeholder="t('iam.signUp.fullNamePlaceholder')"
                   class="custom-input"
               />
             </div>
@@ -99,23 +101,23 @@ const navigateBack = () => {
               <pv-input-text
                   v-model="companyName"
                   type="text"
-                  placeholder="company name"
+                  :placeholder="t('iam.signUp.companyPlaceholder')"
                   class="custom-input"
               />
             </div>
 
             <div class="field">
-              <label>Email Address</label>
+              <label>{{ t('iam.signUp.emailLabel') }}</label>
               <pv-input-text
                   v-model="email"
-                  type="email"
-                  placeholder="name@gmail.com"
+                  type="text"
+                  placeholder="***@gmail.com"
                   class="custom-input"
               />
             </div>
 
             <div class="field">
-              <label>Password</label>
+              <label>{{ t('iam.signUp.passwordLabel') }}</label>
               <pv-input-text
                   v-model="password"
                   type="password"
@@ -132,14 +134,14 @@ const navigateBack = () => {
 
             <pv-button
                 type="submit"
-                label="Get Started"
+                :label="t('iam.signUp.startButton')"
                 :loading="isSubmitting"
                 class="submit-button"
             />
 
             <div class="login-link">
-              <span class="text-gray">Already have an account? </span>
-              <router-link to="/iam/sign-in">Sign In</router-link>
+              <span class="text-gray">{{ t('iam.signUp.alreadyAccount') }} </span>
+              <router-link to="/iam/sign-in">{{ t('iam.signUp.signIn') }}</router-link>
             </div>
 
           </form>

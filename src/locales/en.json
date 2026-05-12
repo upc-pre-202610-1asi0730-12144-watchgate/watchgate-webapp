@@ -1,17 +1,61 @@
 {
-  "read-more": "Read more",
-  "unavailable-news": "News service is unavailable now.",
-  "authoring-phrase": {
-    "intro": "Made with",
-    "use": "using",
-    "author": "by {brand} Developer Team"
-  },
-  "article": {
-    "share": "Share",
-    "copy-to-clipboard": "Copy to clipboard"
-  },
-  "footer": {
-    "powered-by": "Powered by",
-    "and": "and"
+  "iam": {
+    "brand": {
+      "slogan": "IoT Monitoring Platform",
+      "sloganSignup": "Smart enterprise security",
+      "descSignup": "Monitor all your warehouses, manage access and receive alerts in real time.",
+      "seamless": "Seamless",
+      "security": "Security"
+    },
+    "signIn": {
+      "title": "Access the System",
+      "subtitle": "Enter your credentials to continue.",
+      "emailLabel": "Email Address",
+      "passwordLabel": "Password",
+      "loginButton": "Login",
+      "forgot": "Forgot your password?",
+      "noAccount": "Don't have an account?",
+      "register": "Register",
+      "errors": {
+        "invalid": "Invalid email or password.",
+        "connection": "A connection error occurred. Please try again."
+      }
+    },
+    "signUp": {
+      "title": "Create Account",
+      "subtitle": "Protect your warehouses today.",
+      "fullNameLabel": "Full Name",
+      "fullNamePlaceholder": "First and Last name",
+      "companyLabel": "Company Name",
+      "companyPlaceholder": "company name",
+      "emailLabel": "Email Address",
+      "passwordLabel": "Password",
+      "startButton": "Get Started",
+      "alreadyAccount": "Already have an account?",
+      "signIn": "Sign In",
+      "errors": {
+        "required": "All fields are required.",
+        "passwordLength": "Password must be at least 6 characters long.",
+        "creationFailed": "An error occurred while creating your account."
+      }
+    },
+    "recover": {
+      "title": "Recover Password",
+      "subtitle": "Enter your email and we'll send you a link to reset your access.",
+      "emailLabel": "Email Address",
+      "sendBtn": "Send Link",
+      "backTo": "Back to ",
+      "signIn": "Sign In",
+      "messages": {
+        "success": "Recovery link sent successfully to your email.",
+        "notRegistered": "This email is not registered in our system.",
+        "error": "An error occurred connecting to the server."
+      }
+    },
+    "page-not-found": {
+      "title": "Page Not Found",
+      "content": "The path is not available.",
+      "go-home": "Go Home"
+    }
   }
 }
