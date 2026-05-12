@@ -1,9 +1,11 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useIamStore } from '../../application/iam.store.js';
 import ToolbarContent from "../components/toolbar-content.vue";
 
+const { t } = useI18n();
 const router = useRouter();
 const store = useIamStore();
 const { checkEmailExists } = store;
@@ -21,15 +23,15 @@ const onSendLink = () => {
   checkEmailExists(email.value)
       .then(exists => {
         if (exists) {
-          successMessage.value = 'Recovery link sent successfully to your email.';
+          successMessage.value = t('iam.recover.messages.success');
           email.value = '';
         } else {
-          errorMessage.value = 'This email is not registered in our system.';
+          errorMessage.value = t('iam.recover.messages.notRegistered');
         }
       })
       .catch(error => {
         console.error(error);
-        errorMessage.value = 'An error occurred connecting to the server.';
+        errorMessage.value = t('iam.recover.messages.error');
       })
       .finally(() => {
         isSubmitting.value = false;
@@ -48,7 +50,7 @@ const navigateBack = () => {
 
     <div class="left-side">
       <div class="slogan-circle">
-        <h2>Seamless<br>Security</h2>
+        <h2>{{ t('iam.brand.seamless') }}<br>{{ t('iam.brand.security') }}</h2>
       </div>
     </div>
 
@@ -60,16 +62,16 @@ const navigateBack = () => {
         </router-link>
 
         <div class="recover-content">
-          <h2>Recover Password</h2>
-          <p class="subtitle">Enter your email and we'll send you a link to reset your access.</p>
+          <h2>{{ t('iam.recover.title') }}</h2>
+          <p class="subtitle">{{ t('iam.recover.subtitle') }}</p>
 
           <form @submit.prevent="onSendLink">
             <div class="field">
-              <label>Email Address</label>
+              <label>{{ t('iam.recover.emailLabel') }}</label>
               <pv-input-text
                   v-model="email"
                   type="email"
-                  placeholder="example@company.com"
+                  placeholder="****@gmail.com"
                   class="custom-input"
                   required
               />
@@ -89,14 +91,14 @@ const navigateBack = () => {
 
             <pv-button
                 type="submit"
-                label="Send Link"
+                :label="t('iam.recover.sendBtn')"
                 :loading="isSubmitting"
                 class="submit-button"
             />
 
             <div class="back-link">
-              <span class="text-gray">Back to </span>
-              <router-link to="/iam/sign-in">Sign In</router-link>
+              <span class="text-gray">{{ t('iam.recover.backTo') }}</span>
+              <router-link to="/iam/sign-in">{{ t('iam.recover.signIn') }}</router-link>
             </div>
           </form>
         </div>
@@ -106,6 +108,7 @@ const navigateBack = () => {
 
   </div>
 </template>
+
 
 <style scoped>
 

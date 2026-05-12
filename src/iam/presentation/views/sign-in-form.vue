@@ -3,7 +3,9 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useIamStore } from '../../application/iam.store.js';
 import ToolbarContent from "../components/toolbar-content.vue";
+import {useI18n} from "vue-i18n";
 
+const { t } = useI18n();
 const router = useRouter();
 const store = useIamStore();
 const { signIn } = store;
@@ -43,28 +45,28 @@ const onSignIn = () => {
     <div class="left-side">
       <div class="brand-container">
         <h1>LOCKSIGHT</h1>
-        <p>IoT Monitoring Platform</p>
+        <p>{{ t('iam.brand.slogan') }}</p>
       </div>
     </div>
 
     <div class="right-side">
       <div class="login-card">
-        <h2>Access the System</h2>
-        <p class="subtitle">Enter your credentials to continue.</p>
+        <h2>{{ t('iam.signIn.title') }}</h2>
+        <p class="subtitle">{{ t('iam.signIn.subtitle') }}</p>
 
         <form @submit.prevent="onSignIn">
           <div class="field">
-            <label>Email Address</label>
+            <label>{{ t('iam.signIn.emailLabel') }}</label>
             <pv-input-text
                 v-model="email"
                 type="email"
-                placeholder="example@watchgate.com"
+                placeholder= "example@gmail.com"
                 class="custom-input"
             />
           </div>
 
           <div class="field">
-            <label>Password</label>
+            <label>{{ t('iam.signIn.passwordLabel') }}</label>
             <pv-input-text
                 v-model="password"
                 type="password"
@@ -81,18 +83,18 @@ const onSignIn = () => {
 
           <pv-button
               type="submit"
-              label="Login"
+              :label="t('iam.signIn.loginButton')"
               :loading="isSubmitting"
               class="login-button"
           />
 
           <div class="links">
-            <router-link to="/iam/recover-password">Forgot your password?</router-link>
+            <router-link to="/iam/recover-password">{{ t('iam.signIn.forgot') }}</router-link>
           </div>
 
           <div class="register">
-            Don't have an account?
-            <router-link to="/iam/sign-up">Register</router-link>
+            {{ t('iam.signIn.noAccount') }}
+            <router-link to="/iam/sign-up">{{ t('iam.signIn.register') }}</router-link>
           </div>
         </form>
       </div>
