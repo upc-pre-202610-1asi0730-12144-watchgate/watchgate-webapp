@@ -15,4 +15,7 @@ export class IamApi {
     getUserByEmail(email) {
         return http.get(`/users?email=${email}`);
     }
+    createCompany(companyResource) {
+        return http.post('/companies', companyResource);
+    }
 }

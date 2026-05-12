@@ -22,9 +22,26 @@ export const useIamStore = defineStore('iam', () => {
         });
     }
     function signUp(userEntity) {
-        return iamApi.signUp(userEntity).then(response => {
-            currentUser.value = UserAssembler.toEntityFromResource(response.data);
+        const newCompany = {
+            tradeName: userEntity.company.tradeName,
+            taxId: ""
+        };
+        return iamApi.createCompany(newCompany).then(companyResponse => {
+            const newCompanyId = companyResponse.data.id;
+            const userPayload = {
+                fullName: userEntity.fullName,
+                email: userEntity.email,
+                passwordHash: userEntity.passwordHash,
+                companyId: newCompanyId,
+                roleId: 2,
+                notificationPreferenceId: 1
+            };
+            return iamApi.signUp(userPayload);
+
+        }).then(userResponse => {
+            currentUser.value = UserAssembler.toEntityFromResource(userResponse.data);
             return true;
+
         }).catch(error => {
             errors.value.push(error);
             throw error;
