@@ -9,8 +9,8 @@ const router = useRouter();
 const store = useIamStore();
 const { signUp } = store;
 
-const firstName = ref('');
-const lastName = ref('');
+const fullName = ref('');
+const companyName = ref('');
 const email = ref('');
 const password = ref('');
 
@@ -21,7 +21,7 @@ const onSignUp = () => {
   isSubmitting.value = true;
   errorMessage.value = '';
 
-  if (!firstName.value || !lastName.value || !email.value || !password.value) {
+  if (!fullName.value || !companyName.value || !email.value || !password.value) {
     errorMessage.value = 'All fields are required.';
     isSubmitting.value = false;
     return;
@@ -34,10 +34,10 @@ const onSignUp = () => {
   }
 
   const newUser = new User({
-    firstName: firstName.value,
-    lastName: lastName.value,
+    fullName: fullName.value,
+    company: { tradeName: companyName.value },
     email: email.value,
-    password: password.value
+    passwordHash: password.value
   });
 
   signUp(newUser)
@@ -74,7 +74,9 @@ const navigateBack = () => {
     <div class="right-side">
       <div class="form-wrapper">
 
-        <h1 class="mobile-brand" @click="goToSignIn">LOCKSIGHT</h1>
+        <router-link to="/iam/sign-in" class="brand-link mobile-brand">
+          <h1>LOCKSIGHT</h1>
+        </router-link>
 
         <div class="signup-content">
           <h2>Create Account</h2>
@@ -149,7 +151,6 @@ const navigateBack = () => {
 </template>
 
 <style scoped>
-
 :global(html),
 :global(body),
 :global(#app) {
@@ -186,7 +187,7 @@ const navigateBack = () => {
   color: #3B82F6;
   font-size: 4.5rem;
   font-weight: 800;
-  margin: 0 0 1rem;
+  margin: 0 0 1rem -4px;
   letter-spacing: 2px;
 }
 
@@ -218,15 +219,23 @@ const navigateBack = () => {
   padding: 2rem;
 }
 
+.brand-link {
+  text-decoration: none;
+}
+
 .mobile-brand {
   display: none;
+  text-align: center;
+  margin-bottom: 2rem;
+  cursor: pointer;
+}
+
+.mobile-brand h1 {
   color: #3B82F6;
   font-size: 2.5rem;
   font-weight: 800;
   letter-spacing: 2px;
-  text-align: center;
-  margin-bottom: 2rem;
-  cursor: pointer;
+  margin: 0;
 }
 
 .signup-content h2 {
