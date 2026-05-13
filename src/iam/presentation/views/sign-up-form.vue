@@ -18,7 +18,7 @@ const password = ref('');
 
 const isSubmitting = ref(false);
 const errorMessage = ref('');
-
+//Cambiar esta parte
 const onSignUp = () => {
   isSubmitting.value = true;
   errorMessage.value = '';
