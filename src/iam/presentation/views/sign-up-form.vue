@@ -9,50 +9,25 @@ import ToolbarContent from "../components/toolbar-content.vue";
 const { t } = useI18n();
 const router = useRouter();
 const store = useIamStore();
-const { signUp } = store;
+const { signUp, errors } = store;
 
-const fullName = ref('');
-const companyName = ref('');
-const email = ref('');
-const password = ref('');
-
+const form = ref({ fullName: '', companyName: '', email: '', password: '' });
 const isSubmitting = ref(false);
-const errorMessage = ref('');
-//Cambiar esta parte
-const onSignUp = () => {
+
+const saveUser = () => {
   isSubmitting.value = true;
-  errorMessage.value = '';
-
-  if (!fullName.value || !companyName.value || !email.value || !password.value) {
-    errorMessage.value = t('iam.signUp.errors.required');
-    isSubmitting.value = false;
-    return;
-  }
-
-  if (password.value.length < 6) {
-    errorMessage.value = t('iam.signUp.errors.passwordLength');
-    isSubmitting.value = false;
-    return;
-  }
 
   const newUser = new User({
-    fullName: fullName.value,
-    company: { tradeName: companyName.value },
-    email: email.value,
-    passwordHash: password.value
+    fullName: form.value.fullName,
+    company: { tradeName: form.value.companyName },
+    email: form.value.email,
+    passwordHash: form.value.password
   });
 
-  signUp(newUser)
-      .then(success => {
-        if (success) navigateBack();
-      })
-      .catch(error => {
-        console.error(error);
-        errorMessage.value = t('iam.signUp.errors.creationFailed');
-      })
-      .finally(() => {
-        isSubmitting.value = false;
-      });
+  signUp(newUser).then(success => {
+    isSubmitting.value = false;
+    if (success) navigateBack();
+  });
 };
 
 const navigateBack = () => {
@@ -64,7 +39,6 @@ const navigateBack = () => {
   <toolbar-content></toolbar-content>
 
   <div class="signup-container">
-
     <div class="left-side">
       <div class="brand-text-container">
         <h1>LOCKSIGHT</h1>
@@ -75,7 +49,6 @@ const navigateBack = () => {
 
     <div class="right-side">
       <div class="form-wrapper">
-
         <router-link to="/iam/sign-in" class="brand-link mobile-brand">
           <h1>LOCKSIGHT</h1>
         </router-link>
@@ -84,71 +57,57 @@ const navigateBack = () => {
           <h2>{{ t('iam.signUp.title') }}</h2>
           <p class="subtitle">{{ t('iam.signUp.subtitle') }}</p>
 
-          <form @submit.prevent="onSignUp">
-
+          <form @submit.prevent="saveUser">
             <div class="field">
               <label>{{ t('iam.signUp.fullNameLabel') }}</label>
               <pv-input-text
-                  v-model="fullName"
+                  v-model="form.fullName"
                   type="text"
                   :placeholder="t('iam.signUp.fullNamePlaceholder')"
-                  class="custom-input"
-              />
+                  class="custom-input" required />
             </div>
 
             <div class="field">
-              <label>Company Name</label>
+              <label>{{ t('iam.signUp.companyLabel') }}</label>
               <pv-input-text
-                  v-model="companyName"
+                  v-model="form.companyName"
                   type="text"
                   :placeholder="t('iam.signUp.companyPlaceholder')"
-                  class="custom-input"
-              />
+                  class="custom-input" required />
             </div>
 
             <div class="field">
               <label>{{ t('iam.signUp.emailLabel') }}</label>
               <pv-input-text
-                  v-model="email"
-                  type="text"
-                  placeholder="***@gmail.com"
-                  class="custom-input"
-              />
+                  v-model="form.email"
+                  type="email"
+                  placeholder="****@gmail.com"
+                  class="custom-input" required />
             </div>
 
             <div class="field">
               <label>{{ t('iam.signUp.passwordLabel') }}</label>
               <pv-input-text
-                  v-model="password"
+                  v-model="form.password"
                   type="password"
-                  placeholder="••••••"
-                  class="custom-input"
-              />
+                  placeholder="******"
+                  class="custom-input" required minlength="6" />
             </div>
 
-            <transition name="fade">
-              <p v-if="errorMessage" class="error-message">
-                {{ errorMessage }}
-              </p>
-            </transition>
+            <div v-if="errors.length" class="error-message">
+              {{ errors.map(e => t(e.message) || e.message).join(', ') }}
+            </div>
 
-            <pv-button
-                type="submit"
-                :label="t('iam.signUp.startButton')"
-                :loading="isSubmitting"
-                class="submit-button"
-            />
+            <pv-button type="submit" :label="t('iam.signUp.startBtn')" :loading="isSubmitting" class="submit-button" />
 
             <div class="login-link">
               <span class="text-gray">{{ t('iam.signUp.alreadyAccount') }} </span>
               <router-link to="/iam/sign-in">{{ t('iam.signUp.signIn') }}</router-link>
             </div>
-
           </form>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 

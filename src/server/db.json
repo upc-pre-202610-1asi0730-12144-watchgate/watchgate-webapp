@@ -35,6 +35,15 @@
       "roleId": 2,
       "notificationPreferenceId": 1,
       "id": 4
+    },
+    {
+      "fullName": "Carlos Perez",
+      "email": "carlos@gmail.com",
+      "passwordHash": "123456",
+      "companyId": 4,
+      "roleId": 2,
+      "notificationPreferenceId": 1,
+      "id": 5
     }
   ],
   "roles": [
@@ -83,6 +92,11 @@
       "tradeName": "Alex Company",
       "taxId": "",
       "id": 3
+    },
+    {
+      "tradeName": "UPC",
+      "taxId": "",
+      "id": 4
     }
   ],
   "notificationPreferences": [
