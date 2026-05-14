@@ -1,6 +1,13 @@
 import { Permission } from "../domain/model/permission.entity.js";
 
+/**
+ * Permission assembler
+ * @class PermissionAssembler
+ * @description
+ * Permission assembler is used to map permission resources into domain entities.
+ */
 export class PermissionAssembler {
+
     static toEntityFromResource(resource) {
         return new Permission({ ...resource });
     }

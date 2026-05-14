@@ -1,5 +1,11 @@
 import { Role } from "../domain/model/role.entity.js";
 
+/**
+ * Role assembler
+ * @class RoleAssembler
+ * @description
+ * Role assembler is used to map role resources into domain entities.
+ */
 export class RoleAssembler {
     static toEntityFromResource(resource) {
         return new Role({ ...resource });
