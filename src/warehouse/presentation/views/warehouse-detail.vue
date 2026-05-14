@@ -1,4 +1,10 @@
 <script setup>
+/**
+ * Warehouse Detail View
+ * @description
+ * View that provides real-time monitoring details for a specific warehouse.
+ * Displays latest events, sensor status, and connection stability.
+ */
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';

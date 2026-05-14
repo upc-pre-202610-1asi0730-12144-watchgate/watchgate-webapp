@@ -1,4 +1,10 @@
 <script setup>
+/**
+ * Warehouse List View
+ * @description
+ * View that displays a list of all warehouses belonging to the user's company.
+ * Allows navigation to detailed monitoring and warehouse registration.
+ */
 import { onMounted, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
