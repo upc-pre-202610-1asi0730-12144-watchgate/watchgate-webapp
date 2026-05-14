@@ -10,22 +10,28 @@ export const useIamStore = defineStore('iam', () => {
     const errors = ref([]);
 
     function signIn(email, password) {
+        errors.value = [];
         return iamApi.signIn(email, password).then(response => {
             if (response.data.length > 0) {
                 currentUser.value = UserAssembler.toEntityFromResource(response.data[0]);
                 return true;
+            } else {
+                errors.value.push(new Error("iam.signIn.errors.invalid"));
+                return false;
             }
-            return false;
         }).catch(error => {
             errors.value.push(error);
-            throw error;
+            return false;
         });
     }
+
     function signUp(userEntity) {
+        errors.value = [];
         const newCompany = {
             tradeName: userEntity.company.tradeName,
             taxId: ""
         };
+
         return iamApi.createCompany(newCompany).then(companyResponse => {
             const newCompanyId = companyResponse.data.id;
             const userPayload = {
@@ -44,15 +50,21 @@ export const useIamStore = defineStore('iam', () => {
 
         }).catch(error => {
             errors.value.push(error);
-            throw error;
+            return false;
         });
     }
+
     function checkEmailExists(email) {
+        errors.value = [];
         return iamApi.getUserByEmail(email).then(response => {
-            return response.data.length > 0;
+            if (response.data.length === 0) {
+                errors.value.push(new Error("iam.recover.messages.notRegistered"));
+                return false;
+            }
+            return true;
         }).catch(error => {
             errors.value.push(error);
-            throw error;
+            return false;
         });
     }
 
