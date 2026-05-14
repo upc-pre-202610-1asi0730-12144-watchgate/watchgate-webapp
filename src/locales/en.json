@@ -67,9 +67,9 @@
     "view-detail": "View Details",
     "attend": "Attend",
     "status": {
-    "active": "Active",
-    "critical-alert": "Critical Alert",
-    "inactive": "Inactive"
+      "active": "Active",
+      "critical-alert": "Critical Alert",
+      "inactive": "Inactive"
     }
   },
   "warehouse-detail": {
