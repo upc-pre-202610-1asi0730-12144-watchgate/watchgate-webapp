@@ -5,10 +5,21 @@ import { UserAssembler } from "../infrastructure/user.assembler.js";
 
 const iamApi = new IamApi();
 
+/**
+ * IAM store
+ * @summary
+ * This store is used to manage the Identity and Access Management context state.
+ */
 export const useIamStore = defineStore('iam', () => {
     const currentUser = ref(null);
-    const errors = ref([]); // El arreglo de errores al estilo del profe
+    const errors = ref([]);
 
+    /**
+     * Attempt to sign in
+     * @param {string} email
+     * @param {string} password
+     * @returns {Promise<boolean>}
+     */
     function signIn(email, password) {
         errors.value = [];
         return iamApi.signIn(email, password).then(response => {
@@ -25,6 +36,11 @@ export const useIamStore = defineStore('iam', () => {
         });
     }
 
+    /**
+     * Attempt to sign up
+     * @param {object} userEntity
+     * @returns {Promise<boolean>}
+     */
     function signUp(userEntity) {
         errors.value = [];
         const newCompany = {
@@ -54,6 +70,11 @@ export const useIamStore = defineStore('iam', () => {
         });
     }
 
+    /**
+     * Check if an email is registered
+     * @param {string} email
+     * @returns {Promise<boolean>}
+     */
     function checkEmailExists(email) {
         errors.value = [];
         return iamApi.getUserByEmail(email).then(response => {

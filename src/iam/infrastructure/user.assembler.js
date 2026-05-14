@@ -1,7 +1,12 @@
 import { User } from "../domain/model/user.entity.js";
 
+/**
+ * User assembler
+ * @class UserAssembler
+ * @description
+ * User assembler is used to map user resources into domain entities.
+ */
 export class UserAssembler {
-
     static toEntityFromResource(resource) {
         return new User({ ...resource });
     }
