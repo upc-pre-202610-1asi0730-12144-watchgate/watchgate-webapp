@@ -1,38 +1,31 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, toRefs } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useIamStore } from '../../application/iam.store.js';
 import ToolbarContent from "../components/toolbar-content.vue";
-import {useI18n} from "vue-i18n";
 
 const { t } = useI18n();
 const router = useRouter();
 const store = useIamStore();
+const { errors } = toRefs(store);
 const { signIn } = store;
+const form = ref({
+  email: '',
+  password: ''
+});
 
-const email = ref('');
-const password = ref('');
 const isSubmitting = ref(false);
-const errorMessage = ref('');
 
 const onSignIn = () => {
   isSubmitting.value = true;
-  errorMessage.value = '';
 
-  signIn(email.value, password.value)
+  signIn(form.value.email, form.value.password)
       .then(success => {
-        if (success) {
-          router.push({ path: '/layout' });
-        } else {
-          errorMessage.value = 'Correo electrónico o contraseña incorrectos.';
-        }
-      })
-      .catch(error => {
-        console.error(error);
-        errorMessage.value = 'Ocurrió un error de conexión. Inténtalo de nuevo.';
-      })
-      .finally(() => {
         isSubmitting.value = false;
+        if (success) {
+          router.push({ name: 'warehouse-list' });
+        }
       });
 };
 </script>
@@ -41,65 +34,56 @@ const onSignIn = () => {
   <toolbar-content></toolbar-content>
 
   <div class="login-container">
-
     <div class="left-side">
-      <div class="brand-container">
+      <div class="brand-text-container">
         <h1>LOCKSIGHT</h1>
-        <p>{{ t('iam.brand.slogan') }}</p>
+        <h2>{{ t('iam.brand.slogan') }}</h2>
+        <p>
+          <span class="highlight">{{ t('iam.brand.seamless') }}</span> <br>
+          <span class="highlight">{{ t('iam.brand.security') }}</span>
+        </p>
       </div>
     </div>
 
     <div class="right-side">
-      <div class="login-card">
-        <h2>{{ t('iam.signIn.title') }}</h2>
-        <p class="subtitle">{{ t('iam.signIn.subtitle') }}</p>
+      <div class="form-wrapper">
+        <div class="mobile-brand">
+          <h1>LOCKSIGHT</h1>
+        </div>
 
-        <form @submit.prevent="onSignIn">
-          <div class="field">
-            <label>{{ t('iam.signIn.emailLabel') }}</label>
-            <pv-input-text
-                v-model="email"
-                type="email"
-                placeholder= "example@gmail.com"
-                class="custom-input"
-            />
-          </div>
+        <div class="login-content">
+          <h2>{{ t('iam.signIn.title') }}</h2>
+          <p class="subtitle">{{ t('iam.signIn.subtitle') }}</p>
 
-          <div class="field">
-            <label>{{ t('iam.signIn.passwordLabel') }}</label>
-            <pv-input-text
-                v-model="password"
-                type="password"
-                placeholder="••••••••"
-                class="custom-input"
-            />
-          </div>
+          <form @submit.prevent="onSignIn">
+            <div class="field">
+              <label>{{ t('iam.signIn.emailLabel') }}</label>
+              <pv-input-text v-model="form.email" type="email" :placeholder="t('iam.signIn.emailPlaceholder')" class="custom-input" required />
+            </div>
 
-          <transition name="fade">
-            <p v-if="errorMessage" class="error-message">
-              {{ errorMessage }}
-            </p>
-          </transition>
+            <div class="field">
+              <label>{{ t('iam.signIn.passwordLabel') }}</label>
+              <pv-input-text v-model="form.password" type="password" :placeholder="t('iam.signIn.passwordPlaceholder')" class="custom-input" required />
+            </div>
 
-          <pv-button
-              type="submit"
-              :label="t('iam.signIn.loginButton')"
-              :loading="isSubmitting"
-              class="login-button"
-          />
+            <div class="forgot-password">
+              <router-link to="/iam/recover-password">{{ t('iam.signIn.forgot') }}</router-link>
+            </div>
 
-          <div class="links">
-            <router-link to="/iam/recover-password">{{ t('iam.signIn.forgot') }}</router-link>
-          </div>
+            <div v-if="errors.length" class="error-message">
+              {{ errors.map(e => t(e.message) || e.message).join(', ') }}
+            </div>
 
-          <div class="register">
-            {{ t('iam.signIn.noAccount') }}
-            <router-link to="/iam/sign-up">{{ t('iam.signIn.register') }}</router-link>
-          </div>
-        </form>
+            <pv-button type="submit" :label="t('iam.signIn.loginButton')" :loading="isSubmitting" class="submit-button" />
+
+            <div class="register-link">
+              <span class="text-gray">{{ t('iam.signIn.noAccount') }} </span>
+              <router-link to="/iam/sign-up">{{ t('iam.signIn.register') }}</router-link>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-
   </div>
 </template>
 
