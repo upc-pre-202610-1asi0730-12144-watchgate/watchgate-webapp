@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Layout from "./shared/presentation/components/layout.vue";
 import iamRoutes from "./iam/presentation/iam.routes.js";
 import pageNotFound from "./iam/presentation/views/page-not-found.vue";
-
+import { warehouseRoutes } from "./warehouse/presentation/warehouse.routes.js";
 const routes = [
     { path: '/', redirect: '/iam/sign-in' },
     {
@@ -12,7 +12,9 @@ const routes = [
     {
         path: '/layout',
         component: Layout,
+        redirect: '/layout/warehouses',
         children: [
+            ...warehouseRoutes
         ]
     },
     {

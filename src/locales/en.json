@@ -57,5 +57,38 @@
       "content": "The path is not available.",
       "go-home": "Go Home"
     }
+  },
+  "warehouses": {
+    "title": "My Warehouses",
+    "register": "Register Warehouse",
+    "no-warehouses": "No warehouses found.",
+    "last-event": "Last event",
+    "incident-detected": "Incident detected",
+    "view-detail": "View Details",
+    "attend": "Attend",
+    "status": {
+    "active": "Active",
+    "critical-alert": "Critical Alert",
+    "inactive": "Inactive"
+    }
+  },
+  "warehouse-detail": {
+    "back": "Back to list",
+    "active": "Active",
+    "latest-events": "Latest Events",
+    "sensor-status": "Sensor Status",
+    "main-door": "Main Door",
+    "door-closed": "Closed",
+    "motion-sensor": "Motion Sensor",
+    "normal": "Normal",
+    "network": "Network Connection",
+    "stable": "Stable",
+    "view-realtime": "View Real-time",
+    "view-history": "View History"
+  },
+  "events": {
+    "door-open": "Main door opened",
+    "motion-detected": "Motion detected in Sector A",
+    "authorized-access": "Authorized access granted"
   }
 }
