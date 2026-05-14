@@ -90,5 +90,47 @@
     "door-open": "Main door opened",
     "motion-detected": "Motion detected in Sector A",
     "authorized-access": "Authorized access granted"
+  },
+  "nav": {
+    "warehouses": "My Warehouses",
+    "devices": "IoT Devices",
+    "team": "Team & Access",
+    "events": "Event History",
+    "subscription": "My Subscription",
+    "settings": "Settings"
+  },
+
+  "devices": {
+    "title": "IoT Devices",
+    "linkNew": "Link new device",
+    "usage": "Usage",
+    "usageUnit": "dev.",
+    "sectionSensors": "Access Sensors",
+    "sectionCameras": "CCTV Cameras",
+    "empty": "No devices registered yet.",
+    "menu": "Options",
+    "dialog": {
+      "title": "Link Device",
+      "sectionTitle": "IoT Device Details",
+      "serialNumber": "Serial Number (S/N)",
+      "serialNumberPlaceholder": "e.g. LK-987654321",
+      "deviceName": "Device Name",
+      "deviceNamePlaceholder": "e.g. Rear Window Sensor",
+      "zone": "Assign to Zone",
+      "zonePlaceholder": "Zone A",
+      "submit": "Link Device",
+      "errorRequired": "This field is required"
+    },
+    "limitDialog": {
+      "title": "Device Limit Reached",
+      "description": "Your current plan has reached the limit of 5 connected IoT devices.",
+      "upgrade": "Upgrade to Premium",
+      "dismiss": "Close"
+    },
+    "successDialog": {
+      "title": "Device Online",
+      "description": "The motion sensor is active and monitoring {zone} again.",
+      "confirm": "Got it"
+    }
   }
 }

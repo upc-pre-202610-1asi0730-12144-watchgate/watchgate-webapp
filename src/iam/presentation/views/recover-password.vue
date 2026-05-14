@@ -1,5 +1,5 @@
 <script setup>
-import { ref, toRefs } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useIamStore } from '../../application/iam.store.js';
@@ -8,24 +8,38 @@ import ToolbarContent from "../components/toolbar-content.vue";
 const { t } = useI18n();
 const router = useRouter();
 const store = useIamStore();
-
-const { errors } = toRefs(store);
 const { checkEmailExists } = store;
 
-const form = ref({ email: '' });
+const email = ref('');
 const isSubmitting = ref(false);
-const showSuccessMessage = ref(false);
+const successMessage = ref('');
+const errorMessage = ref('');
 
-const onRecover = () => {
+const onSendLink = () => {
   isSubmitting.value = true;
-  showSuccessMessage.value = false;
+  successMessage.value = '';
+  errorMessage.value = '';
 
-  checkEmailExists(form.value.email).then(exists => {
-    isSubmitting.value = false;
-    if (exists) {
-      showSuccessMessage.value = true;
-    }
-  });
+  checkEmailExists(email.value)
+      .then(exists => {
+        if (exists) {
+          successMessage.value = t('iam.recover.messages.success');
+          email.value = '';
+        } else {
+          errorMessage.value = t('iam.recover.messages.notRegistered');
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        errorMessage.value = t('iam.recover.messages.error');
+      })
+      .finally(() => {
+        isSubmitting.value = false;
+      });
+};
+
+const navigateBack = () => {
+  router.push({ name: 'sign-in' });
 };
 </script>
 
@@ -33,42 +47,65 @@ const onRecover = () => {
   <toolbar-content></toolbar-content>
 
   <div class="recover-container">
-    <div class="form-wrapper">
-      <router-link to="/iam/sign-in" class="brand-link">
-        <h1>LOCKSIGHT</h1>
-      </router-link>
 
-      <div class="recover-content">
-        <h2>{{ t('iam.recover.title') }}</h2>
-        <p class="subtitle">{{ t('iam.recover.subtitle') }}</p>
+    <div class="left-side">
+      <div class="slogan-circle">
+        <h2>{{ t('iam.brand.seamless') }}<br>{{ t('iam.brand.security') }}</h2>
+      </div>
+    </div>
 
-        <div v-if="showSuccessMessage" class="success-message">
-          <i class="pi pi-check-circle"></i>
-          <p>{{ t('iam.recover.messages.success') }}</p>
-          <pv-button :label="t('iam.recover.backToLogin')" class="submit-button mt-3" @click="router.push('/iam/sign-in')" />
+    <div class="right-side">
+      <div class="form-wrapper">
+
+        <router-link to="/iam/sign-in" class="brand-link">
+          <h1 class="brand-title">LOCKSIGHT</h1>
+        </router-link>
+
+        <div class="recover-content">
+          <h2>{{ t('iam.recover.title') }}</h2>
+          <p class="subtitle">{{ t('iam.recover.subtitle') }}</p>
+
+          <form @submit.prevent="onSendLink">
+            <div class="field">
+              <label>{{ t('iam.recover.emailLabel') }}</label>
+              <pv-input-text
+                  v-model="email"
+                  type="email"
+                  placeholder="****@gmail.com"
+                  class="custom-input"
+                  required
+              />
+            </div>
+
+            <transition name="fade">
+              <p v-if="successMessage" class="success-message">
+                {{ successMessage }}
+              </p>
+            </transition>
+
+            <transition name="fade">
+              <p v-if="errorMessage" class="error-message">
+                {{ errorMessage }}
+              </p>
+            </transition>
+
+            <pv-button
+                type="submit"
+                :label="t('iam.recover.sendBtn')"
+                :loading="isSubmitting"
+                class="submit-button"
+            />
+
+            <div class="back-link">
+              <span class="text-gray">{{ t('iam.recover.backTo') }}</span>
+              <router-link to="/iam/sign-in">{{ t('iam.recover.signIn') }}</router-link>
+            </div>
+          </form>
         </div>
-
-        <form v-else @submit.prevent="onRecover">
-          <div class="field">
-            <label>{{ t('iam.recover.emailLabel') }}</label>
-            <pv-input-text v-model="form.email" type="email" :placeholder="t('iam.recover.emailPlaceholder')" class="custom-input" required />
-          </div>
-
-          <div v-if="errors.length" class="error-message">
-            {{ errors.map(e => t(e.message) || e.message).join(', ') }}
-          </div>
-
-          <pv-button type="submit" :label="t('iam.recover.sendButton')" :loading="isSubmitting" class="submit-button" />
-
-          <div class="back-link">
-            <router-link to="/iam/sign-in">
-              <i class="pi pi-arrow-left"></i> {{ t('iam.recover.backToLogin') }}
-            </router-link>
-          </div>
-        </form>
 
       </div>
     </div>
+
   </div>
 </template>
 

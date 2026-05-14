@@ -90,5 +90,47 @@
     "door-open": "Puerta principal abierta",
     "motion-detected": "Movimiento detectado en Sector A",
     "authorized-access": "Acceso autorizado concedido"
+  },
+  "nav": {
+    "warehouses": "Mis Almacenes",
+    "devices": "Dispositivos IoT",
+    "team": "Equipo y Accesos",
+    "events": "Historial de eventos",
+    "subscription": "Mi Suscripción",
+    "settings": "Configuración"
+  },
+
+  "devices": {
+    "title": "Dispositivos IoT",
+    "linkNew": "Vincular nuevo dispositivo",
+    "usage": "Uso",
+    "usageUnit": "disp.",
+    "sectionSensors": "Sensores de Acceso",
+    "sectionCameras": "Cámaras CCTV",
+    "empty": "No hay dispositivos registrados aún.",
+    "menu": "Opciones",
+    "dialog": {
+      "title": "Vincular Dispositivo",
+      "sectionTitle": "Datos del Dispositivo IoT",
+      "serialNumber": "Número de Serie (S/N)",
+      "serialNumberPlaceholder": "Ej. LK-987654321",
+      "deviceName": "Nombre del Dispositivo",
+      "deviceNamePlaceholder": "Ej. Sensor Ventana Trasera",
+      "zone": "Asignar a Zona",
+      "zonePlaceholder": "Zona A",
+      "submit": "Vincular Dispositivo",
+      "errorRequired": "Este campo es obligatorio"
+    },
+    "limitDialog": {
+      "title": "Límite de Dispositivos",
+      "description": "Tu plan actual ha alcanzado el límite de 5 dispositivos IoT conectados.",
+      "upgrade": "Mejorar Plan Premium",
+      "dismiss": "Cerrar"
+    },
+    "successDialog": {
+      "title": "Dispositivo en línea",
+      "description": "El sensor de movimiento está activo y monitoreando nuevamente la {zone}.",
+      "confirm": "Entendido"
+    }
   }
 }

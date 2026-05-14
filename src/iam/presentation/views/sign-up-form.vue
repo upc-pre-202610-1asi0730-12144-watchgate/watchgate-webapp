@@ -98,7 +98,7 @@ const navigateBack = () => {
               {{ errors.map(e => t(e.message) || e.message).join(', ') }}
             </div>
 
-            <pv-button type="submit" :label="t('iam.signUp.startBtn')" :loading="isSubmitting" class="submit-button" />
+            <pv-button type="submit" :label="t('iam.signUp.startButton')" :loading="isSubmitting" class="submit-button" />
 
             <div class="login-link">
               <span class="text-gray">{{ t('iam.signUp.alreadyAccount') }} </span>

@@ -3,6 +3,7 @@ import Layout from "./shared/presentation/components/layout.vue";
 import iamRoutes from "./iam/presentation/iam.routes.js";
 import pageNotFound from "./iam/presentation/views/page-not-found.vue";
 import { warehouseRoutes } from "./warehouse/presentation/warehouse.routes.js";
+import devicesRoutes from "@/devices/devices.routes.js";
 const routes = [
     { path: '/', redirect: '/iam/sign-in' },
     {
@@ -14,7 +15,8 @@ const routes = [
         component: Layout,
         redirect: '/layout/warehouses',
         children: [
-            ...warehouseRoutes
+            ...warehouseRoutes,
+            ...devicesRoutes
         ]
     },
     {
