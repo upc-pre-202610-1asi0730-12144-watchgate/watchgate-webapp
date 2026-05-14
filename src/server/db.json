@@ -76,13 +76,13 @@
     },
     {
       "id": 2,
-      "name": "Sergio Logistics",
+      "tradeName": "Sergio Logistics",
       "taxId": "20111111112"
     },
     {
+      "id": 3,
       "tradeName": "Alex Company",
-      "taxId": "",
-      "id": 3
+      "taxId": ""
     }
   ],
   "notificationPreferences": [
@@ -100,6 +100,99 @@
       "id": 3,
       "preferredChannel": "PUSH",
       "isMuted": false
+    }
+  ],
+  "warehouses": [
+    {
+      "id": 1,
+      "name": "Almacén Central Sur",
+      "location": "Lima, Barranco",
+      "capacity": 1500,
+      "companyId": 1
+    },
+    {
+      "id": 2,
+      "name": "Depósito Norte",
+      "location": "Callao",
+      "capacity": 800,
+      "companyId": 1
+    }
+  ],
+  "sectors": [
+    {
+      "id": 1,
+      "name": "Sector A - Refrigerados",
+      "area": 500,
+      "warehouseId": 1
+    }
+  ],
+  "iotDevices": [
+    {
+      "id": 1,
+      "serialNumber": "CAM-X100",
+      "ipAddress": "192.168.1.50",
+      "deviceType": "CAMERA",
+      "status": "ACTIVE",
+      "sectorId": 1,
+      "warehouseId": 1
+    },
+    {
+      "id": 2,
+      "serialNumber": "SENS-TMP-01",
+      "ipAddress": "192.168.1.51",
+      "deviceType": "TEMPERATURE_SENSOR",
+      "status": "OFFLINE",
+      "sectorId": 1,
+      "warehouseId": 1
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "timestamp": "2026-05-14T10:30:00Z",
+      "eventType": "MOTION_DETECTED",
+      "description": "Movimiento inusual detectado fuera del horario de operaciones.",
+      "iotDeviceId": 1,
+      "warehouseId": 1
+    }
+  ],
+  "incidents": [
+    {
+      "id": 1,
+      "severity": "CRITICAL",
+      "resolutionStatus": "UNRESOLVED",
+      "eventId": 2,
+      "warehouseId": 1
+    }
+  ],
+  "subscriptionPlans": [
+    {
+      "id": "1111-2222-3333-4444",
+      "name": "Free",
+      "price": {
+        "amount": 0.0,
+        "currency": "USD"
+      },
+      "warehouseLimit": 1
+    },
+    {
+      "id": "5555-6666-7777-8888",
+      "name": "Premium",
+      "price": {
+        "amount": 29.99,
+        "currency": "USD"
+      },
+      "warehouseLimit": 10
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": "9999-aaaa-bbbb-cccc",
+      "userId": 1,
+      "planId": "5555-6666-7777-8888",
+      "status": "ACTIVE",
+      "startDate": "2026-01-01T00:00:00Z",
+      "endDate": "2026-12-31T00:00:00Z"
     }
   ]
 }

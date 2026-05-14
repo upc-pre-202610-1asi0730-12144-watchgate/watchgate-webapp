@@ -81,7 +81,7 @@ const navigateBack = () => {
               <pv-input-text
                   v-model="form.email"
                   type="email"
-                  placeholder="t('****@gmail.com')"
+                  placeholder="****@gmail.com"
                   class="custom-input" required />
             </div>
 

@@ -1,6 +1,13 @@
 import { NotificationPreference } from "../domain/model/notification-preference.entity.js";
 
+/**
+ * Notification Preference assembler
+ * @class NotificationPreferenceAssembler
+ * @description
+ * NotificationPreference assembler is used to map notification preference resources into domain entities.
+ */
 export class NotificationPreferenceAssembler {
+
     static toEntityFromResource(resource) {
         return new NotificationPreference({ ...resource });
     }

@@ -1,7 +1,12 @@
 import {Company} from "./company.entity.js";
 import {Role} from "./role.entity.js";
 import {NotificationPreference} from "./notification-preference.entity.js";
-
+/**
+ * User entity
+ * @class User
+ * @description
+ * User entity is used to represent a user in the IAM context.
+ */
 export class User {
     constructor({
                     id = null,

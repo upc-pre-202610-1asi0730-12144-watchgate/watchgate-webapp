@@ -57,5 +57,38 @@
       "content": "La ruta no está disponible.",
       "go-home": "Ir al Inicio"
     }
+  },
+  "warehouses": {
+    "title": "Mis Almacenes",
+    "register": "Registrar Almacén",
+    "no-warehouses": "No se encontraron almacenes.",
+    "last-event": "Último evento",
+    "incident-detected": "Incidente detectado",
+    "view-detail": "Ver Detalles",
+    "attend": "Atender",
+    "status": {
+      "active": "Activo",
+      "critical-alert": "Alerta Crítica",
+      "inactive": "Inactivo"
+    }
+  },
+  "warehouse-detail": {
+    "back": "Volver a la lista",
+    "active": "Activo",
+    "latest-events": "Últimos Eventos",
+    "sensor-status": "Estado de Sensores",
+    "main-door": "Puerta Principal",
+    "door-closed": "Cerrada",
+    "motion-sensor": "Sensor de Movimiento",
+    "normal": "Normal",
+    "network": "Conexión de Red",
+    "stable": "Estable",
+    "view-realtime": "Ver en tiempo real",
+    "view-history": "Ver Historial"
+  },
+  "events": {
+    "door-open": "Puerta principal abierta",
+    "motion-detected": "Movimiento detectado en Sector A",
+    "authorized-access": "Acceso autorizado concedido"
   }
 }
