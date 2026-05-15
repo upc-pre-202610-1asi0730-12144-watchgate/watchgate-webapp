@@ -1,4 +1,49 @@
 {
+  "users": [
+    {
+      "id": 1,
+      "fullName": "Alonso Higa",
+      "email": "alonso@gmail.com",
+      "password": "123456",
+      "passwordHash": "123456",
+      "companyId": 1,
+      "roleId": 2,
+      "notificationPreferenceId": 1
+    },
+    {
+      "id": 2,
+      "fullName": "Luis Bardales",
+      "email": "luis@gmail.com",
+      "password": "123456",
+      "passwordHash": "123456",
+      "companyId": 1,
+      "roleId": 1,
+      "notificationPreferenceId": 1
+    }
+  ],
+  "companies": [
+    {
+      "id": 1,
+      "tradeName": "Watchgate SAC",
+      "taxId": "20123456789"
+    }
+  ],
+  "warehouses": [
+    {
+      "id": 1,
+      "nombre": "Almacén Central",
+      "estado": "Activo",
+      "companyId": 1,
+      "direccion": "Av. Industrial 123, Lima"
+    },
+    {
+      "id": 2,
+      "nombre": "Almacén Norte",
+      "estado": "Activo",
+      "companyId": 1,
+      "direccion": "Av. Túpac Amaru 456, Lima"
+    }
+  ],
   "devices": [
     {
       "id": 1,
@@ -25,12 +70,84 @@
       "serialNumber": "LK-200000001"
     },
     {
+      "id": 4,
       "serialNumber": "212s1AA",
       "name": "S11",
       "zone": "Zona B",
       "type": "Sensor",
-      "status": "Online",
-      "id": 4
+      "status": "Online"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "tipo": "alerta",
+      "nombre": "Puerta Principal Abierta",
+      "descripcion": "Sensor: S1 | Fuera de horario",
+      "sensor": "S1",
+      "usuario": "",
+      "hora": "10:30 AM",
+      "fecha": "2026-05-14T10:30:00.000Z",
+      "warehouseId": 1
+    },
+    {
+      "id": 2,
+      "tipo": "normal",
+      "nombre": "Acceso Autorizado",
+      "descripcion": "Usuario: Carlos Pérez (Admin)",
+      "sensor": "",
+      "usuario": "Carlos Pérez",
+      "hora": "09:00 AM",
+      "fecha": "2026-05-14T09:00:00.000Z",
+      "warehouseId": 1
+    },
+    {
+      "id": 3,
+      "tipo": "normal",
+      "nombre": "Sistema Armado",
+      "descripcion": "Cierre de operaciones",
+      "sensor": "",
+      "usuario": "Sistema",
+      "hora": "06:05 PM",
+      "fecha": "2026-05-13T18:05:00.000Z",
+      "warehouseId": 1
+    },
+    {
+      "id": 4,
+      "tipo": "advertencia",
+      "nombre": "Movimiento Detectado",
+      "descripcion": "Sensor: S3 | Zona de Carga",
+      "sensor": "S3",
+      "usuario": "",
+      "hora": "09:50 AM",
+      "fecha": "2026-05-14T09:50:00.000Z",
+      "warehouseId": 1
+    }
+  ],
+  "sensors": [
+    {
+      "id": "s1",
+      "nombre": "S1-Puerta",
+      "estado": "Cerrada",
+      "zona": "ENTRADA",
+      "posicion": { "x": 28, "y": 72 },
+      "warehouseId": 1
+    },
+    {
+      "id": "s2",
+      "nombre": "S2-Movimiento",
+      "estado": "Normal",
+      "zona": "INVENTARIO",
+      "posicion": { "x": 65, "y": 42 },
+      "warehouseId": 1
+    },
+    {
+      "id": "s3",
+      "nombre": "S3-Mov. Detectado",
+      "estado": "Mov. Detectado",
+      "zona": "ZONA DE CARGA",
+      "posicion": { "x": 35, "y": 42 },
+      "warehouseId": 1
     }
   ]
 }
