@@ -1,6 +1,7 @@
 <script setup>
 /**
- * @view DevicesMonitoring — inline-styles rewrite for reliable layout.
+ * @view DevicesMonitoring
+ * @description Content-only view — sidebar is provided by the parent Layout.
  */
 import { ref, computed, onMounted } from 'vue';
 import { useDevicesStore } from '../../application/devices.store.js';
@@ -28,17 +29,6 @@ const usageText = computed(() => `Uso: ${store.deviceCount}/${store.DEVICE_LIMIT
 const sensors   = computed(() => store.devicesByType['Sensor'] ?? []);
 const cameras   = computed(() => store.devicesByType['Camara'] ?? []);
 
-const navItems = [
-  { label: 'Mis Almacenes',        route: '/warehouses' },
-  { label: 'Dispositivos IoT',     route: '/layout/devices', active: true },
-  { label: 'Equipo y Accesos',     route: '/team' },
-  { label: 'Historial de eventos', route: '/events' },
-];
-const bottomNav = [
-  { label: 'Mi Suscripción', route: '/subscription' },
-  { label: 'Configuración',  route: '/settings' },
-];
-
 function onLinkClick() {
   store.isAtLimit ? (showLimitDialog.value = true) : (showDeviceDialog.value = true);
 }
@@ -61,23 +51,70 @@ onMounted(() => store.fetchDevices());
 </script>
 
 <template>
-  <main style="flex:1;overflow-y:auto;padding:24px 32px;display:flex;flex-direction:column;gap:24px;background:#0F172A;min-height:100vh;">
+  <div style="display:flex;flex-direction:column;gap:24px;padding:24px 32px;
+                background:#0F172A;min-height:100%;font-family:Inter,sans-serif;">
 
-    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-      <h1 style="margin:0;color:#fff;font-size:1.5rem;font-weight:700;">Dispositivos IoT</h1>
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <h1 style="margin:0;color:#fff;font-size:1.2rem;font-weight:700;">Dispositivos IoT</h1>
       <button @click="onLinkClick"
               style="background:#3B82F6;color:#fff;border:none;border-radius:8px;
-                      padding:8px 16px;font-size:0.8rem;font-weight:600;cursor:pointer;">
+                       padding:8px 18px;font-size:0.85rem;font-weight:600;cursor:pointer;">
         + Vincular nuevo dispositivo
       </button>
     </div>
 
+    <!-- Warehouse selector + usage -->
     <div style="display:flex;align-items:center;gap:16px;">
+      <pv-select
+          v-model="selectedWarehouse"
+          :options="warehouseOptions"
+          option-label="label"
+          option-value="value"
+          style="min-width:180px;"
+          :pt="{ root: { style: 'background:#1E293B;border-color:#334155;color:#fff;font-size:0.85rem;' } }"
+      />
+      <span style="color:#94A3B8;font-size:0.85rem;">{{ usageText }}</span>
     </div>
 
-  </main>
+    <!-- Loading -->
+    <div v-if="store.loading" style="display:flex;justify-content:center;padding:48px 0;">
+      <i class="pi pi-spin pi-spinner" style="font-size:2rem;color:#3B82F6;" />
+    </div>
 
-  <DeviceDialog v-model:visible="showDeviceDialog" :loading="linkLoading" @submit="onDeviceSubmit" />
-  <LimitWarningDialog v-model:visible="showLimitDialog" @upgrade="showLimitDialog = false" />
-  <SuccessDialog v-model:visible="showSuccessDialog" :zone="lastLinkedDevice?.zone ?? ''" />
+    <template v-else>
+      <!-- Sensors -->
+      <section v-if="sensors.length">
+        <h2 style="color:#CBD5E1;font-size:0.8rem;font-weight:600;margin:0 0 12px;">
+          Sensores de Acceso ({{ sensors.length }})
+        </h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
+          <DeviceCard v-for="d in sensors" :key="d.id" :device="d" />
+        </div>
+      </section>
+
+      <!-- Cameras -->
+      <section v-if="cameras.length">
+        <h2 style="color:#CBD5E1;font-size:0.8rem;font-weight:600;margin:0 0 12px;">
+          Cámaras CCTV ({{ cameras.length }})
+        </h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
+          <DeviceCard v-for="d in cameras" :key="d.id" :device="d" />
+        </div>
+      </section>
+
+      <!-- Empty -->
+      <div v-if="!sensors.length && !cameras.length"
+           style="display:flex;flex-direction:column;align-items:center;gap:12px;
+                        padding:64px 0;color:#475569;">
+        <i class="pi pi-wifi" style="font-size:2rem;" />
+        <p style="margin:0;font-size:0.875rem;">No hay dispositivos registrados aún.</p>
+      </div>
+    </template>
+
+    <!-- Dialogs -->
+    <DeviceDialog v-model:visible="showDeviceDialog" :loading="linkLoading" @submit="onDeviceSubmit" />
+    <LimitWarningDialog v-model:visible="showLimitDialog" @upgrade="showLimitDialog = false" />
+    <SuccessDialog v-model:visible="showSuccessDialog" :zone="lastLinkedDevice?.zone ?? ''" />
+  </div>
 </template>
