@@ -4,6 +4,8 @@ import iamRoutes from "./iam/presentation/iam.routes.js";
 import pageNotFound from "./iam/presentation/views/page-not-found.vue";
 import { warehouseRoutes } from "./warehouse/presentation/warehouse.routes.js";
 import devicesRoutes from "@/devices/devices.routes.js";
+import { eventHistoryRoutes } from "./event-history/presentation/event-history.routes.js";
+
 const routes = [
     { path: '/', redirect: '/iam/sign-in' },
     {
@@ -16,7 +18,8 @@ const routes = [
         redirect: '/layout/warehouses',
         children: [
             ...warehouseRoutes,
-            ...devicesRoutes
+            ...devicesRoutes,
+            ...eventHistoryRoutes
         ]
     },
     {
@@ -32,11 +35,9 @@ const router = createRouter({
     routes: routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
     console.log(`Navigating from ${String(from.name)} to ${String(to.name)}`);
-    let baseTitle = 'LockSight';
-    document.title = `${baseTitle} - ${to.meta['title'] || 'App'}`;
-    return next();
+    document.title = `LockSight - ${to.meta['title'] || 'App'}`;
 });
 
 export default router;

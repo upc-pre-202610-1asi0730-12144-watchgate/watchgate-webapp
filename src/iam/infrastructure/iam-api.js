@@ -16,12 +16,22 @@ const COMPANIES_ENDPOINT = import.meta.env.VITE_COMPANIES_ENDPOINT_PATH;
 export class IamApi {
     /**
      * Sign in a user
+     * Filtra por email primero (json-server 1.x compatible) y luego
+     * compara el password en el cliente, ya que json-server 1.x no
+     * soporta múltiples query params como filtros simultáneos.
      * @param {string} email
      * @param {string} password
      * @returns {Promise}
      */
     signIn(email, password) {
-        return http.get(`${USERS_ENDPOINT}?email=${email}&password=${password}`);
+        return http.get(`${USERS_ENDPOINT}?email=${encodeURIComponent(email)}`)
+            .then(response => {
+                const users = response.data;
+                const match = users.filter(
+                    u => u.password === password || u.passwordHash === password
+                );
+                return { data: match };
+            });
     }
 
     /**
@@ -39,7 +49,7 @@ export class IamApi {
      * @returns {Promise}
      */
     getUserByEmail(email) {
-        return http.get(`${USERS_ENDPOINT}?email=${email}`);
+        return http.get(`${USERS_ENDPOINT}?email=${encodeURIComponent(email)}`);
     }
 
     /**

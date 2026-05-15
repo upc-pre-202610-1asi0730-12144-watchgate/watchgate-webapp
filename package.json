@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "json-server --watch db.json --port 3000",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.6",
+    "json-server": "^1.0.0-beta.15",
     "vite": "^8.0.10"
   }
 }
