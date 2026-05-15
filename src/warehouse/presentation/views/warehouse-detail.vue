@@ -35,6 +35,16 @@ const latestEvents = [
 function goBack() {
   router.push({ name: 'warehouse-list' });
 }
+
+/** Navega al monitoreo en vivo */
+function goToLive() {
+  router.push({ name: 'live-monitoring', params: { id: warehouseId.value } });
+}
+
+/** Navega al historial de eventos */
+function goToHistory() {
+  router.push({ name: 'event-history-list', params: { id: warehouseId.value } });
+}
 </script>
 
 <template>
@@ -83,8 +93,12 @@ function goBack() {
     </div>
 
     <div class="detail-actions">
-      <button class="btn-primary">{{ t('warehouse-detail.view-realtime') }}</button>
-      <button class="btn-outline">{{ t('warehouse-detail.view-history') }}</button>
+      <button class="btn-primary" @click="goToLive">
+        {{ t('warehouse-detail.view-realtime') }}
+      </button>
+      <button class="btn-outline" @click="goToHistory">
+        {{ t('warehouse-detail.view-history') }}
+      </button>
     </div>
   </div>
 </template>
@@ -104,9 +118,7 @@ function goBack() {
   display: inline-block;
 }
 
-.back-link:hover {
-  color: #fff;
-}
+.back-link:hover { color: #fff; }
 
 .warehouse-name {
   font-size: 1.8rem;
@@ -155,11 +167,7 @@ function goBack() {
   margin: 0 0 1rem;
 }
 
-.event-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
+.event-list { display: flex; flex-direction: column; gap: 0.75rem; }
 
 .event-row {
   display: flex;
@@ -169,40 +177,21 @@ function goBack() {
   border-bottom: 1px solid #1e2d42;
 }
 
-.event-row:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
+.event-row:last-child { border-bottom: none; padding-bottom: 0; }
 
-.event-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
+.event-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .dot-error   { background-color: #e74c3c; }
 .dot-warning { background-color: #f39c12; }
 .dot-ok      { background-color: #2ecc71; }
 
-.event-label {
-  flex: 1;
-  font-size: 0.88rem;
-}
-
+.event-label { flex: 1; font-size: 0.88rem; }
 .label-error   { color: #e74c3c; }
 .label-warning { color: #f39c12; }
 .label-ok      { color: #c8d6e5; }
 
-.event-time {
-  font-size: 0.82rem;
-  color: #8a9bb0;
-}
+.event-time { font-size: 0.82rem; color: #8a9bb0; }
 
-.sensor-list {
-  display: flex;
-  flex-direction: column;
-}
+.sensor-list { display: flex; flex-direction: column; }
 
 .sensor-row {
   display: flex;
@@ -212,30 +201,13 @@ function goBack() {
   border-bottom: 1px solid #1e2d42;
 }
 
-.sensor-row:last-child {
-  border-bottom: none;
-}
+.sensor-row:last-child { border-bottom: none; }
 
-.sensor-label {
-  font-size: 0.88rem;
-  color: #8a9bb0;
-}
+.sensor-label { font-size: 0.88rem; color: #8a9bb0; }
+.sensor-value { font-size: 0.88rem; font-weight: 600; color: #fff; }
+.sensor-stable { color: #2ecc71; }
 
-.sensor-value {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #fff;
-}
-
-.sensor-stable {
-  color: #2ecc71;
-}
-
-.detail-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-start;
-}
+.detail-actions { display: flex; gap: 1rem; justify-content: flex-start; }
 
 .btn-primary {
   background-color: #4da6ff;
@@ -248,9 +220,7 @@ function goBack() {
   transition: background-color 0.15s;
 }
 
-.btn-primary:hover {
-  background-color: #3a90e8;
-}
+.btn-primary:hover { background-color: #3a90e8; }
 
 .btn-outline {
   background-color: transparent;
@@ -263,7 +233,5 @@ function goBack() {
   transition: background-color 0.15s;
 }
 
-.btn-outline:hover {
-  background-color: #1a3a5c;
-}
+.btn-outline:hover { background-color: #1a3a5c; }
 </style>
