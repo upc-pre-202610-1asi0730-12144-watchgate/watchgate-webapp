@@ -1,58 +1,38 @@
-import axios from 'axios';
-
 /**
- * Infrastructure gateway for IoT Devices bounded-context endpoints.
- * Uses environment variables for configuration.
+ * @file devices-api.js
+ * @description HTTP client for the /devices endpoint backed by JSON Server.
  */
-const http = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL
-});
 
-const DEVICES_ENDPOINT = import.meta.env.VITE_DEVICES_ENDPOINT_PATH;
+const BASE_URL = 'http://localhost:3000/devices';
 
 export class DevicesApi {
-    /**
-     * Fetches all IoT devices from the server.
-     * @returns {Promise}
-     */
-    getDevices() {
-        return http.get(DEVICES_ENDPOINT);
+    /** @returns {Promise<object[]>} */
+    async getAll() {
+        const response = await fetch(BASE_URL);
+        if (!response.ok) throw new Error('Failed to fetch devices');
+        return response.json();
     }
 
     /**
-     * Fetches a single device by its ID.
+     * @param {object} resource
+     * @returns {Promise<object>}
+     */
+    async create(resource) {
+        const response = await fetch(BASE_URL, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(resource),
+        });
+        if (!response.ok) throw new Error('Failed to create device');
+        return response.json();
+    }
+
+    /**
      * @param {number|string} id
-     * @returns {Promise}
+     * @returns {Promise<void>}
      */
-    getDeviceById(id) {
-        return http.get(`${DEVICES_ENDPOINT}/${id}`);
-    }
-
-    /**
-     * Creates a new IoT device record.
-     * @param {object} deviceResource
-     * @returns {Promise}
-     */
-    createDevice(deviceResource) {
-        return http.post(DEVICES_ENDPOINT, deviceResource);
-    }
-
-    /**
-     * Updates an existing IoT device.
-     * @param {number|string} id
-     * @param {object} deviceResource
-     * @returns {Promise}
-     */
-    updateDevice(id, deviceResource) {
-        return http.put(`${DEVICES_ENDPOINT}/${id}`, deviceResource);
-    }
-
-    /**
-     * Deletes a device record.
-     * @param {number|string} id
-     * @returns {Promise}
-     */
-    deleteDevice(id) {
-        return http.delete(`${DEVICES_ENDPOINT}/${id}`);
+    async remove(id) {
+        const response = await fetch(`${BASE_URL}/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Failed to delete device');
     }
 }

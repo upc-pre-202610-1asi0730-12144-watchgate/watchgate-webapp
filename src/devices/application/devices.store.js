@@ -8,17 +8,19 @@ import { ref, computed } from 'vue';
 import { DevicesApi }      from '../infrastructure/devices-api.js';
 import { DeviceAssembler } from '../infrastructure/device.assembler.js';
 
+const devicesApi = new DevicesApi();
+
 export const useDevicesStore = defineStore('devices', () => {
     /** @type {import('vue').Ref<import('../domain/model/device.entity.js').Device[]>} */
-    const devices  = ref([]);
-    const loading  = ref(false);
-    const error    = ref(null);
+    const devices = ref([]);
+    const loading = ref(false);
+    const error   = ref(null);
 
     /** Maximum devices allowed by the current plan. */
     const DEVICE_LIMIT = 4;
 
-    const deviceCount = computed(() => devices.value.length);
-    const isAtLimit   = computed(() => deviceCount.value >= DEVICE_LIMIT);
+    const deviceCount   = computed(() => devices.value.length);
+    const isAtLimit     = computed(() => deviceCount.value >= DEVICE_LIMIT);
 
     /** Groups devices by type for the monitoring view. */
     const devicesByType = computed(() => {
@@ -35,9 +37,11 @@ export const useDevicesStore = defineStore('devices', () => {
         loading.value = true;
         error.value   = null;
         try {
-            const resources = await DevicesApi.getAll();
-            devices.value   = resources.map(DeviceAssembler.toEntity);
+            const resources = await devicesApi.getAll();
+            console.log('devices fetched:', resources);
+            devices.value = resources.map(DeviceAssembler.toEntity);
         } catch (e) {
+            console.error('fetchDevices error:', e);
             error.value = e.message;
         } finally {
             loading.value = false;
@@ -51,7 +55,7 @@ export const useDevicesStore = defineStore('devices', () => {
      */
     async function addDevice(payload) {
         const resource = { ...payload, status: 'Online' };
-        const created  = await DevicesApi.create(resource);
+        const created  = await devicesApi.create(resource);
         const entity   = DeviceAssembler.toEntity(created);
         devices.value  = [...devices.value, entity];
         return entity;
@@ -62,7 +66,7 @@ export const useDevicesStore = defineStore('devices', () => {
      * @param {number|string} id
      */
     async function removeDevice(id) {
-        await DevicesApi.remove(id);
+        await devicesApi.remove(id);
         devices.value = devices.value.filter(d => d.id !== id);
     }
 
