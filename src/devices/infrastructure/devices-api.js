@@ -3,7 +3,7 @@
  * @description HTTP client for the /devices endpoint backed by JSON Server.
  */
 
-const BASE_URL = 'http://localhost:3000/devices';
+const BASE_URL = 'https://locksight-mockapi.azurewebsites.net/';
 
 export class DevicesApi {
     /** @returns {Promise<object[]>} */
