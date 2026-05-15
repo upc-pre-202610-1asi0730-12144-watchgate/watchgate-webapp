@@ -1,0 +1,136 @@
+{
+  "iam": {
+    "brand": {
+      "slogan": "Plataforma de Monitoreo IoT",
+      "sloganSignup": "Seguridad empresarial inteligente",
+      "descSignup": "Monitorea todos tus almacenes, gestiona accesos y recibe alertas en tiempo real.",
+      "seamless": "Seguridad sin",
+      "security": "interrupciones"
+    },
+    "signIn": {
+      "title": "Acceder al Sistema",
+      "subtitle": "Ingresa tus credenciales para continuar",
+      "emailLabel": "Correo Electrónico",
+      "passwordLabel": "Contraseña",
+      "loginButton": "Iniciar Sesión",
+      "forgot": "¿Olvidaste tu contraseña?",
+      "noAccount": "¿No tienes una cuenta?",
+      "register": "Regístrate",
+      "errors": {
+        "invalid": "Correo electrónico o contraseña incorrectos",
+        "connection": "Ocurrió un error de conexión. Inténtalo de nuevo"
+      }
+    },
+    "signUp": {
+      "title": "Crear Cuenta",
+      "subtitle": "Protege tus almacenes hoy mismo",
+      "fullNameLabel": "Nombre Completo",
+      "fullNamePlaceholder": "Ej. Carlos Perez",
+      "companyLabel": "Nombre de la Empresa",
+      "companyPlaceholder": "Ej. Logística Almacenes",
+      "emailLabel": "Correo Electrónico",
+      "passwordLabel": "Contraseña",
+      "startButton": "Comenzar",
+      "alreadyAccount": "¿Ya tienes cuenta?",
+      "signIn": "Inicia Sesión",
+      "errors": {
+        "required": "Todos los campos son requeridos",
+        "passwordLength": "La contraseña debe tener al menos 6 caracteres",
+        "creationFailed": "Ocurrió un error al crear tu cuenta"
+      }
+    },
+    "recover": {
+      "title": "Recuperar Contraseña",
+      "subtitle": "Ingresa tu correo y te enviaremos un enlace para restablecer tu acceso",
+      "emailLabel": "Correo Electrónico",
+      "sendBtn": "Enviar Enlace",
+      "backTo": "Volver a ",
+      "signIn": "Iniciar Sesión",
+      "messages": {
+        "success": "El enlace de recuperación ha sido enviado con éxito",
+        "notRegistered": "Este correo no está registrado en nuestro sistema",
+        "error": "Ocurrió un error al conectar con el servidor"
+      }
+    },
+    "page-not-found": {
+      "title": "Página no encontrada",
+      "content": "La ruta no está disponible.",
+      "go-home": "Ir al Inicio"
+    }
+  },
+  "warehouses": {
+    "title": "Mis Almacenes",
+    "register": "Registrar Almacén",
+    "no-warehouses": "No se encontraron almacenes.",
+    "last-event": "Último evento",
+    "incident-detected": "Incidente detectado",
+    "view-detail": "Ver Detalles",
+    "attend": "Atender",
+    "status": {
+      "active": "Activo",
+      "critical-alert": "Alerta Crítica",
+      "inactive": "Inactivo"
+    }
+  },
+  "warehouse-detail": {
+    "back": "Volver a la lista",
+    "active": "Activo",
+    "latest-events": "Últimos Eventos",
+    "sensor-status": "Estado de Sensores",
+    "main-door": "Puerta Principal",
+    "door-closed": "Cerrada",
+    "motion-sensor": "Sensor de Movimiento",
+    "normal": "Normal",
+    "network": "Conexión de Red",
+    "stable": "Estable",
+    "view-realtime": "Ver en tiempo real",
+    "view-history": "Ver Historial"
+  },
+  "events": {
+    "door-open": "Puerta principal abierta",
+    "motion-detected": "Movimiento detectado en Sector A",
+    "authorized-access": "Acceso autorizado concedido"
+  },
+  "nav": {
+    "warehouses": "Mis Almacenes",
+    "devices": "Dispositivos IoT",
+    "team": "Equipo y Accesos",
+    "events": "Historial de eventos",
+    "subscription": "Mi Suscripción",
+    "settings": "Configuración"
+  },
+
+  "devices": {
+    "title": "Dispositivos IoT",
+    "linkNew": "Vincular nuevo dispositivo",
+    "usage": "Uso",
+    "usageUnit": "disp.",
+    "sectionSensors": "Sensores de Acceso",
+    "sectionCameras": "Cámaras CCTV",
+    "empty": "No hay dispositivos registrados aún.",
+    "menu": "Opciones",
+    "dialog": {
+      "title": "Vincular Dispositivo",
+      "sectionTitle": "Datos del Dispositivo IoT",
+      "serialNumber": "Número de Serie (S/N)",
+      "serialNumberPlaceholder": "Ej. LK-987654321",
+      "deviceName": "Nombre del Dispositivo",
+      "deviceNamePlaceholder": "Ej. Sensor Ventana Trasera",
+      "zone": "Asignar a Zona",
+      "zonePlaceholder": "Zona A",
+      "submit": "Vincular Dispositivo",
+      "errorRequired": "Este campo es obligatorio"
+    },
+    "limitDialog": {
+      "title": "Límite de Dispositivos",
+      "description": "Tu plan actual ha alcanzado el límite de 5 dispositivos IoT conectados.",
+      "upgrade": "Mejorar Plan Premium",
+      "dismiss": "Cerrar"
+    },
+    "successDialog": {
+      "title": "Dispositivo en línea",
+      "description": "El sensor de movimiento está activo y monitoreando nuevamente la {zone}.",
+      "confirm": "Entendido"
+    }
+  }
+}

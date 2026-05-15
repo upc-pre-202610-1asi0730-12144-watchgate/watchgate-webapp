@@ -1,0 +1,36 @@
+{
+  "devices": [
+    {
+      "id": 1,
+      "name": "S1-Puerta Magnet",
+      "type": "Sensor",
+      "status": "Online",
+      "zone": "Puerta Principal",
+      "serialNumber": "LK-100000001"
+    },
+    {
+      "id": 2,
+      "name": "M1-Pasillo Central",
+      "type": "Sensor",
+      "status": "Offline",
+      "zone": "Zona B",
+      "serialNumber": "LK-100000002"
+    },
+    {
+      "id": 3,
+      "name": "CAM-01 Entrada",
+      "type": "Camara",
+      "status": "Online",
+      "zone": "Perimetro Exterior",
+      "serialNumber": "LK-200000001"
+    },
+    {
+      "serialNumber": "212s1AA",
+      "name": "S11",
+      "zone": "Zona B",
+      "type": "Sensor",
+      "status": "Online",
+      "id": 4
+    }
+  ]
+}
