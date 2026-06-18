@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import Layout from "./shared/presentation/components/layout.vue";
 import iamRoutes from "./iam/presentation/iam.routes.js";
 import pageNotFound from "./iam/presentation/views/page-not-found.vue";
@@ -31,7 +31,7 @@ const routes = [
 ];
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: createWebHashHistory(import.meta.env.BASE_URL),
     routes: routes,
 });
 
