@@ -57,4 +57,21 @@ export class WarehouseApi {
     deleteWarehouse(id) {
         return http.delete(`${WAREHOUSES_ENDPOINT}/${id}`);
     }
+    /**
+     * Get warehouses by Company ID
+     * @param {number|string} companyId
+     * @returns {Promise}
+     */
+    getWarehousesByCompanyId(companyId) {
+        return http.get(`${WAREHOUSES_ENDPOINT}/company/${companyId}`);
+    }
+    /**
+     * Update operating hours of a warehouse
+     * @param {number|string} id
+     * @param {object} hoursResource
+     * @returns {Promise}
+     */
+    updateOperatingHours(id, hoursResource) {
+        return http.put(`${WAREHOUSES_ENDPOINT}/${id}/operating-hours`, hoursResource);
+    }
 }

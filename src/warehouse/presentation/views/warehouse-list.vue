@@ -1,24 +1,21 @@
 <script setup>
-/**
- * Warehouse List View
- * @description
- * View that displays a list of all warehouses belonging to the user's company.
- * Allows navigation to detailed monitoring and warehouse registration.
- */
-import { onMounted, toRefs } from 'vue';
+import { ref, onMounted, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useWarehouseStore } from '../../application/warehouse.store.js';
+import WarehouseRegisterModal from '../views/warehouse-register.vue';
 
 const { t } = useI18n();
 const router = useRouter();
 const store = useWarehouseStore();
 const { warehouses, warehousesLoaded, errors } = toRefs(store);
 const { fetchWarehouses } = store;
+const showRegisterModal = ref(false);
 
 onMounted(() => {
   if (!warehousesLoaded.value) {
-    fetchWarehouses();
+    const currentCompanyId = 1;
+    fetchWarehouses(currentCompanyId);
   }
 });
 
@@ -27,7 +24,11 @@ function goToDetail(warehouseId) {
 }
 
 function goToRegister() {
-  router.push({ name: 'warehouse-register' });
+  showRegisterModal.value = true;
+}
+
+function goToEdit(warehouseId) {
+  router.push({ name: 'warehouse-edit', params: { id: warehouseId } });
 }
 </script>
 
@@ -38,6 +39,11 @@ function goToRegister() {
     <button class="btn-register" @click="goToRegister">
       {{ t('warehouses.register') }}
     </button>
+
+    <WarehouseRegisterModal
+        v-if="showRegisterModal"
+        @close="showRegisterModal = false"
+    />
 
     <div v-if="errors.length" class="text-red-500 mb-3">
       {{ t('errors.occurred') }}: {{ errors.map(e => e.message).join(', ') }}
@@ -55,10 +61,14 @@ function goToRegister() {
           class="warehouse-card"
           :class="{ 'is-critical': warehouse.hasIncident }"
       >
-        <div class="warehouse-icon" :class="{ 'icon-critical': warehouse.hasIncident }"></div>
+        <div
+            class="warehouse-icon clickable"
+            :class="{ 'icon-critical': warehouse.hasIncident }"
+            @click="goToEdit(warehouse.id)"
+        ></div>
 
         <div class="warehouse-info">
-          <p class="warehouse-name">{{ warehouse.name }}</p>
+          <p class="warehouse-name clickable" @click="goToEdit(warehouse.id)">{{ warehouse.name }}</p>
           <p
               class="warehouse-status"
               :class="{

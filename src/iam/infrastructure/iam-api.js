@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const http = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL
+    baseURL: import.meta.env.VITE_MOCK_API_BASE_URL
 });
 
 const USERS_ENDPOINT = import.meta.env.VITE_USERS_ENDPOINT_PATH;

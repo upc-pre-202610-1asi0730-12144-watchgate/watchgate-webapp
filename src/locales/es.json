@@ -90,5 +90,15 @@
     "door-open": "Puerta principal abierta",
     "motion-detected": "Movimiento detectado en Sector A",
     "authorized-access": "Acceso autorizado concedido"
+  },
+  "warehouse-edit": {
+    "back": "Volver a la lista",
+    "title": "Configuración del Almacén",
+    "opening-time": "Horario de Apertura",
+    "closing-time": "Horario de Cierre",
+    "cancel": "Cancelar",
+    "save": "Guardar Cambios",
+    "saving": "Guardando...",
+    "save-success": "¡Cambios guardados con éxito!"
   }
 }
