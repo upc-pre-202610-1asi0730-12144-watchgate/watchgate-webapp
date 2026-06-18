@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const http = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL
+    baseURL: import.meta.env.VITE_BACK_BASE_URL
 });
 
 const WAREHOUSES_ENDPOINT = import.meta.env.VITE_WAREHOUSES_ENDPOINT_PATH;
@@ -56,5 +56,22 @@ export class WarehouseApi {
      */
     deleteWarehouse(id) {
         return http.delete(`${WAREHOUSES_ENDPOINT}/${id}`);
+    }
+    /**
+     * Get warehouses by Company ID
+     * @param {number|string} companyId
+     * @returns {Promise}
+     */
+    getWarehousesByCompanyId(companyId) {
+        return http.get(`${WAREHOUSES_ENDPOINT}/company/${companyId}`);
+    }
+    /**
+     * Update operating hours of a warehouse
+     * @param {number|string} id
+     * @param {object} hoursResource
+     * @returns {Promise}
+     */
+    updateOperatingHours(id, hoursResource) {
+        return http.put(`${WAREHOUSES_ENDPOINT}/${id}/operating-hours`, hoursResource);
     }
 }

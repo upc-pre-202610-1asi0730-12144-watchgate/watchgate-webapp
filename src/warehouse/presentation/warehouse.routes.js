@@ -1,5 +1,6 @@
 const warehouseList = () => import('./views/warehouse-list.vue');
 const warehouseDetail = () => import('./views/warehouse-detail.vue');
+const warehouseEdit = () => import('./views/warehouse-edit.vue');
 
 /**
  * Warehouse Routing Configuration
@@ -13,6 +14,12 @@ export const warehouseRoutes = [
         name: 'warehouse-list',
         component: warehouseList,
         meta: { title: 'Mis Almacenes' }
+    },
+    {
+        path: 'warehouses/:id/edit',
+        name: 'warehouse-edit',
+        component: warehouseEdit,
+        meta: { title: 'Editar Almacén' }
     },
     {
         path: 'warehouses/:id',

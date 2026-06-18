@@ -14,7 +14,7 @@ export const useWarehouseStore = defineStore('warehouse', () => {
     const warehouses = ref([]);
     const errors = ref([]);
     const warehousesLoaded = ref(false);
-
+    const currentCompanyId = ref(null);
     /**
      * Get the count of warehouses
      * @returns {number}
@@ -24,10 +24,13 @@ export const useWarehouseStore = defineStore('warehouse', () => {
     });
 
     /**
-     * Fetch all warehouses from the API
+     * Fetch all warehouses for a specific company from the API
+     * @param {number|string} companyId
      */
-    function fetchWarehouses() {
-        warehouseApi.getWarehouses().then(response => {
+    function fetchWarehouses(companyId) {
+        currentCompanyId.value = parseInt(companyId);
+
+        warehouseApi.getWarehousesByCompanyId(companyId).then(response => {
             warehouses.value = WarehouseAssembler.toEntitiesFromResponse(response);
             warehousesLoaded.value = true;
         }).catch(error => {
@@ -35,6 +38,15 @@ export const useWarehouseStore = defineStore('warehouse', () => {
         });
     }
 
+    /**
+     * Get a specific warehouse by its ID from the local state
+     * @param {number|string} id
+     * @returns {Warehouse|undefined}
+     */
+    function getWarehouseByID(id) {
+        let idNum = parseInt(id);
+        return warehouses.value.find(warehouse => warehouse.id === idNum);
+    }
     /**
      * Get a specific warehouse by its ID from the local state
      * @param {number|string} id
@@ -54,8 +66,31 @@ export const useWarehouseStore = defineStore('warehouse', () => {
             const resource = response.data;
             const newWarehouse = WarehouseAssembler.toEntityFromResource(resource);
             warehouses.value.push(newWarehouse);
+
+            if (newWarehouse.companyId === currentCompanyId.value) {
+                warehouses.value.push(newWarehouse);
+            }
         }).catch(error => {
             errors.value.push(error);
+        });
+    }
+    /**
+     * Update warehouse operating hours
+     * @param {number|string} id
+     * @param {object} hours
+     */
+    function updateHours(id, hours) {
+        return warehouseApi.updateOperatingHours(id, hours).then(response => {
+            const updatedResource = response.data;
+
+            const index = warehouses.value.findIndex(w => w.id === parseInt(id));
+            if (index !== -1) {
+                warehouses.value[index] = WarehouseAssembler.toEntityFromResource(updatedResource);
+            }
+            return true;
+        }).catch(error => {
+            errors.value.push(error);
+            return false;
         });
     }
 
@@ -64,8 +99,10 @@ export const useWarehouseStore = defineStore('warehouse', () => {
         errors,
         warehousesLoaded,
         warehousesCount,
+        currentCompanyId,
         fetchWarehouses,
         getWarehouseById,
-        addWarehouse
+        addWarehouse,
+        updateHours
     };
 });
