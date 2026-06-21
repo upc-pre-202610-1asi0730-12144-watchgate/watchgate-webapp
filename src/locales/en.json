@@ -179,5 +179,15 @@
       "description": "The motion sensor is active and monitoring {zone} again.",
       "confirm": "Got it"
     }
+  },
+  "warehouse-edit": {
+    "back": "Back to list",
+    "title": "Warehouse Settings",
+    "opening-time": "Opening Time",
+    "closing-time": "Closing Time",
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "save-success": "Changes saved successfully!"
   }
 }

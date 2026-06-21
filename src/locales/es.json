@@ -179,5 +179,15 @@
       "description": "El sensor de movimiento está activo y monitoreando nuevamente la {zone}.",
       "confirm": "Entendido"
     }
+  },
+  "warehouse-edit": {
+    "back": "Volver a la lista",
+    "title": "Configuración del Almacén",
+    "opening-time": "Horario de Apertura",
+    "closing-time": "Horario de Cierre",
+    "cancel": "Cancelar",
+    "save": "Guardar Cambios",
+    "saving": "Guardando...",
+    "save-success": "¡Cambios guardados con éxito!"
   }
 }
