@@ -70,6 +70,27 @@ export const useWarehouseStore = defineStore('warehouse', () => {
         });
     }
 
+    /**
+     * Create a new zone within a warehouse and patch it into the local
+     * warehouse's zones, so warehouse-detail can show it without a refetch.
+     * @param {number|string} warehouseId
+     * @param {{ name: string, area: number, riskLevel: string }} zoneData
+     * @returns {Promise<object>} the created WarehouseZoneResource
+     */
+    function createZone(warehouseId, zoneData) {
+        return warehouseApi.createZone(warehouseId, zoneData).then(response => {
+            const zoneResource = response.data;
+            const warehouse = getWarehouseById(warehouseId);
+            if (warehouse) {
+                warehouse.zones = [...warehouse.zones, zoneResource];
+            }
+            return zoneResource;
+        }).catch(error => {
+            errors.value.push(error);
+            throw error;
+        });
+    }
+
     return {
         warehouses,
         errors,
@@ -77,6 +98,7 @@ export const useWarehouseStore = defineStore('warehouse', () => {
         warehousesCount,
         fetchWarehouses,
         getWarehouseById,
-        createWarehouse
+        createWarehouse,
+        createZone
     };
 });

@@ -3,17 +3,32 @@ import { computed } from 'vue';
 
 const props = defineProps({
   device: { type: Object, required: true },
+  // Resolved "Warehouse - Zone" label for device.zoneId; falls back to the raw id.
+  zoneLabel: { type: String, default: '' },
 });
 
-const deviceIcon = computed(() =>
-    props.device.type === 'Sensor' ? 'pi-wifi' : 'pi-video'
-);
+const TYPE_ICONS = {
+  MOTION: 'pi-directions',
+  DOOR: 'pi-lock',
+  TEMPERATURE: 'pi-sun',
+  HUMIDITY: 'pi-cloud',
+  SMOKE: 'pi-exclamation-triangle',
+};
+
+const deviceIcon = computed(() => TYPE_ICONS[props.device.type] ?? 'pi-wifi');
 const statusColor = computed(() =>
     props.device.isOnline ? '#22C55E' : '#EF4444'
 );
 const statusLabel = computed(() =>
     props.device.isOnline ? 'Online' : 'Offline'
 );
+const subtitle = computed(() =>
+    props.zoneLabel || `Zone #${props.device.zoneId}`
+);
+const readingLabel = computed(() => {
+  if (props.device.lastReading === null || props.device.lastReading === undefined) return '';
+  return `${props.device.lastReading}${props.device.unit ? ' ' + props.device.unit : ''}`;
+});
 </script>
 
 <template>
@@ -32,7 +47,7 @@ const statusLabel = computed(() =>
       </p>
       <p style="margin:0;color:#94A3B8;font-size:0.75rem;
                       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-        {{ device.zone }}
+        {{ subtitle }}<span v-if="readingLabel"> · {{ readingLabel }}</span>
       </p>
     </div>
     <!-- Status -->

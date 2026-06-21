@@ -1,27 +1,34 @@
 /**
  * @file device.entity.js
- * @description Represents an IoT device registered in a warehouse.
+ * @description Represents a sensor registered in a warehouse zone
+ * (maps 1:1 to the backend's SensorResource).
  */
 
 export class Device {
-    /** @param {object} data - Raw device data. */
-    constructor({ id, name, type, status, zone, serialNumber }) {
+    /** @param {object} data - Raw sensor data. */
+    constructor({ id, name, type, status, unit = null, lastReading = null, lastReadingAt = null, zoneId, companyId }) {
         /** @type {number|string} */
         this.id = id;
         /** @type {string} */
         this.name = name;
-        /** @type {'Sensor'|'Cámara'} */
+        /** @type {string} e.g. 'MOTION', 'DOOR', 'TEMPERATURE' */
         this.type = type;
-        /** @type {'Online'|'Offline'} */
+        /** @type {string} e.g. 'ACTIVE', 'INACTIVE' */
         this.status = status;
-        /** @type {string} */
-        this.zone = zone;
-        /** @type {string} */
-        this.serialNumber = serialNumber;
+        /** @type {string|null} e.g. '°C', 'ppm' */
+        this.unit = unit;
+        /** @type {number|null} */
+        this.lastReading = lastReading;
+        /** @type {Date|null} */
+        this.lastReadingAt = lastReadingAt ? new Date(lastReadingAt) : null;
+        /** @type {number} real WarehouseZone id */
+        this.zoneId = zoneId;
+        /** @type {number} */
+        this.companyId = companyId;
     }
 
     /** @returns {boolean} */
     get isOnline() {
-        return this.status === 'Online';
+        return this.status === 'ACTIVE';
     }
 }

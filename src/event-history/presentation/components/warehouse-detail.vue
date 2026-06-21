@@ -18,16 +18,11 @@ const irAMonitoreo = () => router.push({ name: 'live-monitoring', params: { id: 
 const irAHistorial = () => router.push({ name: 'event-history-list', params: { id: route.params.id } })
 const irAAlmacenes = () => router.push({ name: 'warehouse-list' })
 
-const colorEvento = (tipo) => {
-  const mapa = { alerta: '#ef4444', advertencia: '#f59e0b', normal: '#22c55e' }
-  return mapa[tipo] ?? '#6b7280'
-}
-
-const claseSensor = (estado) => {
-  const e = estado.toLowerCase()
-  if (e.includes('estable') || e.includes('normal') || e.includes('cerrada')) return 'sensor-ok'
-  if (e.includes('alerta') || e.includes('abierta') || e.includes('detectado')) return 'sensor-alerta'
-  return 'sensor-warn'
+const claseSensor = (status) => {
+  const s = (status ?? '').toUpperCase()
+  if (s === 'ACTIVE') return 'sensor-ok'
+  if (s === 'INACTIVE') return 'sensor-warn'
+  return 'sensor-alerta'
 }
 
 const ultimosEventos = () => eventHistoryStore.events.slice(0, 3)
@@ -49,10 +44,10 @@ const ultimosEventos = () => eventHistoryStore.events.slice(0, 3)
       <div class="wh-card">
         <h3 class="card-title">Últimos eventos</h3>
         <ul class="event-list">
-          <li v-for="evento in ultimosEventos()" :key="evento.id" class="event-item">
-            <span class="event-dot" :style="{ backgroundColor: colorEvento(evento.tipo) }" />
-            <span class="event-nombre" :style="{ color: colorEvento(evento.tipo) }">{{ evento.nombre }}</span>
-            <span class="event-hora">{{ evento.hora }}</span>
+          <li v-for="evento in ultimosEventos()" :key="evento.key" class="event-item">
+            <span class="event-dot" :style="{ backgroundColor: evento.getColor() }" />
+            <span class="event-nombre" :style="{ color: evento.getColor() }">{{ evento.heading }}</span>
+            <span class="event-hora">{{ evento.getFormattedTime() }}</span>
           </li>
         </ul>
       </div>
@@ -61,8 +56,8 @@ const ultimosEventos = () => eventHistoryStore.events.slice(0, 3)
         <h3 class="card-title">Estado de sensores</h3>
         <ul class="sensor-list">
           <li v-for="sensor in eventHistoryStore.sensors" :key="sensor.id" class="sensor-item">
-            <span class="sensor-nombre">{{ sensor.nombre }}:</span>
-            <span :class="['sensor-estado', claseSensor(sensor.estado)]">{{ sensor.estado }}</span>
+            <span class="sensor-nombre">{{ sensor.name }}:</span>
+            <span :class="['sensor-estado', claseSensor(sensor.status)]">{{ sensor.status }}</span>
           </li>
         </ul>
       </div>

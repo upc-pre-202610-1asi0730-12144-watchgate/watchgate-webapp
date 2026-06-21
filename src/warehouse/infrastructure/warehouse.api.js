@@ -48,4 +48,15 @@ export class WarehouseApi {
     updateWarehouse(id, warehouseResource) {
         return http.put(`${WAREHOUSES_ENDPOINT}/${id}`, warehouseResource);
     }
+
+    /**
+     * Create a new zone within a warehouse. resource must match
+     * CreateWarehouseZoneResource: { name, area, riskLevel }
+     * @param {number|string} warehouseId
+     * @param {object} zoneResource
+     * @returns {Promise}
+     */
+    createZone(warehouseId, zoneResource) {
+        return http.post(`${WAREHOUSES_ENDPOINT}/${warehouseId}/zones`, zoneResource);
+    }
 }

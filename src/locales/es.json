@@ -102,7 +102,26 @@
     "network": "Conexión de Red",
     "stable": "Estable",
     "view-realtime": "Ver en tiempo real",
-    "view-history": "Ver Historial"
+    "view-history": "Ver Historial",
+    "zones": {
+      "title": "Zonas",
+      "empty": "Aún no hay zonas registradas.",
+      "nameLabel": "Nombre de la Zona",
+      "namePlaceholder": "Ej. Zona A",
+      "areaLabel": "Área (m²)",
+      "areaPlaceholder": "Ej. 500",
+      "riskLevelLabel": "Nivel de Riesgo",
+      "riskLevels": {
+        "low": "Bajo",
+        "medium": "Medio",
+        "high": "Alto"
+      },
+      "submit": "Agregar Zona",
+      "errors": {
+        "required": "El nombre y el área son obligatorios.",
+        "creationFailed": "Ocurrió un error al crear la zona."
+      }
+    }
   },
   "events": {
     "door-open": "Puerta principal abierta",
@@ -130,12 +149,22 @@
     "dialog": {
       "title": "Vincular Dispositivo",
       "sectionTitle": "Datos del Dispositivo IoT",
-      "serialNumber": "Número de Serie (S/N)",
-      "serialNumberPlaceholder": "Ej. LK-987654321",
       "deviceName": "Nombre del Dispositivo",
       "deviceNamePlaceholder": "Ej. Sensor Ventana Trasera",
+      "typeLabel": "Tipo de Sensor",
+      "typePlaceholder": "Selecciona un tipo",
+      "types": {
+        "motion": "Movimiento",
+        "door": "Puerta",
+        "temperature": "Temperatura",
+        "humidity": "Humedad",
+        "smoke": "Humo"
+      },
+      "unitLabel": "Unidad (opcional)",
+      "unitPlaceholder": "Ej. °C, ppm",
       "zone": "Asignar a Zona",
-      "zonePlaceholder": "Zona A",
+      "zonePlaceholder": "Selecciona una zona del almacén",
+      "zoneEmpty": "Aún no hay zonas de almacén disponibles. Registra una zona primero.",
       "submit": "Vincular Dispositivo",
       "errorRequired": "Este campo es obligatorio"
     },
