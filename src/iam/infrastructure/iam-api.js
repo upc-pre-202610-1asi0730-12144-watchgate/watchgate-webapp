@@ -1,63 +1,44 @@
-import axios from 'axios';
+import { http } from '../../shared/infrastructure/http.api.js';
 
-const http = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL
-});
-
+const AUTH_ENDPOINT = import.meta.env.VITE_AUTH_ENDPOINT_PATH;
 const USERS_ENDPOINT = import.meta.env.VITE_USERS_ENDPOINT_PATH;
-const COMPANIES_ENDPOINT = import.meta.env.VITE_COMPANIES_ENDPOINT_PATH;
 
 /**
  * IAM API Service
  * @class IamApi
  * @description
- * IAM API service is used to communicate with the Identity and Access Management endpoints.
+ * IAM API service is used to communicate with the Identity and Access Management endpoints
+ * of the Watchgate Locksight backend (AuthenticationController / UsersController).
  */
 export class IamApi {
     /**
-     * Sign in a user
-     * Filtra por email primero (json-server 1.x compatible) y luego
-     * compara el password en el cliente, ya que json-server 1.x no
-     * soporta múltiples query params como filtros simultáneos.
+     * Sign in a user against the backend. Returns an AuthenticatedUserResource
+     * ({ id, fullName, email, role, token }).
      * @param {string} email
      * @param {string} password
      * @returns {Promise}
      */
     signIn(email, password) {
-        return http.get(`${USERS_ENDPOINT}?email=${encodeURIComponent(email)}`)
-            .then(response => {
-                const users = response.data;
-                const match = users.filter(
-                    u => u.password === password || u.passwordHash === password
-                );
-                return { data: match };
-            });
+        return http.post(`${AUTH_ENDPOINT}/sign-in`, { email, password });
     }
 
     /**
-     * Sign up a new user
-     * @param {object} userResource
+     * Sign up a new user and company in a single call. Returns an
+     * AuthenticatedUserResource ({ id, fullName, email, role, token }).
+     * @param {{ fullName: string, email: string, password: string, tradeName: string, taxId: string }} signUpResource
      * @returns {Promise}
      */
-    signUp(userResource) {
-        return http.post(USERS_ENDPOINT, userResource);
+    signUp(signUpResource) {
+        return http.post(`${AUTH_ENDPOINT}/sign-up`, signUpResource);
     }
 
     /**
-     * Get a user by email
-     * @param {string} email
+     * Get a user by ID (requires a valid bearer token). Returns a UserResource
+     * ({ id, fullName, email, role, companyId }).
+     * @param {number|string} id
      * @returns {Promise}
      */
-    getUserByEmail(email) {
-        return http.get(`${USERS_ENDPOINT}?email=${encodeURIComponent(email)}`);
-    }
-
-    /**
-     * Create a new company
-     * @param {object} companyResource
-     * @returns {Promise}
-     */
-    createCompany(companyResource) {
-        return http.post(COMPANIES_ENDPOINT, companyResource);
+    getUserById(id) {
+        return http.get(`${USERS_ENDPOINT}/${id}`);
     }
 }

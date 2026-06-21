@@ -1,5 +1,6 @@
 const warehouseList = () => import('./views/warehouse-list.vue');
 const warehouseDetail = () => import('./views/warehouse-detail.vue');
+const warehouseRegister = () => import('./views/warehouse-register.vue');
 
 /**
  * Warehouse Routing Configuration
@@ -13,6 +14,12 @@ export const warehouseRoutes = [
         name: 'warehouse-list',
         component: warehouseList,
         meta: { title: 'Mis Almacenes' }
+    },
+    {
+        path: 'warehouses/register',
+        name: 'warehouse-register',
+        component: warehouseRegister,
+        meta: { title: 'Registrar Almacén' }
     },
     {
         path: 'warehouses/:id',

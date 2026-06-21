@@ -5,21 +5,33 @@
  * View that displays a list of all warehouses belonging to the user's company.
  * Allows navigation to detailed monitoring and warehouse registration.
  */
-import { onMounted, toRefs } from 'vue';
+import { onMounted, watch, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useWarehouseStore } from '../../application/warehouse.store.js';
+import { useIamStore } from '../../../iam/application/iam.store.js';
 
 const { t } = useI18n();
 const router = useRouter();
 const store = useWarehouseStore();
+const iamStore = useIamStore();
 const { warehouses, warehousesLoaded, errors } = toRefs(store);
 const { fetchWarehouses } = store;
 
-onMounted(() => {
-  if (!warehousesLoaded.value) {
-    fetchWarehouses();
+// Guards against the case where this view mounts while the session is still
+// being rehydrated from localStorage (e.g. sessionLoading hasn't resolved
+// yet) — without this, currentUser?.companyId would be undefined and the
+// fetch would silently never happen.
+function tryFetchWarehouses() {
+  if (!warehousesLoaded.value && !iamStore.sessionLoading && iamStore.currentUser?.companyId) {
+    fetchWarehouses(iamStore.currentUser.companyId);
   }
+}
+
+onMounted(tryFetchWarehouses);
+
+watch(() => iamStore.sessionLoading, (loading) => {
+  if (!loading) tryFetchWarehouses();
 });
 
 function goToDetail(warehouseId) {

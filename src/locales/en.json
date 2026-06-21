@@ -70,6 +70,24 @@
       "active": "Active",
       "critical-alert": "Critical Alert",
       "inactive": "Inactive"
+    },
+    "registerForm": {
+      "title": "Register Warehouse",
+      "subtitle": "Add a new warehouse to your company.",
+      "nameLabel": "Warehouse Name",
+      "namePlaceholder": "e.g. Central Warehouse",
+      "locationLabel": "Location",
+      "locationPlaceholder": "e.g. Lima, Callao",
+      "capacityLabel": "Capacity",
+      "capacityPlaceholder": "e.g. 1000",
+      "operationStartLabel": "Operation Start",
+      "operationEndLabel": "Operation End",
+      "submit": "Create Warehouse",
+      "cancel": "Cancel",
+      "errors": {
+        "required": "Name, location and capacity are required.",
+        "creationFailed": "An error occurred while creating the warehouse."
+      }
     }
   },
   "warehouse-detail": {
