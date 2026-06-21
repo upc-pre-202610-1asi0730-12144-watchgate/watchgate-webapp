@@ -50,7 +50,7 @@
       "name": "S1-Puerta Magnet",
       "type": "Sensor",
       "status": "Online",
-      "zone": "Puerta Principal",
+      "zone": "Puerta Principal"
     },
     {
       "id": 2,

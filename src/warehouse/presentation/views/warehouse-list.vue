@@ -3,7 +3,7 @@
  * Warehouse List View
  * @description
  * View that displays a list of all warehouses belonging to the user's company.
- * Allows navigation to detailed monitoring and warehouse registration.
+ * Allows navigation to detailed monitoring, editing, and warehouse registration.
  */
 import { onMounted, watch, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -18,10 +18,6 @@ const iamStore = useIamStore();
 const { warehouses, warehousesLoaded, errors } = toRefs(store);
 const { fetchWarehouses } = store;
 
-// Guards against the case where this view mounts while the session is still
-// being rehydrated from localStorage (e.g. sessionLoading hasn't resolved
-// yet) — without this, currentUser?.companyId would be undefined and the
-// fetch would silently never happen.
 function tryFetchWarehouses() {
   if (!warehousesLoaded.value && !iamStore.sessionLoading && iamStore.currentUser?.companyId) {
     fetchWarehouses(iamStore.currentUser.companyId);
@@ -67,7 +63,10 @@ function goToRegister() {
           class="warehouse-card"
           :class="{ 'is-critical': warehouse.hasIncident }"
       >
-        <div class="warehouse-icon" :class="{ 'icon-critical': warehouse.hasIncident }"></div>
+        <div
+            class="warehouse-icon"
+            :class="{ 'icon-critical': warehouse.hasIncident }"
+        ></div>
 
         <div class="warehouse-info">
           <p class="warehouse-name">{{ warehouse.name }}</p>
