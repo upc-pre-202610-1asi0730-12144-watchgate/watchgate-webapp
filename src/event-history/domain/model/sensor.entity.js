@@ -1,51 +1,48 @@
 /**
  * @fileoverview Entidad de dominio para un Sensor IoT del almacén.
- * Modela un dispositivo físico instalado en el almacén con posición y estado.
+ * Mapea 1:1 contra SensorResource del backend (SensorIntegration).
  * @module event-history/domain/model
  */
 
-/**
- * Clase que modela un sensor IoT dentro de un almacén.
- * Cada sensor tiene una posición relativa (x, y en porcentaje) para ubicarlo en el mapa.
- */
 export class SensorEntity {
     /**
-     * @param {Object} params - Parámetros del sensor
-     * @param {string|number} params.id - Identificador único del sensor
-     * @param {string} params.nombre - Nombre descriptivo (ej. "S1-Puerta Principal")
-     * @param {string} params.estado - Estado actual (ej. "Cerrada", "Normal", "Mov. Detectado")
-     * @param {string} params.zona - Zona del almacén donde está instalado (ej. "ZONA DE CARGA")
-     * @param {{ x: number, y: number }} params.posicion - Posición en porcentaje (0-100) para el mapa SVG
+     * @param {Object} params - SensorResource real
+     * @param {string|number} params.id
+     * @param {string} params.name
+     * @param {string} params.type - ej. 'MOTION', 'DOOR', 'TEMPERATURE'
+     * @param {string} params.status - ej. 'ACTIVE', 'INACTIVE'
+     * @param {string|null} [params.unit]
+     * @param {number|null} [params.lastReading]
+     * @param {string|null} [params.lastReadingAt]
+     * @param {number} params.zoneId
+     * @param {number} params.companyId
      */
-    constructor({ id, nombre, estado, zona, posicion }) {
+    constructor({ id, name, type, status, unit = null, lastReading = null, lastReadingAt = null, zoneId, companyId }) {
         this.id = id
-        this.nombre = nombre
-        this.estado = estado
-        this.zona = zona
-        /** @type {{ x: number, y: number }} */
-        this.posicion = posicion ?? { x: 50, y: 50 }
+        this.name = name
+        this.type = type
+        this.status = status
+        this.unit = unit
+        this.lastReading = lastReading
+        this.lastReadingAt = lastReadingAt ? new Date(lastReadingAt) : null
+        this.zoneId = zoneId
+        this.companyId = companyId
+
+        // El backend todavía no modela una posición física para el sensor.
+        // Se deriva una pseudo-posición estable a partir del id, solo para
+        // tener algo determinístico que dibujar en el mapa de live-monitoring
+        // hasta que existan coordenadas reales.
+        const seed = Number(id) || 0
+        this.posicion = { x: 15 + (seed * 37) % 70, y: 20 + (seed * 53) % 60 }
     }
 
-    /**
-     * Retorna el color del punto del sensor según su estado actual.
-     * Rojo = alerta activa, Amarillo = advertencia, Verde = normal.
-     * @returns {string} Color hexadecimal
-     */
+    /** @returns {string} Color hexadecimal según el estado real del sensor. */
     getColorEstado() {
-        const estadosAlerta = ['alerta', 'abierta', 'fallo']
-        const estadosAdvertencia = ['advertencia', 'mov. detectado', 'desconectado', 'inactivo']
-
-        const estadoNorm = this.estado.toLowerCase()
-        if (estadosAlerta.some(e => estadoNorm.includes(e))) return '#ef4444'
-        if (estadosAdvertencia.some(e => estadoNorm.includes(e))) return '#f59e0b'
-        return '#22c55e'
+        return this.status === 'ACTIVE' ? '#22c55e' : '#ef4444'
     }
 
-    /**
-     * Retorna la etiqueta corta del sensor para mostrar en el mapa (ej. "S1-Puerta").
-     * @returns {string}
-     */
+    /** @returns {string} Etiqueta corta del sensor para el mapa (ej. "Puerta Princ…"). */
     getEtiquetaMapa() {
-        return this.nombre.length > 12 ? this.nombre.slice(0, 12) + '…' : this.nombre
+        return this.name.length > 12 ? this.name.slice(0, 12) + '…' : this.name
     }
 }

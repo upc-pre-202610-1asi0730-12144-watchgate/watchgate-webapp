@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { WarehouseApi } from "../infrastructure/warehouse.api.js";
 import { WarehouseAssembler } from "../infrastructure/warehouse.assembler.js";
+import { useIamStore } from "../../iam/application/iam.store.js";
 
 const warehouseApi = new WarehouseApi();
 
@@ -24,10 +25,11 @@ export const useWarehouseStore = defineStore('warehouse', () => {
     });
 
     /**
-     * Fetch all warehouses from the API
+     * Fetch all warehouses belonging to a company from the API
+     * @param {number|string} companyId
      */
-    function fetchWarehouses() {
-        warehouseApi.getWarehouses().then(response => {
+    function fetchWarehouses(companyId) {
+        warehouseApi.getWarehousesByCompanyId(companyId).then(response => {
             warehouses.value = WarehouseAssembler.toEntitiesFromResponse(response);
             warehousesLoaded.value = true;
         }).catch(error => {
@@ -46,16 +48,46 @@ export const useWarehouseStore = defineStore('warehouse', () => {
     }
 
     /**
-     * Add a new warehouse to the collection
-     * @param {object} warehouse
+     * Create a new warehouse for the current user's company.
+     * Completes companyId from the IAM store and, on success, resets
+     * warehousesLoaded so warehouse-list refetches the up-to-date collection.
+     * @param {{ name: string, location: string, capacity: number, operationStart?: string, operationEnd?: string }} warehouseData
+     * @returns {Promise<Warehouse>}
      */
-    function addWarehouse(warehouse) {
-        warehouseApi.createWarehouse(warehouse).then(response => {
-            const resource = response.data;
-            const newWarehouse = WarehouseAssembler.toEntityFromResource(resource);
-            warehouses.value.push(newWarehouse);
+    function createWarehouse(warehouseData) {
+        const iamStore = useIamStore();
+        const resource = {
+            ...warehouseData,
+            companyId: iamStore.currentUser?.companyId
+        };
+
+        return warehouseApi.createWarehouse(resource).then(response => {
+            warehousesLoaded.value = false;
+            return WarehouseAssembler.toEntityFromResource(response.data);
         }).catch(error => {
             errors.value.push(error);
+            throw error;
+        });
+    }
+
+    /**
+     * Create a new zone within a warehouse and patch it into the local
+     * warehouse's zones, so warehouse-detail can show it without a refetch.
+     * @param {number|string} warehouseId
+     * @param {{ name: string, area: number, riskLevel: string }} zoneData
+     * @returns {Promise<object>} the created WarehouseZoneResource
+     */
+    function createZone(warehouseId, zoneData) {
+        return warehouseApi.createZone(warehouseId, zoneData).then(response => {
+            const zoneResource = response.data;
+            const warehouse = getWarehouseById(warehouseId);
+            if (warehouse) {
+                warehouse.zones = [...warehouse.zones, zoneResource];
+            }
+            return zoneResource;
+        }).catch(error => {
+            errors.value.push(error);
+            throw error;
         });
     }
 
@@ -66,6 +98,7 @@ export const useWarehouseStore = defineStore('warehouse', () => {
         warehousesCount,
         fetchWarehouses,
         getWarehouseById,
-        addWarehouse
+        createWarehouse,
+        createZone
     };
 });

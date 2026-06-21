@@ -5,26 +5,75 @@
  * View that provides real-time monitoring details for a specific warehouse.
  * Displays latest events, sensor status, and connection stability.
  */
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import { useWarehouseStore } from '../../application/warehouse.store.js';
+import { useIamStore } from '../../../iam/application/iam.store.js';
 
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const store = useWarehouseStore();
+const iamStore = useIamStore();
 const warehouseId = computed(() => route.params.id);
 
 const warehouse = computed(() => {
   return store.getWarehouseById(warehouseId.value);
 });
 
-onMounted(() => {
-  if (!store.warehousesLoaded) {
-    store.fetchWarehouses();
+function loadWarehouses() {
+  const companyId = iamStore.currentUser?.companyId;
+  if (!store.warehousesLoaded && companyId) {
+    store.fetchWarehouses(companyId);
   }
+}
+
+onMounted(() => {
+  if (!iamStore.sessionLoading) loadWarehouses();
 });
+
+watch(() => iamStore.sessionLoading, (loading) => {
+  if (!loading) loadWarehouses();
+});
+
+// ── Zone creation form ───────────────────────────────────────────────────────
+const riskLevelOptions = [
+  { label: t('warehouse-detail.zones.riskLevels.low'), value: 'LOW' },
+  { label: t('warehouse-detail.zones.riskLevels.medium'), value: 'MEDIUM' },
+  { label: t('warehouse-detail.zones.riskLevels.high'), value: 'HIGH' },
+];
+
+const zoneForm = ref({ name: '', area: null, riskLevel: 'LOW' });
+const zoneSubmitting = ref(false);
+const zoneErrorMessage = ref('');
+
+function onCreateZone() {
+  zoneErrorMessage.value = '';
+
+  if (!zoneForm.value.name || !zoneForm.value.area) {
+    zoneErrorMessage.value = t('warehouse-detail.zones.errors.required');
+    return;
+  }
+
+  zoneSubmitting.value = true;
+
+  store.createZone(warehouseId.value, {
+    name: zoneForm.value.name,
+    area: Number(zoneForm.value.area),
+    riskLevel: zoneForm.value.riskLevel
+  })
+      .then(() => {
+        zoneForm.value = { name: '', area: null, riskLevel: 'LOW' };
+      })
+      .catch(error => {
+        console.error(error);
+        zoneErrorMessage.value = t('warehouse-detail.zones.errors.creationFailed');
+      })
+      .finally(() => {
+        zoneSubmitting.value = false;
+      });
+}
 
 const latestEvents = [
   { type: 'error',   label: t('events.door-open'),         time: '10:30 AM' },
@@ -99,6 +148,68 @@ function goToHistory() {
       <button class="btn-outline" @click="goToHistory">
         {{ t('warehouse-detail.view-history') }}
       </button>
+    </div>
+
+    <div class="panel zones-panel">
+      <h2 class="panel-title">{{ t('warehouse-detail.zones.title') }}</h2>
+
+      <p v-if="!warehouse?.zones?.length" class="empty-msg">
+        {{ t('warehouse-detail.zones.empty') }}
+      </p>
+      <div v-else class="zone-list">
+        <div v-for="zone in warehouse.zones" :key="zone.id" class="zone-row">
+          <span class="zone-name">{{ zone.name }}</span>
+          <span class="zone-area">{{ zone.area }} m²</span>
+          <span class="zone-risk" :class="'risk-' + zone.riskLevel.toLowerCase()">
+            {{ zone.riskLevel }}
+          </span>
+        </div>
+      </div>
+
+      <form class="zone-form" @submit.prevent="onCreateZone">
+        <div class="field">
+          <label>{{ t('warehouse-detail.zones.nameLabel') }}</label>
+          <pv-input-text
+              v-model="zoneForm.name"
+              type="text"
+              :placeholder="t('warehouse-detail.zones.namePlaceholder')"
+              class="custom-input"
+          />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>{{ t('warehouse-detail.zones.areaLabel') }}</label>
+            <pv-input-text
+                v-model="zoneForm.area"
+                type="number"
+                min="0"
+                :placeholder="t('warehouse-detail.zones.areaPlaceholder')"
+                class="custom-input"
+            />
+          </div>
+
+          <div class="field">
+            <label>{{ t('warehouse-detail.zones.riskLevelLabel') }}</label>
+            <pv-select
+                v-model="zoneForm.riskLevel"
+                :options="riskLevelOptions"
+                option-label="label"
+                option-value="value"
+                class="custom-input"
+            />
+          </div>
+        </div>
+
+        <p v-if="zoneErrorMessage" class="zone-error">{{ zoneErrorMessage }}</p>
+
+        <pv-button
+            type="submit"
+            :label="t('warehouse-detail.zones.submit')"
+            :loading="zoneSubmitting"
+            class="btn-submit"
+        />
+      </form>
     </div>
   </div>
 </template>
@@ -234,4 +345,96 @@ function goToHistory() {
 }
 
 .btn-outline:hover { background-color: #1a3a5c; }
+
+.zones-panel {
+  flex: none;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.empty-msg { color: #8a9bb0; font-size: 0.88rem; margin: 0 0 1rem; }
+
+.zone-list { display: flex; flex-direction: column; margin-bottom: 1.25rem; }
+
+.zone-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #1e2d42;
+}
+
+.zone-row:last-child { border-bottom: none; }
+
+.zone-name { flex: 1; font-size: 0.88rem; color: #fff; font-weight: 600; }
+.zone-area { font-size: 0.85rem; color: #8a9bb0; }
+
+.zone-risk {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+}
+
+.risk-low    { background-color: #1a3a1a; color: #2ecc71; }
+.risk-medium { background-color: #3a2f10; color: #f39c12; }
+.risk-high   { background-color: #3a1a1a; color: #e74c3c; }
+
+.zone-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #1e2d42;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.field label {
+  color: #c8d6e5;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+}
+
+.field-row {
+  display: flex;
+  gap: 1rem;
+}
+
+:deep(.custom-input) {
+  width: 100%;
+  background: #0a1726 !important;
+  border: 1px solid #1e2d42 !important;
+  color: white !important;
+  border-radius: 6px !important;
+  padding: 0.7rem 0.9rem !important;
+}
+
+:deep(.custom-input::placeholder) {
+  color: #5b7290;
+}
+
+.zone-error {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+:deep(.btn-submit) {
+  align-self: flex-start;
+  background: #4da6ff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 0.55rem 1.25rem !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+}
+
+:deep(.btn-submit:hover) {
+  background: #3a90e8 !important;
+}
 </style>

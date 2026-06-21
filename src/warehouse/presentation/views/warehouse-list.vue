@@ -3,23 +3,31 @@
  * Warehouse List View
  * @description
  * View that displays a list of all warehouses belonging to the user's company.
- * Allows navigation to detailed monitoring and warehouse registration.
+ * Allows navigation to detailed monitoring, editing, and warehouse registration.
  */
-import { onMounted, toRefs } from 'vue';
+import { onMounted, watch, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useWarehouseStore } from '../../application/warehouse.store.js';
+import { useIamStore } from '../../../iam/application/iam.store.js';
 
 const { t } = useI18n();
 const router = useRouter();
 const store = useWarehouseStore();
+const iamStore = useIamStore();
 const { warehouses, warehousesLoaded, errors } = toRefs(store);
 const { fetchWarehouses } = store;
 
-onMounted(() => {
-  if (!warehousesLoaded.value) {
-    fetchWarehouses();
+function tryFetchWarehouses() {
+  if (!warehousesLoaded.value && !iamStore.sessionLoading && iamStore.currentUser?.companyId) {
+    fetchWarehouses(iamStore.currentUser.companyId);
   }
+}
+
+onMounted(tryFetchWarehouses);
+
+watch(() => iamStore.sessionLoading, (loading) => {
+  if (!loading) tryFetchWarehouses();
 });
 
 function goToDetail(warehouseId) {
@@ -55,7 +63,10 @@ function goToRegister() {
           class="warehouse-card"
           :class="{ 'is-critical': warehouse.hasIncident }"
       >
-        <div class="warehouse-icon" :class="{ 'icon-critical': warehouse.hasIncident }"></div>
+        <div
+            class="warehouse-icon"
+            :class="{ 'icon-critical': warehouse.hasIncident }"
+        ></div>
 
         <div class="warehouse-info">
           <p class="warehouse-name">{{ warehouse.name }}</p>

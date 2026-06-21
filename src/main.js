@@ -11,8 +11,9 @@ import { Avatar, Button, Card, Dialog, Drawer, Image,
     InputText, Tooltip } from "primevue";
 import router from "./router.js";
 import pinia from "./pinia.js";
+import { useIamStore } from "./iam/application/iam.store.js";
 
-createApp(App)
+const app = createApp(App)
     .use(i18n)
     .use(router)
     .use(pinia)
@@ -29,5 +30,12 @@ createApp(App)
     .component('pv-menu', Menu)
     .component('pv-menubar', Menubar)
     .component('pv-input-text', InputText)
-    .directive('tooltip', Tooltip)
-    .mount('#app');
+    .directive('tooltip', Tooltip);
+
+// Rehydrate the session (token + user) from localStorage, if any, before the
+// app renders — otherwise views that read currentUser on mount (e.g.
+// warehouse-list) would race against this async call and never load.
+const iamStore = useIamStore(pinia);
+iamStore.restoreSession().finally(() => {
+    app.mount('#app');
+});

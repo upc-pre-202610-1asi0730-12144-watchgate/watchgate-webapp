@@ -1,34 +1,65 @@
 /**
- * @fileoverview Entidad de dominio para un Evento de Seguridad.
- * Representa un evento registrado por el sistema de monitoreo IoT del almacén.
+ * @fileoverview Entidad de dominio para un evento de seguridad del almacén.
+ * Unifica SecurityAlertResource y AlertIncidentResource (backend real) bajo
+ * un solo modelo para la vista de Historial de Eventos.
  * @module event-history/domain/model
  */
 
-/**
- * Clase que modela un evento de seguridad dentro del almacén.
- * Puede ser una alerta crítica, advertencia o evento normal.
- */
+const SEVERITY_COLORS = { HIGH: '#ef4444', MEDIUM: '#f59e0b', LOW: '#22c55e' }
+
 export class EventEntity {
     /**
-     * @param {Object} params - Parámetros del evento
-     * @param {string|number} params.id - Identificador único del evento
-     * @param {'alerta'|'advertencia'|'normal'} params.tipo - Criticidad del evento
-     * @param {string} params.nombre - Nombre descriptivo del evento
-     * @param {string} params.descripcion - Descripción detallada del evento
-     * @param {string} params.sensor - Sensor que originó el evento (ej. "S1")
-     * @param {string} params.usuario - Usuario relacionado al evento (si aplica)
-     * @param {string} params.hora - Hora del evento en formato HH:MM AM/PM
-     * @param {Date} params.fecha - Fecha completa del evento
+     * @param {Object} params
+     * @param {string|number} params.id
+     * @param {'alert'|'incident'} params.kind
+     * @param {string} [params.type] - SecurityAlert.Type (solo alerts)
+     * @param {string} [params.title] - AlertIncident.Title (solo incidents)
+     * @param {string} params.description
+     * @param {string} [params.severity] - LOW|MEDIUM|HIGH (solo alerts)
+     * @param {string} [params.priority] - LOW|MEDIUM|HIGH (solo incidents)
+     * @param {string} params.status - alerts: OPEN|ACKNOWLEDGED|RESOLVED; incidents: OPEN|CLOSED
+     * @param {number} [params.sensorId] - solo alerts
+     * @param {number} params.companyId
+     * @param {string} [params.triggeredAt] - solo alerts
+     * @param {string} [params.resolvedAt] - solo alerts
+     * @param {string} [params.createdAt] - solo incidents
+     * @param {string} [params.closedAt] - solo incidents
      */
-    constructor({ id, tipo, nombre, descripcion, sensor, usuario, hora, fecha }) {
+    constructor({
+                    id, kind, type = null, title = null, description = '',
+                    severity = null, priority = null, status = '',
+                    sensorId = null, companyId = null,
+                    triggeredAt = null, resolvedAt = null,
+                    createdAt = null, closedAt = null
+                }) {
         this.id = id
-        this.tipo = tipo           // 'alerta' | 'advertencia' | 'normal'
-        this.nombre = nombre
-        this.descripcion = descripcion
-        this.sensor = sensor
-        this.usuario = usuario
-        this.hora = hora
-        this.fecha = fecha instanceof Date ? fecha : new Date(fecha)
+        this.kind = kind
+        this.type = type
+        this.title = title
+        this.description = description
+        this.severity = severity
+        this.priority = priority
+        this.status = status
+        this.sensorId = sensorId
+        this.companyId = companyId
+        this.occurredAt = new Date(triggeredAt ?? createdAt)
+        this.resolvedAt = resolvedAt ? new Date(resolvedAt) : null
+        this.closedAt = closedAt ? new Date(closedAt) : null
+    }
+
+    /** Unique key across alerts and incidents (their ids can collide). */
+    get key() {
+        return `${this.kind}-${this.id}`
+    }
+
+    /** Display title: SecurityAlert.Type for alerts, AlertIncident.Title for incidents. */
+    get heading() {
+        return this.kind === 'incident' ? this.title : this.type
+    }
+
+    /** Unified LOW/MEDIUM/HIGH level, sourced from severity (alerts) or priority (incidents). */
+    get severityLevel() {
+        return this.severity ?? this.priority ?? 'LOW'
     }
 
     /**
@@ -47,31 +78,25 @@ export class EventEntity {
             a.getDate() === b.getDate()
 
         const opciones = { day: 'numeric', month: 'short' }
-        const fechaCorta = this.fecha.toLocaleDateString('es-PE', opciones)
+        const fechaCorta = this.occurredAt.toLocaleDateString('es-PE', opciones)
 
-        if (mismoAnio(this.fecha, hoy)) return `Hoy - ${fechaCorta}`
-        if (mismoAnio(this.fecha, ayer)) return `Ayer - ${fechaCorta}`
+        if (mismoAnio(this.occurredAt, hoy)) return `Hoy - ${fechaCorta}`
+        if (mismoAnio(this.occurredAt, ayer)) return `Ayer - ${fechaCorta}`
         return fechaCorta
     }
 
-    /**
-     * Retorna el color CSS asociado a la criticidad del evento.
-     * @returns {string} Color hexadecimal o variable CSS
-     */
-    getColorPorTipo() {
-        const colores = {
-            alerta: '#ef4444',
-            advertencia: '#f59e0b',
-            normal: '#22c55e',
-        }
-        return colores[this.tipo] ?? '#6b7280'
+    /** @returns {string} Hora del evento, ej. "10:30 AM" */
+    getFormattedTime() {
+        return this.occurredAt.toLocaleTimeString('es-PE', { hour: 'numeric', minute: '2-digit' })
     }
 
-    /**
-     * Indica si el evento es una alerta crítica (requiere badge "ALERTA").
-     * @returns {boolean}
-     */
+    /** @returns {string} Color hexadecimal asociado a la severidad/prioridad del evento. */
+    getColor() {
+        return SEVERITY_COLORS[this.severityLevel] ?? '#6b7280'
+    }
+
+    /** @returns {boolean} true si es una alerta aún sin resolver (requiere badge "ALERTA"). */
     esAlerta() {
-        return this.tipo === 'alerta'
+        return this.kind === 'alert' && this.status === 'OPEN'
     }
 }

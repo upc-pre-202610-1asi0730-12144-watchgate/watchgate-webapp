@@ -1,50 +1,60 @@
 <script setup>
 /**
  * @component DeviceDialog
- * @description Modal form to register (link) a new IoT device.
- * Validates all fields before emitting the submit event.
+ * @description Modal form to register a new sensor (CreateSensorResource:
+ * name, type, unit, zoneId). Validates required fields before emitting submit.
  */
-import { ref, reactive, computed } from 'vue';
+import { reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
 const props = defineProps({
   visible:  { type: Boolean, default: false },
-  zones:    { type: Array,   default: () => ['Zona A', 'Zona B', 'Zona C'] },
+  // Real WarehouseZone options: [{ label: 'Warehouse - Zone', value: zoneId }]
+  zoneOptions: { type: Array, default: () => [] },
   loading:  { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:visible', 'submit']);
 
+const typeOptions = computed(() => [
+  { label: t('devices.dialog.types.motion'), value: 'MOTION' },
+  { label: t('devices.dialog.types.door'), value: 'DOOR' },
+  { label: t('devices.dialog.types.temperature'), value: 'TEMPERATURE' },
+  { label: t('devices.dialog.types.humidity'), value: 'HUMIDITY' },
+  { label: t('devices.dialog.types.smoke'), value: 'SMOKE' },
+]);
+
 // ── Form state ──────────────────────────────────────────────────────────────
 const form = reactive({
-  serialNumber: '',
-  name:         '',
-  zone:         null,
+  name:   '',
+  type:   null,
+  unit:   '',
+  zoneId: null,
 });
 
 const errors = reactive({
-  serialNumber: '',
-  name:         '',
-  zone:         '',
+  name:   '',
+  type:   '',
+  zoneId: '',
 });
 
 const touched = reactive({
-  serialNumber: false,
-  name:         false,
-  zone:         false,
+  name:   false,
+  type:   false,
+  zoneId: false,
 });
 
 // ── Validation ───────────────────────────────────────────────────────────────
 function validate() {
-  errors.serialNumber = form.serialNumber.trim() ? '' : t('devices.dialog.errorRequired');
-  errors.name         = form.name.trim()         ? '' : t('devices.dialog.errorRequired');
-  errors.zone         = form.zone                ? '' : t('devices.dialog.errorRequired');
-  return !errors.serialNumber && !errors.name && !errors.zone;
+  errors.name   = form.name.trim() ? '' : t('devices.dialog.errorRequired');
+  errors.type   = form.type        ? '' : t('devices.dialog.errorRequired');
+  errors.zoneId = form.zoneId      ? '' : t('devices.dialog.errorRequired');
+  return !errors.name && !errors.type && !errors.zoneId;
 }
 
-const isValid = computed(() => form.serialNumber.trim() && form.name.trim() && form.zone);
+const isValid = computed(() => form.name.trim() && form.type && form.zoneId);
 
 function touchField(field) {
   touched[field] = true;
@@ -55,18 +65,21 @@ function touchField(field) {
 function onSubmit() {
   Object.keys(touched).forEach(k => (touched[k] = true));
   if (!validate()) return;
-  emit('submit', { ...form });
+  emit('submit', { ...form, unit: form.unit.trim() || null });
+}
+
+function resetForm() {
+  Object.assign(form,    { name: '', type: null, unit: '', zoneId: null });
+  Object.assign(errors,  { name: '', type: '', zoneId: '' });
+  Object.assign(touched, { name: false, type: false, zoneId: false });
 }
 
 function onClose() {
   emit('update:visible', false);
-  // Reset form
-  Object.assign(form,   { serialNumber: '', name: '', zone: null });
-  Object.assign(errors, { serialNumber: '', name: '', zone: '' });
-  Object.assign(touched, { serialNumber: false, name: false, zone: false });
+  resetForm();
 }
 
-const zoneOptions = computed(() => props.zones.map(z => ({ label: z, value: z })));
+defineExpose({ resetForm });
 </script>
 
 <template>
@@ -95,21 +108,6 @@ const zoneOptions = computed(() => props.zones.map(z => ({ label: z, value: z })
       >
         <p class="text-white font-semibold text-sm">{{ $t('devices.dialog.sectionTitle') }}</p>
 
-        <!-- Serial Number -->
-        <div class="flex flex-col gap-1">
-          <label class="text-xs text-gray-400">{{ $t('devices.dialog.serialNumber') }}</label>
-          <pv-input-text
-              v-model="form.serialNumber"
-              :placeholder="$t('devices.dialog.serialNumberPlaceholder')"
-              :class="['w-full text-sm', { 'p-invalid': touched.serialNumber && errors.serialNumber }]"
-              :pt="{ root: { style: 'background:#1E293B; border-color:#334155; color:#fff;' } }"
-              @blur="touchField('serialNumber')"
-          />
-          <small v-if="touched.serialNumber && errors.serialNumber" class="text-red-400 text-xs">
-            {{ errors.serialNumber }}
-          </small>
-        </div>
-
         <!-- Device Name -->
         <div class="flex flex-col gap-1">
           <label class="text-xs text-gray-400">{{ $t('devices.dialog.deviceName') }}</label>
@@ -125,22 +123,55 @@ const zoneOptions = computed(() => props.zones.map(z => ({ label: z, value: z })
           </small>
         </div>
 
-        <!-- Zone Dropdown -->
+        <!-- Sensor Type -->
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-gray-400">{{ $t('devices.dialog.typeLabel') }}</label>
+          <pv-select
+              v-model="form.type"
+              :options="typeOptions"
+              option-label="label"
+              option-value="value"
+              :placeholder="$t('devices.dialog.typePlaceholder')"
+              :class="['w-full text-sm', { 'p-invalid': touched.type && errors.type }]"
+              :pt="{ root: { style: 'background:#1E293B; border-color:#334155; color:#fff;' } }"
+              @blur="touchField('type')"
+              @change="touchField('type')"
+          />
+          <small v-if="touched.type && errors.type" class="text-red-400 text-xs">
+            {{ errors.type }}
+          </small>
+        </div>
+
+        <!-- Unit (optional) -->
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-gray-400">{{ $t('devices.dialog.unitLabel') }}</label>
+          <pv-input-text
+              v-model="form.unit"
+              :placeholder="$t('devices.dialog.unitPlaceholder')"
+              class="w-full text-sm"
+              :pt="{ root: { style: 'background:#1E293B; border-color:#334155; color:#fff;' } }"
+          />
+        </div>
+
+        <!-- Zone Dropdown (real WarehouseZone ids) -->
         <div class="flex flex-col gap-1">
           <label class="text-xs text-gray-400">{{ $t('devices.dialog.zone') }}</label>
           <pv-select
-              v-model="form.zone"
+              v-model="form.zoneId"
               :options="zoneOptions"
               option-label="label"
               option-value="value"
               :placeholder="$t('devices.dialog.zonePlaceholder')"
-              :class="['w-full text-sm', { 'p-invalid': touched.zone && errors.zone }]"
+              :class="['w-full text-sm', { 'p-invalid': touched.zoneId && errors.zoneId }]"
               :pt="{ root: { style: 'background:#1E293B; border-color:#334155; color:#fff;' } }"
-              @blur="touchField('zone')"
-              @change="touchField('zone')"
+              @blur="touchField('zoneId')"
+              @change="touchField('zoneId')"
           />
-          <small v-if="touched.zone && errors.zone" class="text-red-400 text-xs">
-            {{ errors.zone }}
+          <small v-if="touched.zoneId && errors.zoneId" class="text-red-400 text-xs">
+            {{ errors.zoneId }}
+          </small>
+          <small v-else-if="!zoneOptions.length" class="text-yellow-400 text-xs">
+            {{ $t('devices.dialog.zoneEmpty') }}
           </small>
         </div>
 

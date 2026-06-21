@@ -70,6 +70,24 @@
       "active": "Active",
       "critical-alert": "Critical Alert",
       "inactive": "Inactive"
+    },
+    "registerForm": {
+      "title": "Register Warehouse",
+      "subtitle": "Add a new warehouse to your company.",
+      "nameLabel": "Warehouse Name",
+      "namePlaceholder": "e.g. Central Warehouse",
+      "locationLabel": "Location",
+      "locationPlaceholder": "e.g. Lima, Callao",
+      "capacityLabel": "Capacity",
+      "capacityPlaceholder": "e.g. 1000",
+      "operationStartLabel": "Operation Start",
+      "operationEndLabel": "Operation End",
+      "submit": "Create Warehouse",
+      "cancel": "Cancel",
+      "errors": {
+        "required": "Name, location and capacity are required.",
+        "creationFailed": "An error occurred while creating the warehouse."
+      }
     }
   },
   "warehouse-detail": {
@@ -84,7 +102,26 @@
     "network": "Network Connection",
     "stable": "Stable",
     "view-realtime": "View Real-time",
-    "view-history": "View History"
+    "view-history": "View History",
+    "zones": {
+      "title": "Zones",
+      "empty": "No zones registered yet.",
+      "nameLabel": "Zone Name",
+      "namePlaceholder": "e.g. Zone A",
+      "areaLabel": "Area (m²)",
+      "areaPlaceholder": "e.g. 500",
+      "riskLevelLabel": "Risk Level",
+      "riskLevels": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "submit": "Add Zone",
+      "errors": {
+        "required": "Name and area are required.",
+        "creationFailed": "An error occurred while creating the zone."
+      }
+    }
   },
   "events": {
     "door-open": "Main door opened",
@@ -112,12 +149,22 @@
     "dialog": {
       "title": "Link Device",
       "sectionTitle": "IoT Device Details",
-      "serialNumber": "Serial Number (S/N)",
-      "serialNumberPlaceholder": "e.g. LK-987654321",
       "deviceName": "Device Name",
       "deviceNamePlaceholder": "e.g. Rear Window Sensor",
+      "typeLabel": "Sensor Type",
+      "typePlaceholder": "Select a type",
+      "types": {
+        "motion": "Motion",
+        "door": "Door",
+        "temperature": "Temperature",
+        "humidity": "Humidity",
+        "smoke": "Smoke"
+      },
+      "unitLabel": "Unit (optional)",
+      "unitPlaceholder": "e.g. °C, ppm",
       "zone": "Assign to Zone",
-      "zonePlaceholder": "Zone A",
+      "zonePlaceholder": "Select a warehouse zone",
+      "zoneEmpty": "No warehouse zones available yet. Register a warehouse zone first.",
       "submit": "Link Device",
       "errorRequired": "This field is required"
     },
@@ -132,5 +179,15 @@
       "description": "The motion sensor is active and monitoring {zone} again.",
       "confirm": "Got it"
     }
+  },
+  "warehouse-edit": {
+    "back": "Back to list",
+    "title": "Warehouse Settings",
+    "opening-time": "Opening Time",
+    "closing-time": "Closing Time",
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "save-success": "Changes saved successfully!"
   }
 }

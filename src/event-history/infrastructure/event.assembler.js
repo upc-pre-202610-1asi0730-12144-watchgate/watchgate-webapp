@@ -1,50 +1,59 @@
 /**
  * @fileoverview Ensamblador de la entidad EventEntity.
- * Transforma los recursos crudos del API en instancias del dominio.
- * Sigue el mismo patrón que ArticleAssembler del proyecto base.
+ * Transforma SecurityAlertResource / AlertIncidentResource (backend real)
+ * en instancias del dominio.
  * @module event-history/infrastructure
  */
 
 import { EventEntity } from '../domain/model/event.entity.js'
 
-/**
- * Clase estática que mapea la respuesta del API a entidades del dominio.
- * Desacopla la capa de infraestructura del dominio.
- */
 export class EventAssembler {
     /**
-     * Convierte un recurso (objeto JSON del API) en una instancia de EventEntity.
-     * @param {Object} resource - Objeto crudo proveniente del backend
-     * @param {string|number} resource.id
-     * @param {string} resource.tipo
-     * @param {string} resource.nombre
-     * @param {string} resource.descripcion
-     * @param {string} resource.sensor
-     * @param {string} resource.usuario
-     * @param {string} resource.hora
-     * @param {string} resource.fecha - ISO string o fecha parseable
+     * Convierte un SecurityAlertResource en un EventEntity.
+     * @param {object} resource - { id, type, severity, status, description, sensorId, companyId, triggeredAt, resolvedAt }
      * @returns {EventEntity}
      */
-    static toEntityFromResource(resource) {
+    static fromAlertResource(resource) {
         return new EventEntity({
             id: resource.id,
-            tipo: resource.tipo ?? 'normal',
-            nombre: resource.nombre ?? resource.name ?? '',
-            descripcion: resource.descripcion ?? resource.description ?? '',
-            sensor: resource.sensor ?? '',
-            usuario: resource.usuario ?? resource.user ?? '',
-            hora: resource.hora ?? resource.time ?? '',
-            fecha: resource.fecha ? new Date(resource.fecha) : new Date(),
+            kind: 'alert',
+            type: resource.type,
+            description: resource.description,
+            severity: resource.severity,
+            status: resource.status,
+            sensorId: resource.sensorId,
+            companyId: resource.companyId,
+            triggeredAt: resource.triggeredAt,
+            resolvedAt: resource.resolvedAt,
         })
     }
 
     /**
-     * Convierte la respuesta completa del API (array de recursos) en un array de EventEntity.
-     * @param {Object[]|Object} response - Lista de recursos del API o respuesta envuelta en { data }
-     * @returns {EventEntity[]}
+     * Convierte un AlertIncidentResource en un EventEntity.
+     * @param {object} resource - { id, title, description, status, priority, companyId, createdAt, closedAt }
+     * @returns {EventEntity}
      */
-    static toEntitiesFromResponse(response) {
-        const list = Array.isArray(response) ? response : (response?.data ?? [])
-        return list.map(resource => EventAssembler.toEntityFromResource(resource))
+    static fromIncidentResource(resource) {
+        return new EventEntity({
+            id: resource.id,
+            kind: 'incident',
+            title: resource.title,
+            description: resource.description,
+            priority: resource.priority,
+            status: resource.status,
+            companyId: resource.companyId,
+            createdAt: resource.createdAt,
+            closedAt: resource.closedAt,
+        })
+    }
+
+    /** @param {object[]} data - SecurityAlertResource[] @returns {EventEntity[]} */
+    static alertsFromResponse(data) {
+        return (data ?? []).map(EventAssembler.fromAlertResource)
+    }
+
+    /** @param {object[]} data - AlertIncidentResource[] @returns {EventEntity[]} */
+    static incidentsFromResponse(data) {
+        return (data ?? []).map(EventAssembler.fromIncidentResource)
     }
 }

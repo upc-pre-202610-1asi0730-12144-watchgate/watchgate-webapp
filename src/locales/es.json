@@ -70,6 +70,24 @@
       "active": "Activo",
       "critical-alert": "Alerta Crítica",
       "inactive": "Inactivo"
+    },
+    "registerForm": {
+      "title": "Registrar Almacén",
+      "subtitle": "Agrega un nuevo almacén a tu empresa.",
+      "nameLabel": "Nombre del Almacén",
+      "namePlaceholder": "Ej. Almacén Central",
+      "locationLabel": "Ubicación",
+      "locationPlaceholder": "Ej. Lima, Callao",
+      "capacityLabel": "Capacidad",
+      "capacityPlaceholder": "Ej. 1000",
+      "operationStartLabel": "Inicio de Operación",
+      "operationEndLabel": "Fin de Operación",
+      "submit": "Crear Almacén",
+      "cancel": "Cancelar",
+      "errors": {
+        "required": "El nombre, la ubicación y la capacidad son obligatorios.",
+        "creationFailed": "Ocurrió un error al crear el almacén."
+      }
     }
   },
   "warehouse-detail": {
@@ -84,7 +102,26 @@
     "network": "Conexión de Red",
     "stable": "Estable",
     "view-realtime": "Ver en tiempo real",
-    "view-history": "Ver Historial"
+    "view-history": "Ver Historial",
+    "zones": {
+      "title": "Zonas",
+      "empty": "Aún no hay zonas registradas.",
+      "nameLabel": "Nombre de la Zona",
+      "namePlaceholder": "Ej. Zona A",
+      "areaLabel": "Área (m²)",
+      "areaPlaceholder": "Ej. 500",
+      "riskLevelLabel": "Nivel de Riesgo",
+      "riskLevels": {
+        "low": "Bajo",
+        "medium": "Medio",
+        "high": "Alto"
+      },
+      "submit": "Agregar Zona",
+      "errors": {
+        "required": "El nombre y el área son obligatorios.",
+        "creationFailed": "Ocurrió un error al crear la zona."
+      }
+    }
   },
   "events": {
     "door-open": "Puerta principal abierta",
@@ -112,12 +149,22 @@
     "dialog": {
       "title": "Vincular Dispositivo",
       "sectionTitle": "Datos del Dispositivo IoT",
-      "serialNumber": "Número de Serie (S/N)",
-      "serialNumberPlaceholder": "Ej. LK-987654321",
       "deviceName": "Nombre del Dispositivo",
       "deviceNamePlaceholder": "Ej. Sensor Ventana Trasera",
+      "typeLabel": "Tipo de Sensor",
+      "typePlaceholder": "Selecciona un tipo",
+      "types": {
+        "motion": "Movimiento",
+        "door": "Puerta",
+        "temperature": "Temperatura",
+        "humidity": "Humedad",
+        "smoke": "Humo"
+      },
+      "unitLabel": "Unidad (opcional)",
+      "unitPlaceholder": "Ej. °C, ppm",
       "zone": "Asignar a Zona",
-      "zonePlaceholder": "Zona A",
+      "zonePlaceholder": "Selecciona una zona del almacén",
+      "zoneEmpty": "Aún no hay zonas de almacén disponibles. Registra una zona primero.",
       "submit": "Vincular Dispositivo",
       "errorRequired": "Este campo es obligatorio"
     },
@@ -132,5 +179,15 @@
       "description": "El sensor de movimiento está activo y monitoreando nuevamente la {zone}.",
       "confirm": "Entendido"
     }
+  },
+  "warehouse-edit": {
+    "back": "Volver a la lista",
+    "title": "Configuración del Almacén",
+    "opening-time": "Horario de Apertura",
+    "closing-time": "Horario de Cierre",
+    "cancel": "Cancelar",
+    "save": "Guardar Cambios",
+    "saving": "Guardando...",
+    "save-success": "¡Cambios guardados con éxito!"
   }
 }

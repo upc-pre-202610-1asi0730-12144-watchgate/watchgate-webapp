@@ -1,43 +1,33 @@
 /**
  * @fileoverview Cliente HTTP para el módulo de Historial de Eventos.
- * Consume los endpoints del backend Locksight para obtener eventos y sensores.
+ * Consume los endpoints reales de SecurityAlerts del backend Locksight,
+ * filtrados por warehouseId (vía el facade ACL SensorIntegration -> WarehouseManagement).
  * @module event-history/infrastructure
  */
 
-import axios from 'axios'
+import { http } from '../../shared/infrastructure/http.api.js'
 
-/**
- * Instancia de Axios configurada con la base URL del API Locksight.
- * La URL se lee desde la variable de entorno VITE_LOCKSIGHT_API_URL.
- * @type {import('axios').AxiosInstance}
- */
-const http = axios.create({
-    baseURL: import.meta.env.VITE_LOCKSIGHT_API_URL ?? 'http://localhost:3000',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-})
+const SECURITY_ALERTS_ENDPOINT = '/security-alerts'
 
 /**
  * API del módulo Historial de Eventos e Incidentes.
- * Contiene los métodos para obtener datos desde el servidor.
  */
 export const eventHistoryApi = {
     /**
-     * Obtiene el listado de eventos registrados para un almacén específico.
-     * @param {string|number} warehouseId - ID del almacén
-     * @returns {Promise<import('axios').AxiosResponse>}
+     * Obtiene las alertas de seguridad de un almacén.
+     * @param {string|number} warehouseId
+     * @returns {Promise<import('axios').AxiosResponse>} SecurityAlertResource[]
      */
     getEvents(warehouseId) {
-        return http.get(`/warehouses/${warehouseId}/events`)
+        return http.get(`${SECURITY_ALERTS_ENDPOINT}/warehouse/${warehouseId}`)
     },
 
     /**
-     * Obtiene el listado de sensores instalados en un almacén específico.
-     * @param {string|number} warehouseId - ID del almacén
-     * @returns {Promise<import('axios').AxiosResponse>}
+     * Obtiene los incidentes de seguridad de un almacén.
+     * @param {string|number} warehouseId
+     * @returns {Promise<import('axios').AxiosResponse>} AlertIncidentResource[]
      */
-    getSensors(warehouseId) {
-        return http.get(`/warehouses/${warehouseId}/sensors`)
+    getIncidents(warehouseId) {
+        return http.get(`${SECURITY_ALERTS_ENDPOINT}/incidents/warehouse/${warehouseId}`)
     },
 }

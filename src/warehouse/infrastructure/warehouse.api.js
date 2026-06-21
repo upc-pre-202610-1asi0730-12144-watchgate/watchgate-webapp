@@ -1,8 +1,4 @@
-import axios from 'axios';
-
-const http = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL
-});
+import { http } from '../../shared/infrastructure/http.api.js';
 
 const WAREHOUSES_ENDPOINT = import.meta.env.VITE_WAREHOUSES_ENDPOINT_PATH;
 
@@ -10,15 +6,17 @@ const WAREHOUSES_ENDPOINT = import.meta.env.VITE_WAREHOUSES_ENDPOINT_PATH;
  * Warehouse API Service
  * @class WarehouseApi
  * @description
- * Warehouse API service is used to communicate with the warehouse tracking endpoints.
+ * Warehouse API service is used to communicate with the Watchgate Locksight
+ * WarehouseManagement endpoints (WarehousesController).
  */
 export class WarehouseApi {
     /**
-     * Get all warehouses
+     * Get all warehouses belonging to a company
+     * @param {number|string} companyId
      * @returns {Promise}
      */
-    getWarehouses() {
-        return http.get(WAREHOUSES_ENDPOINT);
+    getWarehousesByCompanyId(companyId) {
+        return http.get(`${WAREHOUSES_ENDPOINT}/company/${companyId}`);
     }
 
     /**
@@ -31,7 +29,8 @@ export class WarehouseApi {
     }
 
     /**
-     * Create a new warehouse
+     * Create a new warehouse. resource must match CreateWarehouseResource:
+     * { name, location, capacity, companyId, operationStart, operationEnd }
      * @param {object} warehouseResource
      * @returns {Promise}
      */
@@ -40,7 +39,8 @@ export class WarehouseApi {
     }
 
     /**
-     * Update an existing warehouse
+     * Update an existing warehouse. resource must match UpdateWarehouseResource:
+     * { name, location, capacity, operationStart, operationEnd }
      * @param {number|string} id
      * @param {object} warehouseResource
      * @returns {Promise}
@@ -50,11 +50,13 @@ export class WarehouseApi {
     }
 
     /**
-     * Delete a warehouse
-     * @param {number|string} id
+     * Create a new zone within a warehouse. resource must match
+     * CreateWarehouseZoneResource: { name, area, riskLevel }
+     * @param {number|string} warehouseId
+     * @param {object} zoneResource
      * @returns {Promise}
      */
-    deleteWarehouse(id) {
-        return http.delete(`${WAREHOUSES_ENDPOINT}/${id}`);
+    createZone(warehouseId, zoneResource) {
+        return http.post(`${WAREHOUSES_ENDPOINT}/${warehouseId}/zones`, zoneResource);
     }
 }
