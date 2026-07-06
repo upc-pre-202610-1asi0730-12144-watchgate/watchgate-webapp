@@ -1,12 +1,14 @@
 <script setup lang="js">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   eventHistoryStore,
   groupedByDate,
 } from '../../application/event-history.store.js'
+import { useWarehouseStore } from '../../../warehouse/application/warehouse.store.js'
 
 const route = useRoute()
+const warehouseStore = useWarehouseStore()
 
 const opcionesTipo = [
   { label: 'Severidad', value: 'todos' },
@@ -15,11 +17,26 @@ const opcionesTipo = [
   { label: 'Baja', value: 'LOW' },
 ]
 
+const opcionesCategoria = [
+  { label: 'Todos los eventos', value: 'todos' },
+  { label: 'Alertas', value: 'alert' },
+  { label: 'Incidentes', value: 'incident' },
+]
+
 const opcionesPeriodo = [
   { label: 'Últimos 7 días', value: '7dias' },
   { label: 'Hoy', value: 'hoy' },
   { label: 'Últimos 30 días', value: '30dias' },
 ]
+
+const currentWarehouse = computed(() => warehouseStore.getWarehouseById(route.params.id))
+const zoneOptions = computed(() => [
+  { label: 'Todas las zonas', value: 'todos' },
+  ...(currentWarehouse.value?.zones ?? []).map(zone => ({
+    label: zone.name,
+    value: zone.id,
+  })),
+])
 
 onMounted(async () => {
   const warehouseId = route.params.id ?? '1'
@@ -27,10 +44,23 @@ onMounted(async () => {
     eventHistoryStore.loadEvents(warehouseId),
     eventHistoryStore.loadSensors(warehouseId),
   ])
+
+  const warehouse = warehouseStore.getWarehouseById(warehouseId)
+  if (warehouse) {
+    eventHistoryStore.setWarehouse({
+      id: warehouse.id,
+      nombre: warehouse.name,
+      estado: warehouse.status,
+      zones: warehouse.zones,
+    })
+  }
 })
 
 const onTipoChange = (e) => { eventHistoryStore.filterType = e.target.value }
+const onCategoriaChange = (e) => { eventHistoryStore.filterKind = e.target.value }
 const onPeriodoChange = (e) => { eventHistoryStore.filterPeriod = e.target.value }
+const onFechaChange = (e) => { eventHistoryStore.filterDate = e.target.value }
+const onZonaChange = (e) => { eventHistoryStore.filterZoneId = e.target.value }
 
 const mostrarBadgeAlerta = (evento) => evento.esAlerta()
 </script>
@@ -50,11 +80,23 @@ const mostrarBadgeAlerta = (evento) => evento.esAlerta()
 
     <!-- Filtros -->
     <div class="ehl-filters">
+      <select class="ehl-select" :value="eventHistoryStore.filterKind" @change="onCategoriaChange">
+        <option v-for="opt in opcionesCategoria" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+      </select>
       <select class="ehl-select" :value="eventHistoryStore.filterType" @change="onTipoChange">
         <option v-for="opt in opcionesTipo" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
       </select>
       <select class="ehl-select" :value="eventHistoryStore.filterPeriod" @change="onPeriodoChange">
         <option v-for="opt in opcionesPeriodo" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+      </select>
+      <input
+          class="ehl-select"
+          type="date"
+          :value="eventHistoryStore.filterDate"
+          @input="onFechaChange"
+      />
+      <select class="ehl-select" :value="eventHistoryStore.filterZoneId" @change="onZonaChange">
+        <option v-for="opt in zoneOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
       </select>
     </div>
 

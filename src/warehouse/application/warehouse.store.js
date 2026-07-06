@@ -29,11 +29,13 @@ export const useWarehouseStore = defineStore('warehouse', () => {
      * @param {number|string} companyId
      */
     function fetchWarehouses(companyId) {
-        warehouseApi.getWarehousesByCompanyId(companyId).then(response => {
+        return warehouseApi.getWarehousesByCompanyId(companyId).then(response => {
             warehouses.value = WarehouseAssembler.toEntitiesFromResponse(response);
             warehousesLoaded.value = true;
+            return warehouses.value;
         }).catch(error => {
             errors.value.push(error);
+            throw error;
         });
     }
 

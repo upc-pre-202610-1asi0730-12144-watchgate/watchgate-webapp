@@ -6,6 +6,8 @@ import pageNotFound from "./iam/presentation/views/page-not-found.vue";
 import { warehouseRoutes } from "./warehouse/presentation/warehouse.routes.js";
 import devicesRoutes from "@/devices/devices.routes.js";
 import { eventHistoryRoutes } from "./event-history/presentation/event-history.routes.js";
+import alertsRoutes from "./alerts/presentation/alerts.routes.js";
+import reportsRoutes from "./reports/presentation/reports.routes.js";
 
 const routes = [
     {
@@ -25,7 +27,9 @@ const routes = [
         children: [
             ...warehouseRoutes,
             ...devicesRoutes,
-            ...eventHistoryRoutes
+            ...eventHistoryRoutes,
+            ...alertsRoutes,
+            ...reportsRoutes
         ]
     },
     {

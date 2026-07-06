@@ -6,7 +6,9 @@ const { t } = useI18n();
 const items = [
   { label: 'warehouses.title', to: '/layout/warehouses' },
   { label: 'Devices', to: '/layout/devices' },
-  { label: 'History events', to: '/layout/history' }
+  { label: 'History events', to: '/layout/history' },
+  { label: 'Alertas', to: '/layout/alerts' },
+  { label: 'Reportes', to: '/layout/reports' }
 ];
 </script>
 

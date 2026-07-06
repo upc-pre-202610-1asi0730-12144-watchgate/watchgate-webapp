@@ -1,6 +1,7 @@
 const warehouseDetail  = () => import('./components/warehouse-detail.vue')
 const liveMonitoring   = () => import('./components/live-monitoring.vue')
 const eventHistoryList = () => import('./components/event-history-list.vue')
+const eventHistoryOverview = () => import('./components/event-history-overview.vue')
 
 export const eventHistoryRoutes = [
     {
@@ -23,6 +24,8 @@ export const eventHistoryRoutes = [
     },
     {
         path: 'history',
-        redirect: { name: 'event-history-list', params: { id: '1' } }
+        name: 'event-history-overview',
+        component: eventHistoryOverview,
+        meta: { title: 'Historial de Eventos' }
     }
 ]

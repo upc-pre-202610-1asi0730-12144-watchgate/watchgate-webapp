@@ -41,6 +41,15 @@ export const eventHistoryStore = reactive({
     /** @type {string} Filtro por severidad/prioridad: 'todos' | 'LOW' | 'MEDIUM' | 'HIGH' */
     filterType: 'todos',
 
+    /** @type {string} Filtro por categoria: 'todos' | 'alert' | 'incident' */
+    filterKind: 'todos',
+
+    /** @type {string} Filtro por fecha exacta en formato yyyy-mm-dd */
+    filterDate: '',
+
+    /** @type {string|number} Filtro por zona del almacen actual */
+    filterZoneId: 'todos',
+
     /** @type {string} Filtro por período: '7dias' | '30dias' | 'hoy' */
     filterPeriod: '7dias',
 
@@ -138,8 +147,31 @@ export const eventHistoryStore = reactive({
 export const filteredEvents = computed(() => {
     let resultado = eventHistoryStore.events
 
+    if (eventHistoryStore.filterKind !== 'todos') {
+        resultado = resultado.filter(e => e.kind === eventHistoryStore.filterKind)
+    }
+
     if (eventHistoryStore.filterType !== 'todos') {
         resultado = resultado.filter(e => e.severityLevel === eventHistoryStore.filterType)
+    }
+
+    if (eventHistoryStore.filterDate) {
+        const [year, month, day] = eventHistoryStore.filterDate.split('-').map(Number)
+        resultado = resultado.filter(e =>
+            e.occurredAt.getFullYear() === year &&
+            e.occurredAt.getMonth() + 1 === month &&
+            e.occurredAt.getDate() === day
+        )
+    }
+
+    if (eventHistoryStore.filterZoneId !== 'todos') {
+        const selectedZoneId = Number(eventHistoryStore.filterZoneId)
+        const sensorIds = new Set(
+            eventHistoryStore.sensors
+                .filter(sensor => Number(sensor.zoneId) === selectedZoneId)
+                .map(sensor => Number(sensor.id))
+        )
+        resultado = resultado.filter(e => e.sensorId && sensorIds.has(Number(e.sensorId)))
     }
 
     const ahora = new Date()
