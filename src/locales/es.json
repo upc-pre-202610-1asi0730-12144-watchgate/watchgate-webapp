@@ -133,6 +133,8 @@
     "devices": "Dispositivos IoT",
     "team": "Equipo y Accesos",
     "events": "Historial de eventos",
+    "alerts": "Alertas",
+    "reports": "Reportes",
     "subscription": "Mi Suscripción",
     "settings": "Configuración"
   },

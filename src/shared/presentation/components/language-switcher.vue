@@ -1,7 +1,11 @@
 <script setup>
 import {useI18n} from "vue-i18n";
+import { watch } from "vue";
 const { locale, availableLocales } = useI18n();
 
+watch(locale, (value) => {
+  localStorage.setItem('watchgate_locale', value);
+});
 </script>
 
 <template>

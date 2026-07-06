@@ -4,12 +4,12 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 const items = [
-  { label: 'warehouses.title', to: '/layout/warehouses' },
-  { label: 'Devices', to: '/layout/devices' },
-  { label: 'History events', to: '/layout/history' },
-  { label: 'Alertas', to: '/layout/alerts' },
-  { label: 'Reportes', to: '/layout/reports' },
-  { label: 'Suscripcion', to: '/layout/subscription' }
+  { key: 'nav.warehouses', to: '/layout/warehouses' },
+  { key: 'nav.devices', to: '/layout/devices' },
+  { key: 'nav.events', to: '/layout/history' },
+  { key: 'nav.alerts', to: '/layout/alerts' },
+  { key: 'nav.reports', to: '/layout/reports' },
+  { key: 'nav.subscription', to: '/layout/subscription' }
 ];
 </script>
 
@@ -18,12 +18,12 @@ const items = [
     <nav class="menu">
       <router-link
           v-for="item in items"
-          :key="item.label"
+          :key="item.key"
           :to="item.to"
           class="menu-item"
           active-class="active"
       >
-        <span>{{ t(item.label) || item.label }}</span>
+        <span>{{ t(item.key) }}</span>
       </router-link>
     </nav>
   </aside>
