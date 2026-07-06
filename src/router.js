@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from "vue-router";
+import LandingPage from "./landing/presentation/views/landing-page.vue";
 import Layout from "./shared/presentation/components/layout.vue";
 import iamRoutes from "./iam/presentation/iam.routes.js";
 import pageNotFound from "./iam/presentation/views/page-not-found.vue";
@@ -7,7 +8,12 @@ import devicesRoutes from "@/devices/devices.routes.js";
 import { eventHistoryRoutes } from "./event-history/presentation/event-history.routes.js";
 
 const routes = [
-    { path: '/', redirect: '/iam/sign-in' },
+    {
+        path: '/',
+        name: 'landing-page',
+        component: LandingPage,
+        meta: { title: 'Landing Page' }
+    },
     {
         path: '/iam',
         children: iamRoutes

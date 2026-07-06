@@ -1,15 +1,13 @@
 <script setup>
-import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
-const items = ref([
+const items = [
   { label: 'warehouses.title', to: '/layout/warehouses' },
   { label: 'Devices', to: '/layout/devices' },
-  { label: 'Team and Acces', to: '/layout/team' },
   { label: 'History events', to: '/layout/history' }
-]);
+];
 </script>
 
 <template>
