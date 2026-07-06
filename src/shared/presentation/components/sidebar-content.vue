@@ -8,7 +8,8 @@ const items = [
   { label: 'Devices', to: '/layout/devices' },
   { label: 'History events', to: '/layout/history' },
   { label: 'Alertas', to: '/layout/alerts' },
-  { label: 'Reportes', to: '/layout/reports' }
+  { label: 'Reportes', to: '/layout/reports' },
+  { label: 'Suscripcion', to: '/layout/subscription' }
 ];
 </script>
 

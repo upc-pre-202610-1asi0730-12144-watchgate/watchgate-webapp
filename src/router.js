@@ -8,6 +8,7 @@ import devicesRoutes from "@/devices/devices.routes.js";
 import { eventHistoryRoutes } from "./event-history/presentation/event-history.routes.js";
 import alertsRoutes from "./alerts/presentation/alerts.routes.js";
 import reportsRoutes from "./reports/presentation/reports.routes.js";
+import subscriptionRoutes from "./subscription/presentation/subscription.routes.js";
 
 const routes = [
     {
@@ -29,7 +30,8 @@ const routes = [
             ...devicesRoutes,
             ...eventHistoryRoutes,
             ...alertsRoutes,
-            ...reportsRoutes
+            ...reportsRoutes,
+            ...subscriptionRoutes
         ]
     },
     {
