@@ -59,4 +59,16 @@ export class WarehouseApi {
     createZone(warehouseId, zoneResource) {
         return http.post(`${WAREHOUSES_ENDPOINT}/${warehouseId}/zones`, zoneResource);
     }
+
+    deactivateWarehouse(id) {
+        return http.patch(`${WAREHOUSES_ENDPOINT}/${id}/deactivate`);
+    }
+
+    deleteWarehouse(id) {
+        return http.delete(`${WAREHOUSES_ENDPOINT}/${id}`);
+    }
+
+    getDashboard(companyId) {
+        return http.get(`${WAREHOUSES_ENDPOINT}/company/${companyId}/dashboard`);
+    }
 }

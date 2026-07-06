@@ -89,7 +89,7 @@ defineExpose({ resetForm });
       modal
       :closable="true"
       :draggable="false"
-      :style="{ width: '420px', background: '#1E293B', border: 'none' }"
+      :style="{ width: 'min(720px, calc(100vw - 48px))', background: '#1E293B', border: 'none' }"
       :pt="{ header: { style: 'background:#1E293B; border-bottom: 1px solid #334155;' },
                content: { style: 'background:#1E293B;' },
                footer:  { style: 'background:#1E293B;' } }"
@@ -101,15 +101,14 @@ defineExpose({ resetForm });
       </div>
     </template>
 
-    <div class="flex flex-col gap-5 py-4">
+    <div class="device-dialog-content">
       <div
-          class="rounded-xl p-6 flex flex-col gap-4"
-          style="background: #263146;"
+          class="device-form-card"
       >
-        <p class="text-white font-semibold text-sm">{{ $t('devices.dialog.sectionTitle') }}</p>
+        <p class="section-title">{{ $t('devices.dialog.sectionTitle') }}</p>
 
         <!-- Device Name -->
-        <div class="flex flex-col gap-1">
+        <div class="field">
           <label class="text-xs text-gray-400">{{ $t('devices.dialog.deviceName') }}</label>
           <pv-input-text
               v-model="form.name"
@@ -124,7 +123,7 @@ defineExpose({ resetForm });
         </div>
 
         <!-- Sensor Type -->
-        <div class="flex flex-col gap-1">
+        <div class="field">
           <label class="text-xs text-gray-400">{{ $t('devices.dialog.typeLabel') }}</label>
           <pv-select
               v-model="form.type"
@@ -143,7 +142,7 @@ defineExpose({ resetForm });
         </div>
 
         <!-- Unit (optional) -->
-        <div class="flex flex-col gap-1">
+        <div class="field">
           <label class="text-xs text-gray-400">{{ $t('devices.dialog.unitLabel') }}</label>
           <pv-input-text
               v-model="form.unit"
@@ -154,7 +153,7 @@ defineExpose({ resetForm });
         </div>
 
         <!-- Zone Dropdown (real WarehouseZone ids) -->
-        <div class="flex flex-col gap-1">
+        <div class="field field-wide">
           <label class="text-xs text-gray-400">{{ $t('devices.dialog.zone') }}</label>
           <pv-select
               v-model="form.zoneId"
@@ -188,3 +187,47 @@ defineExpose({ resetForm });
     </div>
   </pv-dialog>
 </template>
+
+<style scoped>
+.device-dialog-content {
+  padding: 1.25rem 0 .5rem;
+}
+
+.device-form-card {
+  background: #263146;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.section-title {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: white;
+  font-weight: 700;
+  font-size: .95rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  min-width: 0;
+}
+
+.field-wide {
+  grid-column: 1 / -1;
+}
+
+:deep(.p-button) {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 680px) {
+  .device-form-card {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

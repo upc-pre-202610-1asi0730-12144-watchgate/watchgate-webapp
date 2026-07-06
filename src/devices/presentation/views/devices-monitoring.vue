@@ -25,8 +25,11 @@ const showLimitDialog   = ref(false);
 const showSuccessDialog = ref(false);
 const lastLinkedDevice  = ref(null);
 const linkLoading       = ref(false);
+const simulationMessage = ref('');
+const simulationError   = ref('');
 
 const usageText = computed(() => `${t('devices.usage')}: ${store.deviceCount}/${store.DEVICE_LIMIT} ${t('devices.usageUnit')}`);
+const canManageDevices = computed(() => ['Administrator', 'OperationsManager'].includes(iamStore.currentUser?.role));
 
 // Flat list of real { id, name, warehouseId } zones across all of the
 // company's warehouses, used both for the dialog's zone select and to
@@ -63,6 +66,17 @@ async function onDeviceSubmit(payload) {
   }
 }
 
+async function onSimulateAlert(device) {
+  simulationMessage.value = '';
+  simulationError.value = '';
+  try {
+    const alert = await store.simulateAlert(device);
+    simulationMessage.value = `Alert #${alert.id} created for ${device.name}. Open Reports to generate the PDF.`;
+  } catch (e) {
+    simulationError.value = e.response?.data?.detail || e.message;
+  }
+}
+
 function loadData() {
   const companyId = iamStore.currentUser?.companyId;
   if (!companyId) return;
@@ -86,7 +100,7 @@ watch(() => iamStore.sessionLoading, (loading) => {
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <h1 style="margin:0;color:#fff;font-size:1.2rem;font-weight:700;">{{ t('devices.title') }}</h1>
-      <button @click="onLinkClick"
+      <button v-if="canManageDevices" @click="onLinkClick"
               style="background:#3B82F6;color:#fff;border:none;border-radius:8px;
                        padding:8px 18px;font-size:0.85rem;font-weight:600;cursor:pointer;">
         + {{ t('devices.linkNew') }}
@@ -97,6 +111,13 @@ watch(() => iamStore.sessionLoading, (loading) => {
     <div style="display:flex;align-items:center;gap:16px;">
       <span style="color:#94A3B8;font-size:0.85rem;">{{ usageText }}</span>
     </div>
+
+    <p v-if="simulationMessage" style="margin:0;background:#064E3B;color:#BBF7D0;border-radius:8px;padding:10px 12px;">
+      {{ simulationMessage }}
+    </p>
+    <p v-if="simulationError" style="margin:0;background:#7F1D1D;color:#FECACA;border-radius:8px;padding:10px 12px;">
+      {{ simulationError }}
+    </p>
 
     <!-- Loading -->
     <div v-if="store.loading || iamStore.sessionLoading" style="display:flex;justify-content:center;padding:48px 0;">
@@ -110,7 +131,14 @@ watch(() => iamStore.sessionLoading, (loading) => {
           {{ type }} ({{ group.length }})
         </h2>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
-          <DeviceCard v-for="d in group" :key="d.id" :device="d" :zone-label="zoneLabelFor(d.zoneId)" />
+          <div v-for="d in group" :key="d.id" style="display:flex;flex-direction:column;gap:8px;">
+            <DeviceCard :device="d" :zone-label="zoneLabelFor(d.zoneId)" />
+            <button v-if="canManageDevices" @click="onSimulateAlert(d)"
+                    style="background:#F97316;color:#111827;border:none;border-radius:8px;
+                           padding:8px 12px;font-size:0.8rem;font-weight:700;cursor:pointer;">
+              Simulate alert
+            </button>
+          </div>
         </div>
       </section>
 

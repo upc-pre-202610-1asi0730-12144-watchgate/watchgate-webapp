@@ -1,15 +1,20 @@
 <script setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useIamStore } from '../../../iam/application/iam.store.js';
 
 const { t } = useI18n();
+const iamStore = useIamStore();
+const role = computed(() => iamStore.currentUser?.role || 'Viewer');
 
-const items = ref([
-  { label: 'warehouses.title', to: '/layout/warehouses' },
-  { label: 'Devices', to: '/layout/devices' },
-  { label: 'Team and Acces', to: '/layout/team' },
-  { label: 'History events', to: '/layout/history' }
-]);
+const items = computed(() => [
+  { label: 'nav.warehouses', to: '/layout/warehouses', roles: ['Administrator', 'OperationsManager', 'Viewer'] },
+  { label: 'nav.devices', to: '/layout/devices', roles: ['Administrator', 'OperationsManager', 'Viewer'] },
+  { label: 'nav.team', to: '/layout/team', roles: ['Administrator'] },
+  { label: 'nav.reports', to: '/layout/reports', roles: ['Administrator', 'OperationsManager', 'Viewer'] },
+  { label: 'nav.billing', to: '/layout/billing', roles: ['Administrator'] },
+  { label: 'nav.events', to: '/layout/history', roles: ['Administrator', 'OperationsManager', 'Viewer'] }
+].filter(item => item.roles.includes(role.value)));
 </script>
 
 <template>

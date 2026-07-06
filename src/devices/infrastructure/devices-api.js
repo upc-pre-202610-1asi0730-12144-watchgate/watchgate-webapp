@@ -5,7 +5,8 @@
  */
 import { http } from '../../shared/infrastructure/http.api.js';
 
-const SENSORS_ENDPOINT = '/sensors';
+const SENSORS_ENDPOINT = import.meta.env.VITE_SENSORS_ENDPOINT_PATH || '/sensors';
+const SECURITY_ALERTS_ENDPOINT = import.meta.env.VITE_SECURITY_ALERTS_ENDPOINT_PATH || '/security-alerts';
 
 export class DevicesApi {
     /**
@@ -26,6 +27,16 @@ export class DevicesApi {
      */
     async create(resource) {
         const response = await http.post(SENSORS_ENDPOINT, resource);
+        return response.data;
+    }
+
+    async unlink(sensorId) {
+        const response = await http.patch(`${SENSORS_ENDPOINT}/${sensorId}/unlink`);
+        return response.data;
+    }
+
+    async createSecurityAlert(resource) {
+        const response = await http.post(SECURITY_ALERTS_ENDPOINT, resource);
         return response.data;
     }
 }

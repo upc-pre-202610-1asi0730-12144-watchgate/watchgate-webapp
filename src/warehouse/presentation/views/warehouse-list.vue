@@ -5,7 +5,7 @@
  * View that displays a list of all warehouses belonging to the user's company.
  * Allows navigation to detailed monitoring, editing, and warehouse registration.
  */
-import { onMounted, watch, toRefs } from 'vue';
+import { computed, onMounted, watch, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useWarehouseStore } from '../../application/warehouse.store.js';
@@ -16,7 +16,9 @@ const router = useRouter();
 const store = useWarehouseStore();
 const iamStore = useIamStore();
 const { warehouses, warehousesLoaded, errors } = toRefs(store);
-const { fetchWarehouses } = store;
+const { fetchWarehouses, deleteWarehouse } = store;
+const canDeleteWarehouses = computed(() => iamStore.currentUser?.role === 'Administrator');
+const canCreateWarehouses = computed(() => ['Administrator', 'OperationsManager'].includes(iamStore.currentUser?.role));
 
 function tryFetchWarehouses() {
   if (!warehousesLoaded.value && !iamStore.sessionLoading && iamStore.currentUser?.companyId) {
@@ -37,13 +39,18 @@ function goToDetail(warehouseId) {
 function goToRegister() {
   router.push({ name: 'warehouse-register' });
 }
+
+async function onDeleteWarehouse(warehouse) {
+  if (!window.confirm(`Delete warehouse "${warehouse.name}"?`)) return;
+  await deleteWarehouse(warehouse.id);
+}
 </script>
 
 <template>
   <div class="warehouse-list-view">
     <h1 class="page-title">{{ t('warehouses.title') }}</h1>
 
-    <button class="btn-register" @click="goToRegister">
+    <button v-if="canCreateWarehouses" class="btn-register" @click="goToRegister">
       {{ t('warehouses.register') }}
     </button>
 
@@ -107,6 +114,13 @@ function goToRegister() {
               @click="goToDetail(warehouse.id)"
           >
             {{ t('warehouses.view-detail') }}
+          </button>
+          <button
+              v-if="canDeleteWarehouses"
+              class="btn-delete"
+              @click="onDeleteWarehouse(warehouse)"
+          >
+            {{ t('warehouses.delete') }}
           </button>
           <button
               v-else
@@ -266,5 +280,20 @@ function goToRegister() {
 
 .btn-attend:hover {
   background-color: #c0392b;
+}
+
+.btn-delete {
+  background-color: transparent;
+  border: 1px solid #ef4444;
+  color: #fecaca;
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-left: .5rem;
+}
+
+.btn-delete:hover {
+  background-color: rgba(239, 68, 68, .16);
 }
 </style>

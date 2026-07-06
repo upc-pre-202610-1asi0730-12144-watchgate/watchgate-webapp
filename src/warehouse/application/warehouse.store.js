@@ -91,6 +91,15 @@ export const useWarehouseStore = defineStore('warehouse', () => {
         });
     }
 
+    function deleteWarehouse(warehouseId) {
+        return warehouseApi.deleteWarehouse(warehouseId).then(() => {
+            warehouses.value = warehouses.value.filter(warehouse => warehouse.id !== warehouseId);
+        }).catch(error => {
+            errors.value.push(error);
+            throw error;
+        });
+    }
+
     return {
         warehouses,
         errors,
@@ -99,6 +108,7 @@ export const useWarehouseStore = defineStore('warehouse', () => {
         fetchWarehouses,
         getWarehouseById,
         createWarehouse,
-        createZone
+        createZone,
+        deleteWarehouse
     };
 });

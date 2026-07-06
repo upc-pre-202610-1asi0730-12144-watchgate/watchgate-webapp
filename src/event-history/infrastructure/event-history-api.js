@@ -7,7 +7,8 @@
 
 import { http } from '../../shared/infrastructure/http.api.js'
 
-const SECURITY_ALERTS_ENDPOINT = '/security-alerts'
+const SECURITY_ALERTS_ENDPOINT = import.meta.env.VITE_SECURITY_ALERTS_ENDPOINT_PATH || '/security-alerts'
+const REPORTS_ENDPOINT = import.meta.env.VITE_REPORTS_ENDPOINT_PATH || '/reports'
 
 /**
  * API del módulo Historial de Eventos e Incidentes.
@@ -30,4 +31,24 @@ export const eventHistoryApi = {
     getIncidents(warehouseId) {
         return http.get(`${SECURITY_ALERTS_ENDPOINT}/incidents/warehouse/${warehouseId}`)
     },
+
+    acknowledgeAlert(alertId) {
+        return http.patch(`${SECURITY_ALERTS_ENDPOINT}/${alertId}/acknowledge`)
+    },
+
+    attendAlert(alertId) {
+        return http.patch(`${SECURITY_ALERTS_ENDPOINT}/${alertId}/attend`)
+    },
+
+    escalateAlert(alertId) {
+        return http.patch(`${SECURITY_ALERTS_ENDPOINT}/${alertId}/escalate`)
+    },
+
+    flagFalseAlarm(alertId) {
+        return http.patch(`${SECURITY_ALERTS_ENDPOINT}/${alertId}/false-alarm`)
+    },
+
+    getEventLog(params) {
+        return http.get(`${REPORTS_ENDPOINT}/event-log`, { params })
+    }
 }

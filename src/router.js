@@ -5,6 +5,9 @@ import pageNotFound from "./iam/presentation/views/page-not-found.vue";
 import { warehouseRoutes } from "./warehouse/presentation/warehouse.routes.js";
 import devicesRoutes from "@/devices/devices.routes.js";
 import { eventHistoryRoutes } from "./event-history/presentation/event-history.routes.js";
+import { userAccessRoutes } from "./iam/presentation/user-access.routes.js";
+import { subscriptionRoutes } from "./subscription/presentation/subscription.routes.js";
+import { reportsRoutes } from "./reports/presentation/reports.routes.js";
 
 const routes = [
     { path: '/', redirect: '/iam/sign-in' },
@@ -19,7 +22,10 @@ const routes = [
         children: [
             ...warehouseRoutes,
             ...devicesRoutes,
-            ...eventHistoryRoutes
+            ...eventHistoryRoutes,
+            ...userAccessRoutes,
+            ...subscriptionRoutes,
+            ...reportsRoutes
         ]
     },
     {

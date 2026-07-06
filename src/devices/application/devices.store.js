@@ -77,6 +77,17 @@ export const useDevicesStore = defineStore('devices', () => {
         return entity;
     }
 
+    async function simulateAlert(device) {
+        const resource = {
+            type: device.type === 'DOOR' ? 'DOOR_OPEN_DETECTED' : `${device.type}_DETECTED`,
+            severity: device.type === 'MOTION' || device.type === 'DOOR' ? 'HIGH' : 'MEDIUM',
+            description: `${device.name} detected an event in zone ${device.zoneId}`,
+            sensorId: device.id,
+            companyId: device.companyId
+        };
+        return await devicesApi.createSecurityAlert(resource);
+    }
+
     return {
         devices,
         loading,
@@ -88,5 +99,6 @@ export const useDevicesStore = defineStore('devices', () => {
         DEVICE_LIMIT,
         fetchDevices,
         addDevice,
+        simulateAlert,
     };
 });
