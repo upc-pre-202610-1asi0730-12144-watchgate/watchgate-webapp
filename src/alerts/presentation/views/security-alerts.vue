@@ -1,10 +1,12 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { AlertsApi } from '../../infrastructure/alerts-api.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useDevicesStore } from '../../../devices/application/devices.store.js';
 
 const alertsApi = new AlertsApi();
+const { t } = useI18n();
 const iamStore = useIamStore();
 const devicesStore = useDevicesStore();
 
@@ -21,19 +23,19 @@ const form = ref({
   sensorId: null,
 });
 
-const alertTypes = [
-  { value: 'DOOR_OPEN', label: 'Puerta abierta' },
-  { value: 'MOTION_DETECTED', label: 'Movimiento detectado' },
-  { value: 'AFTER_HOURS_ACCESS', label: 'Acceso fuera de horario' },
-  { value: 'CONNECTIVITY_FAILURE', label: 'Falla de conectividad' },
-];
+const alertTypes = computed(() => [
+  { value: 'DOOR_OPEN', label: t('alerts.types.doorOpen') },
+  { value: 'MOTION_DETECTED', label: t('alerts.types.motionDetected') },
+  { value: 'AFTER_HOURS_ACCESS', label: t('alerts.types.afterHoursAccess') },
+  { value: 'CONNECTIVITY_FAILURE', label: t('alerts.types.connectivityFailure') },
+]);
 
-const severities = [
-  { value: 'LOW', label: 'Baja' },
-  { value: 'MEDIUM', label: 'Media' },
-  { value: 'HIGH', label: 'Alta' },
-  { value: 'CRITICAL', label: 'Critica' },
-];
+const severities = computed(() => [
+  { value: 'LOW', label: t('alerts.severities.low') },
+  { value: 'MEDIUM', label: t('alerts.severities.medium') },
+  { value: 'HIGH', label: t('alerts.severities.high') },
+  { value: 'CRITICAL', label: t('alerts.severities.critical') },
+]);
 
 const openAlerts = computed(() => alerts.value.filter(alert => alert.status !== 'RESOLVED').length);
 const criticalAlerts = computed(() => alerts.value.filter(alert => ['HIGH', 'CRITICAL'].includes(alert.severity)).length);
@@ -50,7 +52,7 @@ function loadAlerts() {
       })
       .catch(error => {
         console.error(error);
-        errorMessage.value = 'No se pudieron cargar las alertas.';
+        errorMessage.value = t('alerts.messages.loadError');
       })
       .finally(() => {
         loading.value = false;
@@ -73,7 +75,7 @@ function ensureData() {
 function createAlert() {
   const companyId = iamStore.currentUser?.companyId;
   if (!companyId || !form.value.sensorId || !form.value.description.trim()) {
-    errorMessage.value = 'Completa sensor y descripcion.';
+    errorMessage.value = t('alerts.messages.required');
     return;
   }
 
@@ -90,10 +92,10 @@ function createAlert() {
   }).then(created => {
     alerts.value = [created, ...alerts.value];
     form.value.description = '';
-    successMessage.value = 'Alerta registrada correctamente.';
+    successMessage.value = t('alerts.messages.created');
   }).catch(error => {
     console.error(error);
-    errorMessage.value = 'No se pudo registrar la alerta.';
+    errorMessage.value = t('alerts.messages.createError');
   }).finally(() => {
     saving.value = false;
   });
@@ -105,17 +107,17 @@ function updateAlert(alertId, action) {
   action(alertId)
       .then(updated => {
         alerts.value = alerts.value.map(alert => alert.id === updated.id ? updated : alert);
-        successMessage.value = 'Alerta actualizada.';
+        successMessage.value = t('alerts.messages.updated');
       })
       .catch(error => {
         console.error(error);
-        errorMessage.value = 'No se pudo actualizar la alerta.';
+        errorMessage.value = t('alerts.messages.updateError');
       });
 }
 
 function sensorLabel(sensorId) {
   const sensor = devicesStore.devices.find(device => device.id === sensorId);
-  return sensor ? sensor.name : `Sensor ${sensorId}`;
+  return sensor ? sensor.name : `${t('alerts.form.sensor')} ${sensorId}`;
 }
 
 function formatDate(value) {
@@ -130,56 +132,56 @@ watch(() => iamStore.sessionLoading, ensureData);
   <div class="alerts-view">
     <header class="page-header">
       <div>
-        <h1>Alertas de seguridad</h1>
-        <p>Registra, atiende y resuelve alertas reales del backend.</p>
+        <h1>{{ t('alerts.title') }}</h1>
+        <p>{{ t('alerts.subtitle') }}</p>
       </div>
       <div class="metrics">
-        <div><strong>{{ alerts.length }}</strong><span>Total</span></div>
-        <div><strong>{{ openAlerts }}</strong><span>Abiertas</span></div>
-        <div><strong>{{ criticalAlerts }}</strong><span>Criticas</span></div>
+        <div><strong>{{ alerts.length }}</strong><span>{{ t('alerts.metrics.total') }}</span></div>
+        <div><strong>{{ openAlerts }}</strong><span>{{ t('alerts.metrics.open') }}</span></div>
+        <div><strong>{{ criticalAlerts }}</strong><span>{{ t('alerts.metrics.critical') }}</span></div>
       </div>
     </header>
 
     <section class="panel">
-      <h2>Nueva alerta</h2>
+      <h2>{{ t('alerts.form.title') }}</h2>
       <form class="alert-form" @submit.prevent="createAlert">
         <label>
-          Tipo
+          {{ t('alerts.form.type') }}
           <select v-model="form.type">
             <option v-for="type in alertTypes" :key="type.value" :value="type.value">{{ type.label }}</option>
           </select>
         </label>
         <label>
-          Severidad
+          {{ t('alerts.form.severity') }}
           <select v-model="form.severity">
             <option v-for="severity in severities" :key="severity.value" :value="severity.value">{{ severity.label }}</option>
           </select>
         </label>
         <label>
-          Sensor
+          {{ t('alerts.form.sensor') }}
           <select v-model="form.sensorId">
-            <option :value="null">Selecciona un sensor</option>
+            <option :value="null">{{ t('alerts.form.sensorPlaceholder') }}</option>
             <option v-for="device in devicesStore.devices" :key="device.id" :value="device.id">
               {{ device.name }} - {{ device.type }}
             </option>
           </select>
         </label>
         <label class="description-field">
-          Descripcion
-          <input v-model="form.description" placeholder="Ej. Puerta principal abierta fuera de horario" />
+          {{ t('alerts.form.description') }}
+          <input v-model="form.description" :placeholder="t('alerts.form.descriptionPlaceholder')" />
         </label>
-        <button type="submit" :disabled="saving">{{ saving ? 'Guardando...' : 'Registrar alerta' }}</button>
+        <button type="submit" :disabled="saving">{{ saving ? t('common.saving') : t('alerts.form.submit') }}</button>
       </form>
-      <p v-if="!devicesStore.devices.length" class="hint">Primero registra un almacen, una zona y un dispositivo IoT.</p>
+      <p v-if="!devicesStore.devices.length" class="hint">{{ t('alerts.form.noDevices') }}</p>
     </section>
 
     <p v-if="errorMessage" class="message error">{{ errorMessage }}</p>
     <p v-if="successMessage" class="message success">{{ successMessage }}</p>
 
     <section class="panel">
-      <h2>Alertas registradas</h2>
-      <div v-if="loading" class="empty">Cargando alertas...</div>
-      <div v-else-if="!alerts.length" class="empty">Aun no hay alertas registradas.</div>
+      <h2>{{ t('alerts.list.title') }}</h2>
+      <div v-if="loading" class="empty">{{ t('alerts.list.loading') }}</div>
+      <div v-else-if="!alerts.length" class="empty">{{ t('alerts.list.empty') }}</div>
       <div v-else class="alerts-list">
         <article v-for="alert in alerts" :key="alert.id" class="alert-card">
           <div class="alert-main">
@@ -190,11 +192,11 @@ watch(() => iamStore.sessionLoading, ensureData);
           </div>
           <div class="alert-side">
             <span class="status">{{ alert.status }}</span>
-            <button @click="updateAlert(alert.id, alertsApi.acknowledge.bind(alertsApi))">Acknowledge</button>
-            <button @click="updateAlert(alert.id, alertsApi.markAsAttended.bind(alertsApi))">Atendida</button>
-            <button @click="updateAlert(alert.id, alertsApi.escalate.bind(alertsApi))">Escalar</button>
-            <button @click="updateAlert(alert.id, alertsApi.flagAsFalseAlarm.bind(alertsApi))">Falsa alarma</button>
-            <button @click="updateAlert(alert.id, alertsApi.resolve.bind(alertsApi))">Resolver</button>
+            <button @click="updateAlert(alert.id, alertsApi.acknowledge.bind(alertsApi))">{{ t('alerts.actions.acknowledge') }}</button>
+            <button @click="updateAlert(alert.id, alertsApi.markAsAttended.bind(alertsApi))">{{ t('alerts.actions.attend') }}</button>
+            <button @click="updateAlert(alert.id, alertsApi.escalate.bind(alertsApi))">{{ t('alerts.actions.escalate') }}</button>
+            <button @click="updateAlert(alert.id, alertsApi.flagAsFalseAlarm.bind(alertsApi))">{{ t('alerts.actions.falseAlarm') }}</button>
+            <button @click="updateAlert(alert.id, alertsApi.resolve.bind(alertsApi))">{{ t('alerts.actions.resolve') }}</button>
           </div>
         </article>
       </div>

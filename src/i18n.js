@@ -4,8 +4,8 @@ import es from "./locales/es.json";
 
 const i18n = createI18n({
     legacy: false,
-    locale: localStorage.getItem('watchgate_locale') || 'es',
-    fallbackLocale: 'es',
+    locale: localStorage.getItem('watchgate_locale') || 'en',
+    fallbackLocale: 'en',
     messages: { en, es }
 });
 

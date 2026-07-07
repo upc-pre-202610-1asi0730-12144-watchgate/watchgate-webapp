@@ -1,9 +1,11 @@
 <script setup>
 import { onMounted, watch, toRefs } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useWarehouseStore } from '../../../warehouse/application/warehouse.store.js';
 
+const { t } = useI18n();
 const router = useRouter();
 const iamStore = useIamStore();
 const warehouseStore = useWarehouseStore();
@@ -30,19 +32,19 @@ watch(() => iamStore.sessionLoading, (loading) => {
   <div class="history-overview">
     <header class="page-header">
       <div>
-        <h1>Historial de eventos</h1>
-        <p>Selecciona un almacen para revisar alertas, incidentes y eventos filtrables.</p>
+        <h1>{{ t('eventHistory.overview.title') }}</h1>
+        <p>{{ t('eventHistory.overview.subtitle') }}</p>
       </div>
     </header>
 
     <p v-if="errors.length" class="message error">
-      No se pudieron cargar los almacenes.
+      {{ t('eventHistory.overview.loadError') }}
     </p>
 
     <section class="panel">
-      <div v-if="!warehousesLoaded" class="empty">Cargando almacenes...</div>
+      <div v-if="!warehousesLoaded" class="empty">{{ t('eventHistory.overview.loading') }}</div>
       <div v-else-if="!warehouses.length" class="empty">
-        Registra un almacen antes de consultar el historial.
+        {{ t('eventHistory.overview.empty') }}
       </div>
       <div v-else class="warehouse-grid">
         <button
@@ -53,8 +55,8 @@ watch(() => iamStore.sessionLoading, (loading) => {
             @click="goToHistory(warehouse)"
         >
           <strong>{{ warehouse.name }}</strong>
-          <span>{{ warehouse.location || 'Sin ubicacion' }}</span>
-          <small>{{ warehouse.zones?.length ?? 0 }} zonas</small>
+          <span>{{ warehouse.location || t('eventHistory.overview.noLocation') }}</span>
+          <small>{{ t('eventHistory.overview.zoneCount', { count: warehouse.zones?.length ?? 0 }) }}</small>
         </button>
       </div>
     </section>

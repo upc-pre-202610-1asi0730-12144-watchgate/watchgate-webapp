@@ -1,5 +1,6 @@
 <script setup lang="js">
 import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import {
   eventHistoryStore,
@@ -8,30 +9,31 @@ import {
 import { useWarehouseStore } from '../../../warehouse/application/warehouse.store.js'
 
 const route = useRoute()
+const { t } = useI18n()
 const warehouseStore = useWarehouseStore()
 
-const opcionesTipo = [
-  { label: 'Severidad', value: 'todos' },
-  { label: 'Alta', value: 'HIGH' },
-  { label: 'Media', value: 'MEDIUM' },
-  { label: 'Baja', value: 'LOW' },
-]
+const opcionesTipo = computed(() => [
+  { label: t('eventHistory.filters.severity'), value: 'todos' },
+  { label: t('alerts.severities.high'), value: 'HIGH' },
+  { label: t('alerts.severities.medium'), value: 'MEDIUM' },
+  { label: t('alerts.severities.low'), value: 'LOW' },
+])
 
-const opcionesCategoria = [
-  { label: 'Todos los eventos', value: 'todos' },
-  { label: 'Alertas', value: 'alert' },
-  { label: 'Incidentes', value: 'incident' },
-]
+const opcionesCategoria = computed(() => [
+  { label: t('eventHistory.filters.allEvents'), value: 'todos' },
+  { label: t('eventHistory.filters.alerts'), value: 'alert' },
+  { label: t('eventHistory.filters.incidents'), value: 'incident' },
+])
 
-const opcionesPeriodo = [
-  { label: 'Últimos 7 días', value: '7dias' },
-  { label: 'Hoy', value: 'hoy' },
-  { label: 'Últimos 30 días', value: '30dias' },
-]
+const opcionesPeriodo = computed(() => [
+  { label: t('eventHistory.filters.last7Days'), value: '7dias' },
+  { label: t('eventHistory.filters.today'), value: 'hoy' },
+  { label: t('eventHistory.filters.last30Days'), value: '30dias' },
+])
 
 const currentWarehouse = computed(() => warehouseStore.getWarehouseById(route.params.id))
 const zoneOptions = computed(() => [
-  { label: 'Todas las zonas', value: 'todos' },
+  { label: t('eventHistory.filters.allZones'), value: 'todos' },
   ...(currentWarehouse.value?.zones ?? []).map(zone => ({
     label: zone.name,
     value: zone.id,
@@ -67,18 +69,16 @@ const mostrarBadgeAlerta = (evento) => evento.esAlerta()
 
 <template>
   <div class="ehl-page">
-    <!-- Header -->
     <div class="ehl-header">
       <div class="ehl-header-left">
-        <h1 class="ehl-title">Historial de Eventos</h1>
+        <h1 class="ehl-title">{{ t('eventHistory.title') }}</h1>
         <span class="ehl-warehouse-badge">
-          {{ eventHistoryStore.currentWarehouse?.nombre ?? 'Seleccionar almacén' }}
+          {{ eventHistoryStore.currentWarehouse?.nombre ?? t('eventHistory.selectWarehouse') }}
           <i class="pi pi-chevron-down" style="font-size: 0.7rem;" />
         </span>
       </div>
     </div>
 
-    <!-- Filtros -->
     <div class="ehl-filters">
       <select class="ehl-select" :value="eventHistoryStore.filterKind" @change="onCategoriaChange">
         <option v-for="opt in opcionesCategoria" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
@@ -100,23 +100,20 @@ const mostrarBadgeAlerta = (evento) => evento.esAlerta()
       </select>
     </div>
 
-    <!-- Errores -->
     <div v-if="eventHistoryStore.errors.length" class="ehl-error">
       <i class="pi pi-exclamation-triangle" />
       <span>{{ eventHistoryStore.errors[eventHistoryStore.errors.length - 1] }}</span>
     </div>
 
-    <!-- Loading -->
     <div v-if="eventHistoryStore.loadingEvents" class="ehl-empty">
       <i class="pi pi-spin pi-spinner" style="font-size: 2rem; color: #2d8cff;" />
-      <p>Cargando eventos...</p>
+      <p>{{ t('eventHistory.loading') }}</p>
     </div>
 
-    <!-- Lista -->
     <template v-else>
       <div v-if="groupedByDate.length === 0" class="ehl-empty">
         <i class="pi pi-inbox" style="font-size: 2rem; color: #30363d;" />
-        <p>No se encontraron eventos con los filtros seleccionados.</p>
+        <p>{{ t('eventHistory.empty') }}</p>
       </div>
 
       <div v-for="grupo in groupedByDate" :key="grupo.fecha" class="ehl-group">
@@ -132,7 +129,7 @@ const mostrarBadgeAlerta = (evento) => evento.esAlerta()
               <span class="ehl-event-hora">{{ evento.getFormattedTime() }}</span>
               <span class="ehl-badge-severity" :style="{ color: evento.getColor() }">{{ evento.severityLevel }}</span>
               <span class="ehl-status">{{ evento.status }}</span>
-              <span v-if="mostrarBadgeAlerta(evento)" class="ehl-badge-alerta">ALERTA</span>
+              <span v-if="mostrarBadgeAlerta(evento)" class="ehl-badge-alerta">{{ t('eventHistory.alertBadge') }}</span>
             </div>
           </li>
         </ul>
@@ -181,6 +178,7 @@ const mostrarBadgeAlerta = (evento) => evento.esAlerta()
   display: flex;
   gap: 12px;
   margin-bottom: 28px;
+  flex-wrap: wrap;
 }
 
 .ehl-select {
@@ -193,9 +191,7 @@ const mostrarBadgeAlerta = (evento) => evento.esAlerta()
   cursor: pointer;
   outline: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238b949e' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
+  min-width: 150px;
 }
 
 .ehl-select:hover, .ehl-select:focus { border-color: #2d8cff; }
@@ -236,6 +232,7 @@ const mostrarBadgeAlerta = (evento) => evento.esAlerta()
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .ehl-event-nombre { font-size: 0.92rem; font-weight: 600; color: #e6edf3; }
@@ -276,5 +273,20 @@ const mostrarBadgeAlerta = (evento) => evento.esAlerta()
   padding: 60px 0;
   color: #6e7681;
   font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+  .ehl-header-left,
+  .ehl-event-item {
+    flex-direction: column;
+  }
+
+  .ehl-event-right {
+    align-items: flex-start;
+  }
+
+  .ehl-select {
+    width: 100%;
+  }
 }
 </style>

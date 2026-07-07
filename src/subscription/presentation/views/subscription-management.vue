@@ -1,9 +1,11 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { SubscriptionApi } from '../../infrastructure/subscription-api.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 
 const subscriptionApi = new SubscriptionApi();
+const { t, locale } = useI18n();
 const iamStore = useIamStore();
 
 const plans = ref([]);
@@ -23,7 +25,7 @@ const currentPlan = computed(() =>
 );
 
 function formatMoney(value) {
-    return new Intl.NumberFormat('es-PE', {
+    return new Intl.NumberFormat(locale.value === 'es' ? 'es-PE' : 'en-US', {
         style: 'currency',
         currency: 'USD',
         minimumFractionDigits: 2,
@@ -31,7 +33,7 @@ function formatMoney(value) {
 }
 
 function formatDate(value) {
-    return value ? new Date(value).toLocaleDateString('es-PE') : '-';
+    return value ? new Date(value).toLocaleDateString(locale.value === 'es' ? 'es-PE' : 'en-US') : '-';
 }
 
 function loadSubscriptionData() {
@@ -51,7 +53,7 @@ function loadSubscriptionData() {
         invoices.value = invoicesData.sort((a, b) => new Date(b.issuedAt) - new Date(a.issuedAt));
     }).catch(error => {
         console.error(error);
-        errorMessage.value = 'No se pudo cargar la informacion de suscripcion.';
+        errorMessage.value = t('subscription.messages.loadError');
     }).finally(() => {
         loading.value = false;
     });
@@ -72,11 +74,11 @@ function selectPlan(plan) {
     request.then(subscription => {
         upsertSubscription(subscription);
         successMessage.value = activeSubscription.value?.id === subscription.id
-            ? 'Plan actualizado correctamente.'
-            : 'Suscripcion creada correctamente.';
+            ? t('subscription.messages.planUpdated')
+            : t('subscription.messages.created');
     }).catch(error => {
         console.error(error);
-        errorMessage.value = 'No se pudo seleccionar el plan.';
+        errorMessage.value = t('subscription.messages.selectError');
     }).finally(() => {
         actionLoading.value = false;
     });
@@ -92,11 +94,11 @@ function cancelCurrentSubscription() {
     subscriptionApi.cancelSubscription(activeSubscription.value.id)
         .then(subscription => {
             upsertSubscription(subscription);
-            successMessage.value = 'Suscripcion cancelada.';
+            successMessage.value = t('subscription.messages.cancelled');
         })
         .catch(error => {
             console.error(error);
-            errorMessage.value = 'No se pudo cancelar la suscripcion.';
+            errorMessage.value = t('subscription.messages.cancelError');
         })
         .finally(() => {
             actionLoading.value = false;
@@ -117,10 +119,10 @@ function processPayment() {
         simulateFailure: false,
     }).then(invoice => {
         invoices.value = [invoice, ...invoices.value];
-        successMessage.value = 'Pago procesado y comprobante generado.';
+        successMessage.value = t('subscription.messages.paymentProcessed');
     }).catch(error => {
         console.error(error);
-        errorMessage.value = 'No se pudo procesar el pago.';
+        errorMessage.value = t('subscription.messages.paymentError');
     }).finally(() => {
         actionLoading.value = false;
     });
@@ -149,7 +151,7 @@ function downloadReceipt(invoice) {
         .then(response => saveReceipt(response, invoice))
         .catch(error => {
             console.error(error);
-            errorMessage.value = 'No se pudo descargar el comprobante.';
+            errorMessage.value = t('subscription.messages.receiptError');
         });
 }
 
@@ -166,13 +168,13 @@ watch(() => iamStore.sessionLoading, (loading) => {
   <div class="subscription-view">
     <header class="page-header">
       <div>
-        <h1>Mi suscripcion</h1>
-        <p>Selecciona planes, procesa pagos simulados y descarga comprobantes.</p>
+        <h1>{{ t('subscription.title') }}</h1>
+        <p>{{ t('subscription.subtitle') }}</p>
       </div>
       <div class="current-plan">
-        <span>Plan actual</span>
-        <strong>{{ currentPlan?.name ?? 'Sin plan activo' }}</strong>
-        <small>{{ activeSubscription?.status ?? 'PENDIENTE' }}</small>
+        <span>{{ t('subscription.currentPlan') }}</span>
+        <strong>{{ currentPlan?.name ?? t('subscription.noActivePlan') }}</strong>
+        <small>{{ activeSubscription?.status ?? t('common.pendingUpper') }}</small>
       </div>
     </header>
 
@@ -180,21 +182,21 @@ watch(() => iamStore.sessionLoading, (loading) => {
     <p v-if="successMessage" class="message success">{{ successMessage }}</p>
 
     <section class="panel">
-      <h2>Planes disponibles</h2>
-      <div v-if="loading" class="empty">Cargando planes...</div>
+      <h2>{{ t('subscription.plans.title') }}</h2>
+      <div v-if="loading" class="empty">{{ t('subscription.plans.loading') }}</div>
       <div v-else class="plans-grid">
         <article v-for="plan in plans" :key="plan.id" class="plan-card" :class="{ selected: plan.id === currentPlan?.id }">
           <div>
             <h3>{{ plan.name }}</h3>
             <p>{{ plan.description }}</p>
           </div>
-          <strong class="price">{{ formatMoney(plan.monthlyPrice) }}<span>/mes</span></strong>
+          <strong class="price">{{ formatMoney(plan.monthlyPrice) }}<span>{{ t('subscription.plans.perMonth') }}</span></strong>
           <ul>
-            <li>{{ plan.maxWarehouses }} almacenes</li>
-            <li>{{ plan.maxSensors }} sensores IoT</li>
+            <li>{{ t('subscription.plans.warehouseLimit', { count: plan.maxWarehouses }) }}</li>
+            <li>{{ t('subscription.plans.sensorLimit', { count: plan.maxSensors }) }}</li>
           </ul>
           <button type="button" :disabled="actionLoading || plan.id === currentPlan?.id" @click="selectPlan(plan)">
-            {{ plan.id === currentPlan?.id ? 'Plan activo' : 'Seleccionar plan' }}
+            {{ plan.id === currentPlan?.id ? t('subscription.actions.activePlan') : t('subscription.actions.selectPlan') }}
           </button>
         </article>
       </div>
@@ -202,22 +204,22 @@ watch(() => iamStore.sessionLoading, (loading) => {
 
     <section class="panel actions-panel">
       <div>
-        <h2>Facturacion</h2>
-        <p>Procesa un pago simulado para la suscripcion activa.</p>
+        <h2>{{ t('subscription.billing.title') }}</h2>
+        <p>{{ t('subscription.billing.subtitle') }}</p>
       </div>
       <div class="billing-actions">
         <button type="button" :disabled="!activeSubscription || actionLoading" @click="processPayment">
-          Procesar pago
+          {{ t('subscription.actions.processPayment') }}
         </button>
         <button class="danger" type="button" :disabled="!activeSubscription || actionLoading" @click="cancelCurrentSubscription">
-          Cancelar suscripcion
+          {{ t('subscription.actions.cancel') }}
         </button>
       </div>
     </section>
 
     <section class="panel">
-      <h2>Comprobantes</h2>
-      <div v-if="!invoices.length" class="empty">Aun no hay comprobantes emitidos.</div>
+      <h2>{{ t('subscription.invoices.title') }}</h2>
+      <div v-if="!invoices.length" class="empty">{{ t('subscription.invoices.empty') }}</div>
       <div v-else class="invoice-list">
         <article v-for="invoice in invoices" :key="invoice.id" class="invoice-card">
           <div>
@@ -225,7 +227,7 @@ watch(() => iamStore.sessionLoading, (loading) => {
             <p>{{ formatMoney(invoice.amount) }} {{ invoice.currency }} - {{ invoice.status }}</p>
             <small>{{ formatDate(invoice.issuedAt) }}</small>
           </div>
-          <button type="button" @click="downloadReceipt(invoice)">Descargar</button>
+          <button type="button" @click="downloadReceipt(invoice)">{{ t('subscription.actions.download') }}</button>
         </article>
       </div>
     </section>

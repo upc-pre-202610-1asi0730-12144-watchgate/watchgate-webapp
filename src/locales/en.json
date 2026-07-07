@@ -1,4 +1,18 @@
 {
+  "common": {
+    "activeUpper": "ACTIVE",
+    "inactiveUpper": "INACTIVE",
+    "pendingUpper": "PENDING",
+    "saving": "Saving..."
+  },
+  "errors": {
+    "occurred": "An error occurred"
+  },
+  "page-not-found": {
+    "title": "Page Not Found",
+    "content": "The path is not available.",
+    "go-home": "Go Home"
+  },
   "iam": {
     "brand": {
       "slogan": "IoT Monitoring Platform",
@@ -25,9 +39,9 @@
       "title": "Create Account",
       "subtitle": "Protect your warehouses today.",
       "fullNameLabel": "Full Name",
-      "fullNamePlaceholder": "First and Last name",
+      "fullNamePlaceholder": "First and last name",
       "companyLabel": "Company Name",
-      "companyPlaceholder": "company name",
+      "companyPlaceholder": "Company name",
       "emailLabel": "Email Address",
       "passwordLabel": "Password",
       "startButton": "Get Started",
@@ -57,6 +71,16 @@
       "content": "The path is not available.",
       "go-home": "Go Home"
     }
+  },
+  "nav": {
+    "warehouses": "My Warehouses",
+    "devices": "IoT Devices",
+    "team": "Team & Access",
+    "events": "Event History",
+    "alerts": "Security Alerts",
+    "reports": "Reports",
+    "subscription": "My Subscription",
+    "settings": "Settings"
   },
   "warehouses": {
     "title": "My Warehouses",
@@ -108,7 +132,7 @@
       "empty": "No zones registered yet.",
       "nameLabel": "Zone Name",
       "namePlaceholder": "e.g. Zone A",
-      "areaLabel": "Area (m²)",
+      "areaLabel": "Area (m2)",
       "areaPlaceholder": "e.g. 500",
       "riskLevelLabel": "Risk Level",
       "riskLevels": {
@@ -123,22 +147,21 @@
       }
     }
   },
+  "warehouse-edit": {
+    "back": "Back to list",
+    "title": "Warehouse Settings",
+    "opening-time": "Opening Time",
+    "closing-time": "Closing Time",
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "save-success": "Changes saved successfully!"
+  },
   "events": {
     "door-open": "Main door opened",
     "motion-detected": "Motion detected in Sector A",
     "authorized-access": "Authorized access granted"
   },
-  "nav": {
-    "warehouses": "My Warehouses",
-    "devices": "IoT Devices",
-    "team": "Team & Access",
-    "events": "Event History",
-    "alerts": "Security Alerts",
-    "reports": "Reports",
-    "subscription": "My Subscription",
-    "settings": "Settings"
-  },
-
   "devices": {
     "title": "IoT Devices",
     "linkNew": "Link new device",
@@ -163,7 +186,7 @@
         "smoke": "Smoke"
       },
       "unitLabel": "Unit (optional)",
-      "unitPlaceholder": "e.g. °C, ppm",
+      "unitPlaceholder": "e.g. C, ppm",
       "zone": "Assign to Zone",
       "zonePlaceholder": "Select a warehouse zone",
       "zoneEmpty": "No warehouse zones available yet. Register a warehouse zone first.",
@@ -182,14 +205,175 @@
       "confirm": "Got it"
     }
   },
-  "warehouse-edit": {
-    "back": "Back to list",
-    "title": "Warehouse Settings",
-    "opening-time": "Opening Time",
-    "closing-time": "Closing Time",
-    "cancel": "Cancel",
-    "save": "Save Changes",
-    "saving": "Saving...",
-    "save-success": "Changes saved successfully!"
+  "alerts": {
+    "title": "Security Alerts",
+    "subtitle": "Register, attend and resolve backend security alerts.",
+    "metrics": {
+      "total": "Total",
+      "open": "Open",
+      "critical": "Critical"
+    },
+    "types": {
+      "doorOpen": "Door open",
+      "motionDetected": "Motion detected",
+      "afterHoursAccess": "After-hours access",
+      "connectivityFailure": "Connectivity failure"
+    },
+    "severities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "form": {
+      "title": "New alert",
+      "type": "Type",
+      "severity": "Severity",
+      "sensor": "Sensor",
+      "sensorPlaceholder": "Select a sensor",
+      "description": "Description",
+      "descriptionPlaceholder": "e.g. Main door opened after hours",
+      "submit": "Register alert",
+      "noDevices": "Register a warehouse, zone and IoT device first."
+    },
+    "list": {
+      "title": "Registered alerts",
+      "loading": "Loading alerts...",
+      "empty": "There are no registered alerts yet."
+    },
+    "actions": {
+      "acknowledge": "Acknowledge",
+      "attend": "Mark attended",
+      "escalate": "Escalate",
+      "falseAlarm": "False alarm",
+      "resolve": "Resolve"
+    },
+    "messages": {
+      "loadError": "Alerts could not be loaded.",
+      "required": "Complete sensor and description.",
+      "created": "Alert registered successfully.",
+      "createError": "The alert could not be registered.",
+      "updated": "Alert updated.",
+      "updateError": "The alert could not be updated."
+    }
+  },
+  "reports": {
+    "title": "Security Reports",
+    "subtitle": "Consolidated dashboard, generation and report downloads.",
+    "metrics": {
+      "events": "Events",
+      "open": "Open",
+      "resolved": "Resolved",
+      "critical": "Critical"
+    },
+    "form": {
+      "generateTitle": "Generate report",
+      "from": "From",
+      "to": "To",
+      "warehouse": "Warehouse",
+      "format": "Format",
+      "allWarehouses": "All warehouses"
+    },
+    "schedule": {
+      "title": "Schedule periodic report",
+      "name": "Name",
+      "namePlaceholder": "Weekly security report",
+      "frequency": "Frequency",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "email": "Email",
+      "start": "Start"
+    },
+    "actions": {
+      "generate": "Generate",
+      "generating": "Generating...",
+      "schedule": "Schedule",
+      "scheduling": "Scheduling..."
+    },
+    "generated": {
+      "title": "Generated reports",
+      "loading": "Loading reports...",
+      "empty": "There are no generated reports yet.",
+      "summary": "{total} events - {critical} critical - {resolved} resolved"
+    },
+    "scheduled": {
+      "title": "Scheduled reports",
+      "empty": "There are no scheduled reports yet.",
+      "startsAt": "Starts: {date}"
+    },
+    "messages": {
+      "loadError": "Reports could not be loaded.",
+      "generated": "Report generated successfully.",
+      "generateError": "The report could not be generated.",
+      "scheduleRequired": "Complete recipient name and email.",
+      "scheduled": "Periodic report scheduled.",
+      "scheduleError": "The report could not be scheduled."
+    }
+  },
+  "subscription": {
+    "title": "My Subscription",
+    "subtitle": "Select plans, process simulated payments and download receipts.",
+    "currentPlan": "Current plan",
+    "noActivePlan": "No active plan",
+    "plans": {
+      "title": "Available plans",
+      "loading": "Loading plans...",
+      "perMonth": "/month",
+      "warehouseLimit": "{count} warehouses",
+      "sensorLimit": "{count} IoT sensors"
+    },
+    "billing": {
+      "title": "Billing",
+      "subtitle": "Process a simulated payment for the active subscription."
+    },
+    "invoices": {
+      "title": "Receipts",
+      "empty": "There are no issued receipts yet."
+    },
+    "actions": {
+      "activePlan": "Active plan",
+      "selectPlan": "Select plan",
+      "processPayment": "Process payment",
+      "cancel": "Cancel subscription",
+      "download": "Download"
+    },
+    "messages": {
+      "loadError": "Subscription information could not be loaded.",
+      "planUpdated": "Plan updated successfully.",
+      "created": "Subscription created successfully.",
+      "selectError": "The plan could not be selected.",
+      "cancelled": "Subscription cancelled.",
+      "cancelError": "The subscription could not be cancelled.",
+      "paymentProcessed": "Payment processed and receipt generated.",
+      "paymentError": "The payment could not be processed.",
+      "receiptError": "The receipt could not be downloaded."
+    }
+  },
+  "eventHistory": {
+    "title": "Event History",
+    "selectWarehouse": "Select warehouse",
+    "loading": "Loading events...",
+    "empty": "No events were found with the selected filters.",
+    "alertBadge": "ALERT",
+    "filters": {
+      "severity": "Severity",
+      "allEvents": "All events",
+      "alerts": "Alerts",
+      "incidents": "Incidents",
+      "last7Days": "Last 7 days",
+      "today": "Today",
+      "last30Days": "Last 30 days",
+      "allZones": "All zones"
+    },
+    "overview": {
+      "title": "Event History",
+      "subtitle": "Select a warehouse to review alerts, incidents and filterable events.",
+      "loadError": "Warehouses could not be loaded.",
+      "loading": "Loading warehouses...",
+      "empty": "Register a warehouse before checking event history.",
+      "noLocation": "No location",
+      "zoneCount": "{count} zones"
+    }
   }
 }

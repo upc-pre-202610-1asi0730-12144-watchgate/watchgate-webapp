@@ -89,88 +89,86 @@ defineExpose({ resetForm });
       modal
       :closable="true"
       :draggable="false"
-      :style="{ width: '420px', background: '#1E293B', border: 'none' }"
+      :style="{ width: 'min(720px, calc(100vw - 48px))', background: '#1E293B', border: 'none' }"
       :pt="{ header: { style: 'background:#1E293B; border-bottom: 1px solid #334155;' },
                content: { style: 'background:#1E293B;' },
                footer:  { style: 'background:#1E293B;' } }"
   >
     <template #header>
-      <div class="flex items-center gap-2">
-        <i class="pi pi-arrow-left text-white cursor-pointer" @click="onClose" />
-        <span class="text-white font-semibold text-base">{{ $t('devices.dialog.title') }}</span>
+      <div class="device-dialog-header">
+        <button class="device-dialog-back" type="button" @click="onClose" aria-label="Back">
+          <i class="pi pi-arrow-left" />
+        </button>
+        <span>{{ $t('devices.dialog.title') }}</span>
       </div>
     </template>
 
-    <div class="flex flex-col gap-5 py-4">
-      <div
-          class="rounded-xl p-6 flex flex-col gap-4"
-          style="background: #263146;"
-      >
-        <p class="text-white font-semibold text-sm">{{ $t('devices.dialog.sectionTitle') }}</p>
+    <div class="device-dialog-content">
+      <div class="device-form-card">
+        <p class="section-title">{{ $t('devices.dialog.sectionTitle') }}</p>
 
         <!-- Device Name -->
-        <div class="flex flex-col gap-1">
-          <label class="text-xs text-gray-400">{{ $t('devices.dialog.deviceName') }}</label>
+        <div class="device-field">
+          <label>{{ $t('devices.dialog.deviceName') }}</label>
           <pv-input-text
               v-model="form.name"
               :placeholder="$t('devices.dialog.deviceNamePlaceholder')"
-              :class="['w-full text-sm', { 'p-invalid': touched.name && errors.name }]"
+              :class="[{ 'p-invalid': touched.name && errors.name }]"
               :pt="{ root: { style: 'background:#1E293B; border-color:#334155; color:#fff;' } }"
               @blur="touchField('name')"
           />
-          <small v-if="touched.name && errors.name" class="text-red-400 text-xs">
+          <small v-if="touched.name && errors.name" class="field-error">
             {{ errors.name }}
           </small>
         </div>
 
         <!-- Sensor Type -->
-        <div class="flex flex-col gap-1">
-          <label class="text-xs text-gray-400">{{ $t('devices.dialog.typeLabel') }}</label>
+        <div class="device-field">
+          <label>{{ $t('devices.dialog.typeLabel') }}</label>
           <pv-select
               v-model="form.type"
               :options="typeOptions"
               option-label="label"
               option-value="value"
               :placeholder="$t('devices.dialog.typePlaceholder')"
-              :class="['w-full text-sm', { 'p-invalid': touched.type && errors.type }]"
+              :class="[{ 'p-invalid': touched.type && errors.type }]"
               :pt="{ root: { style: 'background:#1E293B; border-color:#334155; color:#fff;' } }"
               @blur="touchField('type')"
               @change="touchField('type')"
           />
-          <small v-if="touched.type && errors.type" class="text-red-400 text-xs">
+          <small v-if="touched.type && errors.type" class="field-error">
             {{ errors.type }}
           </small>
         </div>
 
         <!-- Unit (optional) -->
-        <div class="flex flex-col gap-1">
-          <label class="text-xs text-gray-400">{{ $t('devices.dialog.unitLabel') }}</label>
+        <div class="device-field">
+          <label>{{ $t('devices.dialog.unitLabel') }}</label>
           <pv-input-text
               v-model="form.unit"
               :placeholder="$t('devices.dialog.unitPlaceholder')"
-              class="w-full text-sm"
               :pt="{ root: { style: 'background:#1E293B; border-color:#334155; color:#fff;' } }"
           />
         </div>
 
         <!-- Zone Dropdown (real WarehouseZone ids) -->
-        <div class="flex flex-col gap-1">
-          <label class="text-xs text-gray-400">{{ $t('devices.dialog.zone') }}</label>
+        <div class="device-field device-field-wide">
+          <label>{{ $t('devices.dialog.zone') }}</label>
           <pv-select
               v-model="form.zoneId"
               :options="zoneOptions"
               option-label="label"
               option-value="value"
               :placeholder="$t('devices.dialog.zonePlaceholder')"
-              :class="['w-full text-sm', { 'p-invalid': touched.zoneId && errors.zoneId }]"
+              :class="[{ 'p-invalid': touched.zoneId && errors.zoneId }]"
               :pt="{ root: { style: 'background:#1E293B; border-color:#334155; color:#fff;' } }"
               @blur="touchField('zoneId')"
               @change="touchField('zoneId')"
           />
-          <small v-if="touched.zoneId && errors.zoneId" class="text-red-400 text-xs">
+          <small v-if="touched.zoneId && errors.zoneId" class="field-error">
             {{ errors.zoneId }}
           </small>
-          <small v-else-if="!zoneOptions.length" class="text-yellow-400 text-xs">
+          <small v-else-if="!zoneOptions.length" class="field-hint">
             {{ $t('devices.dialog.zoneEmpty') }}
           </small>
         </div>
@@ -180,7 +178,7 @@ defineExpose({ resetForm });
             :label="$t('devices.dialog.submit')"
             :loading="loading"
             :disabled="!isValid"
-            class="w-full mt-2"
+            class="device-submit"
             style="background: #3B82F6; border-color: #3B82F6; font-weight: 600;"
             @click="onSubmit"
         />
@@ -188,3 +186,92 @@ defineExpose({ resetForm });
     </div>
   </pv-dialog>
 </template>
+
+<style scoped>
+.device-dialog-header {
+  align-items: center;
+  color: #fff;
+  display: flex;
+  font-size: 1rem;
+  font-weight: 700;
+  gap: 0.75rem;
+}
+
+.device-dialog-back {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 1.1rem;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  width: 32px;
+}
+
+.device-dialog-content {
+  padding: 1.25rem 0 0.25rem;
+}
+
+.device-form-card {
+  background: #263146;
+  border-radius: 8px;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 1.25rem;
+  width: 100%;
+}
+
+.section-title {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.device-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.device-field-wide,
+.device-submit {
+  grid-column: 1 / -1;
+}
+
+.device-field label {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.field-error {
+  color: #f87171;
+  font-size: 0.75rem;
+}
+
+.field-hint {
+  color: #facc15;
+  font-size: 0.75rem;
+}
+
+:deep(.p-inputtext),
+:deep(.p-select),
+:deep(.p-button) {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 680px) {
+  .device-form-card {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

@@ -1,4 +1,18 @@
 {
+  "common": {
+    "activeUpper": "ACTIVO",
+    "inactiveUpper": "INACTIVO",
+    "pendingUpper": "PENDIENTE",
+    "saving": "Guardando..."
+  },
+  "errors": {
+    "occurred": "Ocurrió un error"
+  },
+  "page-not-found": {
+    "title": "Página no encontrada",
+    "content": "La ruta no está disponible.",
+    "go-home": "Ir al inicio"
+  },
   "iam": {
     "brand": {
       "slogan": "Plataforma de Monitoreo IoT",
@@ -9,80 +23,90 @@
     },
     "signIn": {
       "title": "Acceder al Sistema",
-      "subtitle": "Ingresa tus credenciales para continuar",
-      "emailLabel": "Correo Electrónico",
+      "subtitle": "Ingresa tus credenciales para continuar.",
+      "emailLabel": "Correo electrónico",
       "passwordLabel": "Contraseña",
-      "loginButton": "Iniciar Sesión",
+      "loginButton": "Iniciar sesión",
       "forgot": "¿Olvidaste tu contraseña?",
       "noAccount": "¿No tienes una cuenta?",
       "register": "Regístrate",
       "errors": {
-        "invalid": "Correo electrónico o contraseña incorrectos",
-        "connection": "Ocurrió un error de conexión. Inténtalo de nuevo"
+        "invalid": "Correo electrónico o contraseña incorrectos.",
+        "connection": "Ocurrió un error de conexión. Inténtalo de nuevo."
       }
     },
     "signUp": {
-      "title": "Crear Cuenta",
-      "subtitle": "Protege tus almacenes hoy mismo",
-      "fullNameLabel": "Nombre Completo",
-      "fullNamePlaceholder": "Ej. Carlos Perez",
-      "companyLabel": "Nombre de la Empresa",
-      "companyPlaceholder": "Ej. Logística Almacenes",
-      "emailLabel": "Correo Electrónico",
+      "title": "Crear cuenta",
+      "subtitle": "Protege tus almacenes hoy mismo.",
+      "fullNameLabel": "Nombre completo",
+      "fullNamePlaceholder": "Nombres y apellidos",
+      "companyLabel": "Nombre de la empresa",
+      "companyPlaceholder": "Nombre de la empresa",
+      "emailLabel": "Correo electrónico",
       "passwordLabel": "Contraseña",
       "startButton": "Comenzar",
       "alreadyAccount": "¿Ya tienes cuenta?",
-      "signIn": "Inicia Sesión",
+      "signIn": "Inicia sesión",
       "errors": {
-        "required": "Todos los campos son requeridos",
-        "passwordLength": "La contraseña debe tener al menos 6 caracteres",
-        "creationFailed": "Ocurrió un error al crear tu cuenta"
+        "required": "Todos los campos son obligatorios.",
+        "passwordLength": "La contraseña debe tener al menos 6 caracteres.",
+        "creationFailed": "Ocurrió un error al crear tu cuenta."
       }
     },
     "recover": {
-      "title": "Recuperar Contraseña",
-      "subtitle": "Ingresa tu correo y te enviaremos un enlace para restablecer tu acceso",
-      "emailLabel": "Correo Electrónico",
-      "sendBtn": "Enviar Enlace",
+      "title": "Recuperar contraseña",
+      "subtitle": "Ingresa tu correo y te enviaremos un enlace para restablecer tu acceso.",
+      "emailLabel": "Correo electrónico",
+      "sendBtn": "Enviar enlace",
       "backTo": "Volver a ",
-      "signIn": "Iniciar Sesión",
+      "signIn": "Iniciar sesión",
       "messages": {
-        "success": "El enlace de recuperación ha sido enviado con éxito",
-        "notRegistered": "Este correo no está registrado en nuestro sistema",
-        "error": "Ocurrió un error al conectar con el servidor"
+        "success": "El enlace de recuperación fue enviado correctamente.",
+        "notRegistered": "Este correo no está registrado en nuestro sistema.",
+        "error": "Ocurrió un error al conectar con el servidor."
       }
     },
     "page-not-found": {
       "title": "Página no encontrada",
       "content": "La ruta no está disponible.",
-      "go-home": "Ir al Inicio"
+      "go-home": "Ir al inicio"
     }
   },
+  "nav": {
+    "warehouses": "Mis almacenes",
+    "devices": "Dispositivos IoT",
+    "team": "Equipo y accesos",
+    "events": "Historial de eventos",
+    "alerts": "Alertas de seguridad",
+    "reports": "Reportes",
+    "subscription": "Mi suscripción",
+    "settings": "Configuración"
+  },
   "warehouses": {
-    "title": "Mis Almacenes",
-    "register": "Registrar Almacén",
+    "title": "Mis almacenes",
+    "register": "Registrar almacén",
     "no-warehouses": "No se encontraron almacenes.",
     "last-event": "Último evento",
     "incident-detected": "Incidente detectado",
-    "view-detail": "Ver Detalles",
+    "view-detail": "Ver detalles",
     "attend": "Atender",
     "status": {
       "active": "Activo",
-      "critical-alert": "Alerta Crítica",
+      "critical-alert": "Alerta crítica",
       "inactive": "Inactivo"
     },
     "registerForm": {
-      "title": "Registrar Almacén",
+      "title": "Registrar almacén",
       "subtitle": "Agrega un nuevo almacén a tu empresa.",
-      "nameLabel": "Nombre del Almacén",
+      "nameLabel": "Nombre del almacén",
       "namePlaceholder": "Ej. Almacén Central",
       "locationLabel": "Ubicación",
       "locationPlaceholder": "Ej. Lima, Callao",
       "capacityLabel": "Capacidad",
       "capacityPlaceholder": "Ej. 1000",
-      "operationStartLabel": "Inicio de Operación",
-      "operationEndLabel": "Fin de Operación",
-      "submit": "Crear Almacén",
+      "operationStartLabel": "Inicio de operación",
+      "operationEndLabel": "Fin de operación",
+      "submit": "Crear almacén",
       "cancel": "Cancelar",
       "errors": {
         "required": "El nombre, la ubicación y la capacidad son obligatorios.",
@@ -93,67 +117,66 @@
   "warehouse-detail": {
     "back": "Volver a la lista",
     "active": "Activo",
-    "latest-events": "Últimos Eventos",
-    "sensor-status": "Estado de Sensores",
-    "main-door": "Puerta Principal",
+    "latest-events": "Últimos eventos",
+    "sensor-status": "Estado de sensores",
+    "main-door": "Puerta principal",
     "door-closed": "Cerrada",
-    "motion-sensor": "Sensor de Movimiento",
+    "motion-sensor": "Sensor de movimiento",
     "normal": "Normal",
-    "network": "Conexión de Red",
+    "network": "Conexión de red",
     "stable": "Estable",
     "view-realtime": "Ver en tiempo real",
-    "view-history": "Ver Historial",
+    "view-history": "Ver historial",
     "zones": {
       "title": "Zonas",
       "empty": "Aún no hay zonas registradas.",
-      "nameLabel": "Nombre de la Zona",
+      "nameLabel": "Nombre de la zona",
       "namePlaceholder": "Ej. Zona A",
-      "areaLabel": "Área (m²)",
+      "areaLabel": "Área (m2)",
       "areaPlaceholder": "Ej. 500",
-      "riskLevelLabel": "Nivel de Riesgo",
+      "riskLevelLabel": "Nivel de riesgo",
       "riskLevels": {
         "low": "Bajo",
         "medium": "Medio",
         "high": "Alto"
       },
-      "submit": "Agregar Zona",
+      "submit": "Agregar zona",
       "errors": {
         "required": "El nombre y el área son obligatorios.",
         "creationFailed": "Ocurrió un error al crear la zona."
       }
     }
   },
+  "warehouse-edit": {
+    "back": "Volver a la lista",
+    "title": "Configuración del almacén",
+    "opening-time": "Horario de apertura",
+    "closing-time": "Horario de cierre",
+    "cancel": "Cancelar",
+    "save": "Guardar cambios",
+    "saving": "Guardando...",
+    "save-success": "¡Cambios guardados correctamente!"
+  },
   "events": {
     "door-open": "Puerta principal abierta",
     "motion-detected": "Movimiento detectado en Sector A",
     "authorized-access": "Acceso autorizado concedido"
   },
-  "nav": {
-    "warehouses": "Mis Almacenes",
-    "devices": "Dispositivos IoT",
-    "team": "Equipo y Accesos",
-    "events": "Historial de eventos",
-    "alerts": "Alertas",
-    "reports": "Reportes",
-    "subscription": "Mi Suscripción",
-    "settings": "Configuración"
-  },
-
   "devices": {
     "title": "Dispositivos IoT",
     "linkNew": "Vincular nuevo dispositivo",
     "usage": "Uso",
     "usageUnit": "disp.",
-    "sectionSensors": "Sensores de Acceso",
+    "sectionSensors": "Sensores de acceso",
     "sectionCameras": "Cámaras CCTV",
-    "empty": "No hay dispositivos registrados aún.",
+    "empty": "Aún no hay dispositivos registrados.",
     "menu": "Opciones",
     "dialog": {
-      "title": "Vincular Dispositivo",
-      "sectionTitle": "Datos del Dispositivo IoT",
-      "deviceName": "Nombre del Dispositivo",
-      "deviceNamePlaceholder": "Ej. Sensor Ventana Trasera",
-      "typeLabel": "Tipo de Sensor",
+      "title": "Vincular dispositivo",
+      "sectionTitle": "Datos del dispositivo IoT",
+      "deviceName": "Nombre del dispositivo",
+      "deviceNamePlaceholder": "Ej. Sensor ventana trasera",
+      "typeLabel": "Tipo de sensor",
       "typePlaceholder": "Selecciona un tipo",
       "types": {
         "motion": "Movimiento",
@@ -163,33 +186,194 @@
         "smoke": "Humo"
       },
       "unitLabel": "Unidad (opcional)",
-      "unitPlaceholder": "Ej. °C, ppm",
-      "zone": "Asignar a Zona",
+      "unitPlaceholder": "Ej. C, ppm",
+      "zone": "Asignar a zona",
       "zonePlaceholder": "Selecciona una zona del almacén",
-      "zoneEmpty": "Aún no hay zonas de almacén disponibles. Registra una zona primero.",
-      "submit": "Vincular Dispositivo",
+      "zoneEmpty": "Aún no hay zonas disponibles. Registra una zona primero.",
+      "submit": "Vincular dispositivo",
       "errorRequired": "Este campo es obligatorio"
     },
     "limitDialog": {
-      "title": "Límite de Dispositivos",
-      "description": "Tu plan actual ha alcanzado el límite de 5 dispositivos IoT conectados.",
-      "upgrade": "Mejorar Plan Premium",
+      "title": "Límite de dispositivos alcanzado",
+      "description": "Tu plan actual alcanzó el límite de 5 dispositivos IoT conectados.",
+      "upgrade": "Mejorar a Premium",
       "dismiss": "Cerrar"
     },
     "successDialog": {
       "title": "Dispositivo en línea",
-      "description": "El sensor de movimiento está activo y monitoreando nuevamente la {zone}.",
+      "description": "El sensor de movimiento está activo y monitoreando nuevamente {zone}.",
       "confirm": "Entendido"
     }
   },
-  "warehouse-edit": {
-    "back": "Volver a la lista",
-    "title": "Configuración del Almacén",
-    "opening-time": "Horario de Apertura",
-    "closing-time": "Horario de Cierre",
-    "cancel": "Cancelar",
-    "save": "Guardar Cambios",
-    "saving": "Guardando...",
-    "save-success": "¡Cambios guardados con éxito!"
+  "alerts": {
+    "title": "Alertas de seguridad",
+    "subtitle": "Registra, atiende y resuelve alertas reales del backend.",
+    "metrics": {
+      "total": "Total",
+      "open": "Abiertas",
+      "critical": "Críticas"
+    },
+    "types": {
+      "doorOpen": "Puerta abierta",
+      "motionDetected": "Movimiento detectado",
+      "afterHoursAccess": "Acceso fuera de horario",
+      "connectivityFailure": "Falla de conectividad"
+    },
+    "severities": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta",
+      "critical": "Crítica"
+    },
+    "form": {
+      "title": "Nueva alerta",
+      "type": "Tipo",
+      "severity": "Severidad",
+      "sensor": "Sensor",
+      "sensorPlaceholder": "Selecciona un sensor",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Ej. Puerta principal abierta fuera de horario",
+      "submit": "Registrar alerta",
+      "noDevices": "Primero registra un almacén, una zona y un dispositivo IoT."
+    },
+    "list": {
+      "title": "Alertas registradas",
+      "loading": "Cargando alertas...",
+      "empty": "Aún no hay alertas registradas."
+    },
+    "actions": {
+      "acknowledge": "Confirmar",
+      "attend": "Marcar atendida",
+      "escalate": "Escalar",
+      "falseAlarm": "Falsa alarma",
+      "resolve": "Resolver"
+    },
+    "messages": {
+      "loadError": "No se pudieron cargar las alertas.",
+      "required": "Completa sensor y descripción.",
+      "created": "Alerta registrada correctamente.",
+      "createError": "No se pudo registrar la alerta.",
+      "updated": "Alerta actualizada.",
+      "updateError": "No se pudo actualizar la alerta."
+    }
+  },
+  "reports": {
+    "title": "Reportes de seguridad",
+    "subtitle": "Dashboard consolidado, generación y descarga de reportes.",
+    "metrics": {
+      "events": "Eventos",
+      "open": "Abiertos",
+      "resolved": "Resueltos",
+      "critical": "Críticos"
+    },
+    "form": {
+      "generateTitle": "Generar reporte",
+      "from": "Desde",
+      "to": "Hasta",
+      "warehouse": "Almacén",
+      "format": "Formato",
+      "allWarehouses": "Todos los almacenes"
+    },
+    "schedule": {
+      "title": "Programar reporte periódico",
+      "name": "Nombre",
+      "namePlaceholder": "Reporte semanal de seguridad",
+      "frequency": "Frecuencia",
+      "daily": "Diaria",
+      "weekly": "Semanal",
+      "monthly": "Mensual",
+      "email": "Correo",
+      "start": "Inicio"
+    },
+    "actions": {
+      "generate": "Generar",
+      "generating": "Generando...",
+      "schedule": "Programar",
+      "scheduling": "Programando..."
+    },
+    "generated": {
+      "title": "Reportes generados",
+      "loading": "Cargando reportes...",
+      "empty": "Aún no hay reportes generados.",
+      "summary": "{total} eventos - {critical} críticos - {resolved} resueltos"
+    },
+    "scheduled": {
+      "title": "Reportes programados",
+      "empty": "Aún no hay reportes programados.",
+      "startsAt": "Inicia: {date}"
+    },
+    "messages": {
+      "loadError": "No se pudieron cargar los reportes.",
+      "generated": "Reporte generado correctamente.",
+      "generateError": "No se pudo generar el reporte.",
+      "scheduleRequired": "Completa nombre y correo del destinatario.",
+      "scheduled": "Reporte periódico programado.",
+      "scheduleError": "No se pudo programar el reporte."
+    }
+  },
+  "subscription": {
+    "title": "Mi suscripción",
+    "subtitle": "Selecciona planes, procesa pagos simulados y descarga comprobantes.",
+    "currentPlan": "Plan actual",
+    "noActivePlan": "Sin plan activo",
+    "plans": {
+      "title": "Planes disponibles",
+      "loading": "Cargando planes...",
+      "perMonth": "/mes",
+      "warehouseLimit": "{count} almacenes",
+      "sensorLimit": "{count} sensores IoT"
+    },
+    "billing": {
+      "title": "Facturación",
+      "subtitle": "Procesa un pago simulado para la suscripción activa."
+    },
+    "invoices": {
+      "title": "Comprobantes",
+      "empty": "Aún no hay comprobantes emitidos."
+    },
+    "actions": {
+      "activePlan": "Plan activo",
+      "selectPlan": "Seleccionar plan",
+      "processPayment": "Procesar pago",
+      "cancel": "Cancelar suscripción",
+      "download": "Descargar"
+    },
+    "messages": {
+      "loadError": "No se pudo cargar la información de suscripción.",
+      "planUpdated": "Plan actualizado correctamente.",
+      "created": "Suscripción creada correctamente.",
+      "selectError": "No se pudo seleccionar el plan.",
+      "cancelled": "Suscripción cancelada.",
+      "cancelError": "No se pudo cancelar la suscripción.",
+      "paymentProcessed": "Pago procesado y comprobante generado.",
+      "paymentError": "No se pudo procesar el pago.",
+      "receiptError": "No se pudo descargar el comprobante."
+    }
+  },
+  "eventHistory": {
+    "title": "Historial de eventos",
+    "selectWarehouse": "Seleccionar almacén",
+    "loading": "Cargando eventos...",
+    "empty": "No se encontraron eventos con los filtros seleccionados.",
+    "alertBadge": "ALERTA",
+    "filters": {
+      "severity": "Severidad",
+      "allEvents": "Todos los eventos",
+      "alerts": "Alertas",
+      "incidents": "Incidentes",
+      "last7Days": "Últimos 7 días",
+      "today": "Hoy",
+      "last30Days": "Últimos 30 días",
+      "allZones": "Todas las zonas"
+    },
+    "overview": {
+      "title": "Historial de eventos",
+      "subtitle": "Selecciona un almacén para revisar alertas, incidentes y eventos filtrables.",
+      "loadError": "No se pudieron cargar los almacenes.",
+      "loading": "Cargando almacenes...",
+      "empty": "Registra un almacén antes de consultar el historial.",
+      "noLocation": "Sin ubicación",
+      "zoneCount": "{count} zonas"
+    }
   }
 }

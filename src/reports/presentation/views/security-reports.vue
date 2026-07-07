@@ -1,10 +1,12 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ReportsApi } from '../../infrastructure/reports-api.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useWarehouseStore } from '../../../warehouse/application/warehouse.store.js';
 
 const reportsApi = new ReportsApi();
+const { t } = useI18n();
 const iamStore = useIamStore();
 const warehouseStore = useWarehouseStore();
 
@@ -28,7 +30,7 @@ const form = ref({
 });
 
 const scheduleForm = ref({
-  name: 'Reporte semanal de seguridad',
+  name: '',
   warehouseId: '',
   frequency: 'WEEKLY',
   format: 'PDF',
@@ -37,7 +39,7 @@ const scheduleForm = ref({
 });
 
 const warehouseOptions = computed(() => [
-  { value: '', label: 'Todos los almacenes' },
+  { value: '', label: t('reports.form.allWarehouses') },
   ...warehouseStore.warehouses.map(warehouse => ({ value: warehouse.id, label: warehouse.name })),
 ]);
 
@@ -65,7 +67,7 @@ function loadReports() {
       })
       .catch(error => {
         console.error(error);
-        errorMessage.value = 'No se pudieron cargar los reportes.';
+        errorMessage.value = t('reports.messages.loadError');
       })
       .finally(() => {
         loading.value = false;
@@ -88,11 +90,11 @@ function generateReport() {
     format: form.value.format,
   }).then(report => {
     reports.value = [report, ...reports.value];
-    successMessage.value = 'Reporte generado correctamente.';
+    successMessage.value = t('reports.messages.generated');
     return reportsApi.getDashboard(companyId).then(data => { dashboard.value = data; });
   }).catch(error => {
     console.error(error);
-    errorMessage.value = 'No se pudo generar el reporte.';
+    errorMessage.value = t('reports.messages.generateError');
   }).finally(() => {
     generating.value = false;
   });
@@ -101,7 +103,7 @@ function generateReport() {
 function scheduleReport() {
   const companyId = iamStore.currentUser?.companyId;
   if (!companyId || !scheduleForm.value.name.trim() || !scheduleForm.value.recipientEmail.trim()) {
-    errorMessage.value = 'Completa nombre y correo del destinatario.';
+    errorMessage.value = t('reports.messages.scheduleRequired');
     return;
   }
 
@@ -119,10 +121,10 @@ function scheduleReport() {
     startsAt: `${scheduleForm.value.startsAt}T09:00:00`,
   }).then(report => {
     scheduledReports.value = [report, ...scheduledReports.value];
-    successMessage.value = 'Reporte periodico programado.';
+    successMessage.value = t('reports.messages.scheduled');
   }).catch(error => {
     console.error(error);
-    errorMessage.value = 'No se pudo programar el reporte.';
+    errorMessage.value = t('reports.messages.scheduleError');
   }).finally(() => {
     scheduling.value = false;
   });
@@ -164,31 +166,31 @@ watch(() => iamStore.sessionLoading, (loading) => {
   <div class="reports-view">
     <header class="page-header">
       <div>
-        <h1>Reportes de seguridad</h1>
-        <p>Dashboard consolidado, generacion y descarga de reportes.</p>
+        <h1>{{ t('reports.title') }}</h1>
+        <p>{{ t('reports.subtitle') }}</p>
       </div>
     </header>
 
     <section class="metrics">
-      <div><strong>{{ dashboard?.totalEvents ?? 0 }}</strong><span>Eventos</span></div>
-      <div><strong>{{ dashboard?.openEvents ?? 0 }}</strong><span>Abiertos</span></div>
-      <div><strong>{{ dashboard?.resolvedEvents ?? 0 }}</strong><span>Resueltos</span></div>
-      <div><strong>{{ dashboard?.criticalEvents ?? 0 }}</strong><span>Criticos</span></div>
+      <div><strong>{{ dashboard?.totalEvents ?? 0 }}</strong><span>{{ t('reports.metrics.events') }}</span></div>
+      <div><strong>{{ dashboard?.openEvents ?? 0 }}</strong><span>{{ t('reports.metrics.open') }}</span></div>
+      <div><strong>{{ dashboard?.resolvedEvents ?? 0 }}</strong><span>{{ t('reports.metrics.resolved') }}</span></div>
+      <div><strong>{{ dashboard?.criticalEvents ?? 0 }}</strong><span>{{ t('reports.metrics.critical') }}</span></div>
     </section>
 
     <section class="panel">
-      <h2>Generar reporte</h2>
+      <h2>{{ t('reports.form.generateTitle') }}</h2>
       <form class="report-form" @submit.prevent="generateReport">
         <label>
-          Desde
+          {{ t('reports.form.from') }}
           <input v-model="form.from" type="date" />
         </label>
         <label>
-          Hasta
+          {{ t('reports.form.to') }}
           <input v-model="form.to" type="date" />
         </label>
         <label>
-          Almacen
+          {{ t('reports.form.warehouse') }}
           <select v-model="form.warehouseId">
             <option v-for="warehouse in warehouseOptions" :key="warehouse.value" :value="warehouse.value">
               {{ warehouse.label }}
@@ -196,13 +198,13 @@ watch(() => iamStore.sessionLoading, (loading) => {
           </select>
         </label>
         <label>
-          Formato
+          {{ t('reports.form.format') }}
           <select v-model="form.format">
             <option value="PDF">PDF</option>
             <option value="TXT">TXT</option>
           </select>
         </label>
-        <button type="submit" :disabled="generating">{{ generating ? 'Generando...' : 'Generar' }}</button>
+        <button type="submit" :disabled="generating">{{ generating ? t('reports.actions.generating') : t('reports.actions.generate') }}</button>
       </form>
     </section>
 
@@ -210,22 +212,22 @@ watch(() => iamStore.sessionLoading, (loading) => {
     <p v-if="successMessage" class="message success">{{ successMessage }}</p>
 
     <section class="panel">
-      <h2>Programar reporte periodico</h2>
+      <h2>{{ t('reports.schedule.title') }}</h2>
       <form class="schedule-form" @submit.prevent="scheduleReport">
         <label>
-          Nombre
-          <input v-model="scheduleForm.name" placeholder="Reporte semanal de seguridad" />
+          {{ t('reports.schedule.name') }}
+          <input v-model="scheduleForm.name" :placeholder="t('reports.schedule.namePlaceholder')" />
         </label>
         <label>
-          Frecuencia
+          {{ t('reports.schedule.frequency') }}
           <select v-model="scheduleForm.frequency">
-            <option value="DAILY">Diaria</option>
-            <option value="WEEKLY">Semanal</option>
-            <option value="MONTHLY">Mensual</option>
+            <option value="DAILY">{{ t('reports.schedule.daily') }}</option>
+            <option value="WEEKLY">{{ t('reports.schedule.weekly') }}</option>
+            <option value="MONTHLY">{{ t('reports.schedule.monthly') }}</option>
           </select>
         </label>
         <label>
-          Almacen
+          {{ t('reports.form.warehouse') }}
           <select v-model="scheduleForm.warehouseId">
             <option v-for="warehouse in warehouseOptions" :key="warehouse.value" :value="warehouse.value">
               {{ warehouse.label }}
@@ -233,28 +235,27 @@ watch(() => iamStore.sessionLoading, (loading) => {
           </select>
         </label>
         <label>
-          Correo
+          {{ t('reports.schedule.email') }}
           <input v-model="scheduleForm.recipientEmail" type="email" placeholder="operaciones@locksight.com" />
         </label>
         <label>
-          Inicio
+          {{ t('reports.schedule.start') }}
           <input v-model="scheduleForm.startsAt" type="date" />
         </label>
-        <button type="submit" :disabled="scheduling">{{ scheduling ? 'Programando...' : 'Programar' }}</button>
+        <button type="submit" :disabled="scheduling">{{ scheduling ? t('reports.actions.scheduling') : t('reports.actions.schedule') }}</button>
       </form>
     </section>
 
     <section class="panel">
-      <h2>Reportes generados</h2>
-      <div v-if="loading" class="empty">Cargando reportes...</div>
-      <div v-else-if="!reports.length" class="empty">Aun no hay reportes generados.</div>
+      <h2>{{ t('reports.generated.title') }}</h2>
+      <div v-if="loading" class="empty">{{ t('reports.generated.loading') }}</div>
+      <div v-else-if="!reports.length" class="empty">{{ t('reports.generated.empty') }}</div>
       <div v-else class="reports-list">
         <article v-for="report in reports" :key="report.id" class="report-card">
           <div>
             <h3>{{ report.title }}</h3>
             <p>
-              {{ report.totalEvents }} eventos - {{ report.criticalEvents }} criticos -
-              {{ report.resolvedEvents }} resueltos
+              {{ t('reports.generated.summary', { total: report.totalEvents, critical: report.criticalEvents, resolved: report.resolvedEvents }) }}
             </p>
             <small>{{ formatDate(report.generatedAt) }}</small>
           </div>
@@ -268,17 +269,17 @@ watch(() => iamStore.sessionLoading, (loading) => {
     </section>
 
     <section class="panel">
-      <h2>Reportes programados</h2>
-      <div v-if="!scheduledReports.length" class="empty">Aun no hay reportes programados.</div>
+      <h2>{{ t('reports.scheduled.title') }}</h2>
+      <div v-if="!scheduledReports.length" class="empty">{{ t('reports.scheduled.empty') }}</div>
       <div v-else class="reports-list">
         <article v-for="report in scheduledReports" :key="report.id" class="report-card">
           <div>
             <h3>{{ report.name }}</h3>
             <p>{{ report.frequency }} - {{ report.format }} - {{ report.recipientEmail }}</p>
-            <small>Inicia: {{ formatDate(report.startsAt) }}</small>
+            <small>{{ t('reports.scheduled.startsAt', { date: formatDate(report.startsAt) }) }}</small>
           </div>
           <div class="actions">
-            <span>{{ report.isActive ? 'ACTIVO' : 'INACTIVO' }}</span>
+            <span>{{ report.isActive ? t('common.activeUpper') : t('common.inactiveUpper') }}</span>
           </div>
         </article>
       </div>

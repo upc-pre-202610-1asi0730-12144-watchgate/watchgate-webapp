@@ -25,34 +25,26 @@ function onUpgrade() { emit('upgrade'); }
       :style="{ width: '320px', background: '#1E293B', border: 'none', borderRadius: '16px' }"
       :pt="{ content: { style: 'background:#1E293B; padding: 2rem; border-radius: 16px;' } }"
   >
-    <div class="flex flex-col items-center gap-4 text-center">
-      <!-- Lock icon -->
-      <div
-          class="flex items-center justify-center rounded-full"
-          style="width: 56px; height: 56px; background: #B45309;"
-      >
-        <i class="pi pi-lock text-white" style="font-size: 1.4rem;" />
+    <div class="limit-dialog-body">
+      <div class="limit-dialog-icon">
+        <i class="pi pi-lock" />
       </div>
 
-      <!-- Title -->
-      <p class="text-white font-bold text-base">{{ $t('devices.limitDialog.title') }}</p>
+      <p class="limit-dialog-title">{{ $t('devices.limitDialog.title') }}</p>
 
-      <!-- Description -->
-      <p class="text-gray-400 text-sm leading-relaxed">
+      <p class="limit-dialog-description">
         {{ $t('devices.limitDialog.description') }}
       </p>
 
-      <!-- Upgrade CTA -->
       <pv-button
           :label="$t('devices.limitDialog.upgrade')"
-          class="w-full font-semibold"
+          class="limit-dialog-primary"
           style="background: #F59E0B; border-color: #F59E0B; color: #0F172A;"
           @click="onUpgrade"
       />
 
-      <!-- Dismiss -->
       <button
-          class="text-gray-400 hover:text-white text-sm transition-colors"
+          class="limit-dialog-dismiss"
           @click="onClose"
       >
         {{ $t('devices.limitDialog.dismiss') }}
@@ -60,3 +52,60 @@ function onUpgrade() { emit('upgrade'); }
     </div>
   </pv-dialog>
 </template>
+
+<style scoped>
+.limit-dialog-body {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: center;
+}
+
+.limit-dialog-icon {
+  align-items: center;
+  background: #B45309;
+  border-radius: 999px;
+  color: #fff;
+  display: flex;
+  height: 56px;
+  justify-content: center;
+  width: 56px;
+}
+
+.limit-dialog-icon i {
+  font-size: 1.4rem;
+}
+
+.limit-dialog-title {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.limit-dialog-description {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.limit-dialog-primary {
+  font-weight: 700;
+  width: 100%;
+}
+
+.limit-dialog-dismiss {
+  background: transparent;
+  border: 0;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.25rem;
+}
+
+.limit-dialog-dismiss:hover {
+  color: #fff;
+}
+</style>
