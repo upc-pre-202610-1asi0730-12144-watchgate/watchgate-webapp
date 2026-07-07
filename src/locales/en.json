@@ -83,6 +83,14 @@
     "subscription": "My Subscription",
     "settings": "Settings"
   },
+  "topbar": {
+    "welcome": "Welcome, {name}",
+    "guest": "user",
+    "logout": "Logout",
+    "apiChecking": "Checking API",
+    "apiOnline": "API online",
+    "apiOffline": "API offline"
+  },
   "warehouses": {
     "title": "My Warehouses",
     "register": "Register Warehouse",

@@ -83,6 +83,14 @@
     "subscription": "Mi suscripción",
     "settings": "Configuración"
   },
+  "topbar": {
+    "welcome": "Bienvenido, {name}",
+    "guest": "usuario",
+    "logout": "Cerrar sesión",
+    "apiChecking": "Verificando API",
+    "apiOnline": "API en línea",
+    "apiOffline": "API sin conexión"
+  },
   "warehouses": {
     "title": "Mis almacenes",
     "register": "Registrar almacén",
