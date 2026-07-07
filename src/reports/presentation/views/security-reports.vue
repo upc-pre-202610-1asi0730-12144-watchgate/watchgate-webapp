@@ -10,9 +10,12 @@ const warehouseStore = useWarehouseStore();
 
 const dashboard = ref(null);
 const reports = ref([]);
+const scheduledReports = ref([]);
 const loading = ref(false);
 const generating = ref(false);
+const scheduling = ref(false);
 const errorMessage = ref('');
+const successMessage = ref('');
 
 const today = new Date().toISOString().slice(0, 10);
 const previousWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -22,6 +25,15 @@ const form = ref({
   to: today,
   warehouseId: '',
   format: 'PDF',
+});
+
+const scheduleForm = ref({
+  name: 'Reporte semanal de seguridad',
+  warehouseId: '',
+  frequency: 'WEEKLY',
+  format: 'PDF',
+  recipientEmail: '',
+  startsAt: today,
 });
 
 const warehouseOptions = computed(() => [
@@ -44,10 +56,12 @@ function loadReports() {
       .then(() => Promise.all([
         reportsApi.getDashboard(companyId),
         reportsApi.getReportsByCompanyId(companyId),
+        reportsApi.getScheduledByCompanyId(companyId),
       ]))
-      .then(([dashboardData, reportData]) => {
+      .then(([dashboardData, reportData, scheduledData]) => {
         dashboard.value = dashboardData;
         reports.value = reportData.sort((a, b) => new Date(b.generatedAt) - new Date(a.generatedAt));
+        scheduledReports.value = scheduledData.sort((a, b) => new Date(b.startsAt) - new Date(a.startsAt));
       })
       .catch(error => {
         console.error(error);
@@ -64,6 +78,7 @@ function generateReport() {
 
   generating.value = true;
   errorMessage.value = '';
+  successMessage.value = '';
 
   reportsApi.generate({
     companyId,
@@ -73,12 +88,43 @@ function generateReport() {
     format: form.value.format,
   }).then(report => {
     reports.value = [report, ...reports.value];
+    successMessage.value = 'Reporte generado correctamente.';
     return reportsApi.getDashboard(companyId).then(data => { dashboard.value = data; });
   }).catch(error => {
     console.error(error);
     errorMessage.value = 'No se pudo generar el reporte.';
   }).finally(() => {
     generating.value = false;
+  });
+}
+
+function scheduleReport() {
+  const companyId = iamStore.currentUser?.companyId;
+  if (!companyId || !scheduleForm.value.name.trim() || !scheduleForm.value.recipientEmail.trim()) {
+    errorMessage.value = 'Completa nombre y correo del destinatario.';
+    return;
+  }
+
+  scheduling.value = true;
+  errorMessage.value = '';
+  successMessage.value = '';
+
+  reportsApi.schedule({
+    companyId,
+    warehouseId: scheduleForm.value.warehouseId ? Number(scheduleForm.value.warehouseId) : null,
+    name: scheduleForm.value.name.trim(),
+    frequency: scheduleForm.value.frequency,
+    format: scheduleForm.value.format,
+    recipientEmail: scheduleForm.value.recipientEmail.trim(),
+    startsAt: `${scheduleForm.value.startsAt}T09:00:00`,
+  }).then(report => {
+    scheduledReports.value = [report, ...scheduledReports.value];
+    successMessage.value = 'Reporte periodico programado.';
+  }).catch(error => {
+    console.error(error);
+    errorMessage.value = 'No se pudo programar el reporte.';
+  }).finally(() => {
+    scheduling.value = false;
   });
 }
 
@@ -161,6 +207,42 @@ watch(() => iamStore.sessionLoading, (loading) => {
     </section>
 
     <p v-if="errorMessage" class="message error">{{ errorMessage }}</p>
+    <p v-if="successMessage" class="message success">{{ successMessage }}</p>
+
+    <section class="panel">
+      <h2>Programar reporte periodico</h2>
+      <form class="schedule-form" @submit.prevent="scheduleReport">
+        <label>
+          Nombre
+          <input v-model="scheduleForm.name" placeholder="Reporte semanal de seguridad" />
+        </label>
+        <label>
+          Frecuencia
+          <select v-model="scheduleForm.frequency">
+            <option value="DAILY">Diaria</option>
+            <option value="WEEKLY">Semanal</option>
+            <option value="MONTHLY">Mensual</option>
+          </select>
+        </label>
+        <label>
+          Almacen
+          <select v-model="scheduleForm.warehouseId">
+            <option v-for="warehouse in warehouseOptions" :key="warehouse.value" :value="warehouse.value">
+              {{ warehouse.label }}
+            </option>
+          </select>
+        </label>
+        <label>
+          Correo
+          <input v-model="scheduleForm.recipientEmail" type="email" placeholder="operaciones@locksight.com" />
+        </label>
+        <label>
+          Inicio
+          <input v-model="scheduleForm.startsAt" type="date" />
+        </label>
+        <button type="submit" :disabled="scheduling">{{ scheduling ? 'Programando...' : 'Programar' }}</button>
+      </form>
+    </section>
 
     <section class="panel">
       <h2>Reportes generados</h2>
@@ -184,6 +266,23 @@ watch(() => iamStore.sessionLoading, (loading) => {
         </article>
       </div>
     </section>
+
+    <section class="panel">
+      <h2>Reportes programados</h2>
+      <div v-if="!scheduledReports.length" class="empty">Aun no hay reportes programados.</div>
+      <div v-else class="reports-list">
+        <article v-for="report in scheduledReports" :key="report.id" class="report-card">
+          <div>
+            <h3>{{ report.name }}</h3>
+            <p>{{ report.frequency }} - {{ report.format }} - {{ report.recipientEmail }}</p>
+            <small>Inicia: {{ formatDate(report.startsAt) }}</small>
+          </div>
+          <div class="actions">
+            <span>{{ report.isActive ? 'ACTIVO' : 'INACTIVO' }}</span>
+          </div>
+        </article>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -197,13 +296,14 @@ h1, h2, h3, p { margin-top: 0; }
 .metrics strong { display: block; color: #fff; font-size: 1.6rem; }
 .metrics span { color: #94a3b8; font-size: 0.8rem; }
 .panel h2 { font-size: 1rem; margin-bottom: 1rem; }
-.report-form { display: grid; grid-template-columns: repeat(5, minmax(130px, 1fr)); gap: 0.9rem; align-items: end; }
+.report-form, .schedule-form { display: grid; grid-template-columns: repeat(5, minmax(130px, 1fr)); gap: 0.9rem; align-items: end; }
 label { display: flex; flex-direction: column; gap: 0.35rem; color: #cbd5e1; font-size: 0.85rem; }
 input, select { background: #0a1726; border: 1px solid #1e2d42; color: #fff; border-radius: 6px; min-height: 42px; padding: 0.65rem 0.75rem; }
 button { background: #3b82f6; border: 0; border-radius: 6px; color: #fff; cursor: pointer; font-weight: 700; min-height: 42px; padding: 0.65rem 0.85rem; }
 button:disabled { opacity: 0.65; cursor: progress; }
 .message { border-radius: 8px; padding: 0.8rem 1rem; margin: 0; }
 .error { background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); }
+.success { background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.35); }
 .reports-list { display: flex; flex-direction: column; gap: 0.75rem; }
 .report-card { display: flex; justify-content: space-between; gap: 1rem; background: #0a1726; border: 1px solid #1e2d42; border-radius: 8px; padding: 1rem; }
 .report-card h3 { margin-bottom: 0.4rem; font-size: 1rem; }
@@ -212,7 +312,7 @@ button:disabled { opacity: 0.65; cursor: progress; }
 .actions span { color: #93c5fd; font-size: 0.8rem; font-weight: 800; }
 .actions button { background: transparent; border: 1px solid #334155; }
 @media (max-width: 900px) {
-  .metrics, .report-form { grid-template-columns: 1fr; }
+  .metrics, .report-form, .schedule-form { grid-template-columns: 1fr; }
   .report-card { flex-direction: column; }
   .actions { justify-content: flex-start; }
 }

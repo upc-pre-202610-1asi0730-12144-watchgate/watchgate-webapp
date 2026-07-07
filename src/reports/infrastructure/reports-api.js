@@ -22,4 +22,12 @@ export class ReportsApi {
     exportPdf(reportId) {
         return http.get(`${REPORTS_ENDPOINT}/${reportId}/export/pdf`, { responseType: 'blob' });
     }
+
+    schedule(resource) {
+        return http.post(`${REPORTS_ENDPOINT}/schedule`, resource).then(response => response.data);
+    }
+
+    getScheduledByCompanyId(companyId) {
+        return http.get(`${REPORTS_ENDPOINT}/schedule/company/${companyId}`).then(response => response.data);
+    }
 }

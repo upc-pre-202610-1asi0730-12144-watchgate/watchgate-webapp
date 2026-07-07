@@ -26,4 +26,8 @@ export class AlertsApi {
     resolve(alertId) {
         return http.patch(`${ALERTS_ENDPOINT}/${alertId}/resolve`).then(response => response.data);
     }
+
+    flagAsFalseAlarm(alertId) {
+        return http.patch(`${ALERTS_ENDPOINT}/${alertId}/false-alarm`).then(response => response.data);
+    }
 }

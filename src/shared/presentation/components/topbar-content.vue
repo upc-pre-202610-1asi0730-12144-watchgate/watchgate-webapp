@@ -1,12 +1,30 @@
 <script setup>
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import LanguageSwitcher from "./language-switcher.vue";
+import { PlatformApi } from '../../infrastructure/platform-api.js';
 
 const router = useRouter();
+const platformApi = new PlatformApi();
+const appVersion = import.meta.env.VITE_APP_VERSION || '3.0.0';
+const apiStatus = ref('checking');
+const apiVersion = ref('');
 
 const onLogout = () => {
   router.push({ path: '/iam/sign-in' });
 };
+
+onMounted(() => {
+  platformApi.getHealth()
+      .then(health => {
+        apiStatus.value = 'online';
+        apiVersion.value = health.version ? `API v${health.version}` : 'API online';
+      })
+      .catch(() => {
+        apiStatus.value = 'offline';
+        apiVersion.value = 'API offline';
+      });
+});
 </script>
 
 <template>
@@ -19,6 +37,11 @@ const onLogout = () => {
 
     <template #end>
       <div class="flex align-items-center gap-3">
+        <div class="release-status" :class="apiStatus">
+          <span class="status-dot"></span>
+          <span>Web v{{ appVersion }}</span>
+          <small>{{ apiVersion || 'Verificando API' }}</small>
+        </div>
         <LanguageSwitcher />
         <pv-button
             icon="pi pi-sign-out"
@@ -48,7 +71,56 @@ const onLogout = () => {
   color: #3b82f6;
   margin: 0;
   font-weight: 800;
-  letter-spacing: 2px;
+  letter-spacing: 0;
   font-size: 1.5rem;
+}
+
+.release-status {
+  align-items: center;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #cbd5e1;
+  display: flex;
+  gap: 0.45rem;
+  min-height: 38px;
+  padding: 0.4rem 0.65rem;
+}
+
+.release-status span:not(.status-dot) {
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.release-status small {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.status-dot {
+  border-radius: 999px;
+  display: inline-block;
+  height: 8px;
+  width: 8px;
+}
+
+.release-status.checking .status-dot {
+  background: #f59e0b;
+}
+
+.release-status.online .status-dot {
+  background: #22c55e;
+}
+
+.release-status.offline .status-dot {
+  background: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .release-status {
+    display: none;
+  }
 }
 </style>

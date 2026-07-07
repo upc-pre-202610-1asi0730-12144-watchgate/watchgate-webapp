@@ -193,6 +193,7 @@ watch(() => iamStore.sessionLoading, ensureData);
             <button @click="updateAlert(alert.id, alertsApi.acknowledge.bind(alertsApi))">Acknowledge</button>
             <button @click="updateAlert(alert.id, alertsApi.markAsAttended.bind(alertsApi))">Atendida</button>
             <button @click="updateAlert(alert.id, alertsApi.escalate.bind(alertsApi))">Escalar</button>
+            <button @click="updateAlert(alert.id, alertsApi.flagAsFalseAlarm.bind(alertsApi))">Falsa alarma</button>
             <button @click="updateAlert(alert.id, alertsApi.resolve.bind(alertsApi))">Resolver</button>
           </div>
         </article>
