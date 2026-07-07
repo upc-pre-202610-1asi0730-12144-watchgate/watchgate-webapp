@@ -5,7 +5,8 @@
  * Warehouse entity is used to represent a warehouse within the Warehouse Tracking context.
  */
 export class Warehouse {
-    constructor({ id = 0, name = '', location = '', capacity = 0, companyId = 0, zones = [] }) {
+    constructor({ id = 0, name = '', location = '', capacity = 0, status = 'ACTIVE',
+                    companyId = 0, zones = [], lastEventMessage = 'No recent events' }) {
         this.id = id;
         this.name = name;
         this.location = location;
@@ -15,7 +16,7 @@ export class Warehouse {
         this.zones = zones;
 
         this.hasIncident = false;
-        this.status = 'active';
-        this.lastEventMessage = 'No recent events';
+        this.status = String(status).toLowerCase();
+        this.lastEventMessage = lastEventMessage;
     }
 }

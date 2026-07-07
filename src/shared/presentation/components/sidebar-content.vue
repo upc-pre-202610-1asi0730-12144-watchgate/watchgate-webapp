@@ -1,16 +1,20 @@
 <script setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useIamStore } from '../../../iam/application/iam.store.js';
 
 const { t } = useI18n();
+const iamStore = useIamStore();
 
-const items = [
-  { key: 'nav.warehouses', to: '/layout/warehouses' },
-  { key: 'nav.devices', to: '/layout/devices' },
-  { key: 'nav.events', to: '/layout/history' },
-  { key: 'nav.alerts', to: '/layout/alerts' },
-  { key: 'nav.reports', to: '/layout/reports' },
-  { key: 'nav.subscription', to: '/layout/subscription' }
-];
+const items = computed(() => [
+  { key: 'nav.warehouses', to: '/layout/warehouses', visible: true },
+  { key: 'nav.devices', to: '/layout/devices', visible: true },
+  { key: 'nav.team', to: '/layout/team-access', visible: iamStore.isAdministrator || iamStore.canManageOperations },
+  { key: 'nav.events', to: '/layout/history', visible: true },
+  { key: 'nav.alerts', to: '/layout/alerts', visible: iamStore.canManageSecurity },
+  { key: 'nav.reports', to: '/layout/reports', visible: true },
+  { key: 'nav.subscription', to: '/layout/subscription', visible: iamStore.canManageBilling }
+].filter(item => item.visible));
 </script>
 
 <template>

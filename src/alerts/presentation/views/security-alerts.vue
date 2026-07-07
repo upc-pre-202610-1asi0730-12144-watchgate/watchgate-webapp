@@ -11,6 +11,7 @@ const iamStore = useIamStore();
 const devicesStore = useDevicesStore();
 
 const alerts = ref([]);
+const incidents = ref([]);
 const loading = ref(false);
 const saving = ref(false);
 const errorMessage = ref('');
@@ -21,6 +22,12 @@ const form = ref({
   severity: 'HIGH',
   description: '',
   sensorId: null,
+});
+
+const incidentForm = ref({
+  title: 'Restricted zone incident',
+  description: '',
+  priority: 'HIGH',
 });
 
 const alertTypes = computed(() => [
@@ -39,6 +46,7 @@ const severities = computed(() => [
 
 const openAlerts = computed(() => alerts.value.filter(alert => alert.status !== 'RESOLVED').length);
 const criticalAlerts = computed(() => alerts.value.filter(alert => ['HIGH', 'CRITICAL'].includes(alert.severity)).length);
+const openIncidents = computed(() => incidents.value.filter(incident => incident.status !== 'CLOSED').length);
 
 function loadAlerts() {
   const companyId = iamStore.currentUser?.companyId;
@@ -59,6 +67,19 @@ function loadAlerts() {
       });
 }
 
+function loadIncidents() {
+  const companyId = iamStore.currentUser?.companyId;
+  if (!companyId) return Promise.resolve();
+  return alertsApi.getIncidentsByCompanyId(companyId)
+      .then(data => {
+        incidents.value = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      })
+      .catch(error => {
+        console.error(error);
+        errorMessage.value = t('alerts.messages.incidentsLoadError');
+      });
+}
+
 function loadDevices() {
   const companyId = iamStore.currentUser?.companyId;
   if (companyId && !devicesStore.devicesLoaded) {
@@ -69,7 +90,7 @@ function loadDevices() {
 
 function ensureData() {
   if (iamStore.sessionLoading) return;
-  Promise.all([loadAlerts(), loadDevices()]);
+  Promise.all([loadAlerts(), loadDevices(), loadIncidents()]);
 }
 
 function createAlert() {
@@ -115,6 +136,50 @@ function updateAlert(alertId, action) {
       });
 }
 
+function classify(alert, severity) {
+  updateAlert(alert.id, () => alertsApi.classifyPriority(alert.id, severity));
+}
+
+function createIncident() {
+  const companyId = iamStore.currentUser?.companyId;
+  if (!companyId || !incidentForm.value.title.trim() || !incidentForm.value.description.trim()) {
+    errorMessage.value = t('alerts.messages.incidentRequired');
+    return;
+  }
+
+  saving.value = true;
+  errorMessage.value = '';
+  successMessage.value = '';
+
+  alertsApi.createIncident({
+    title: incidentForm.value.title.trim(),
+    description: incidentForm.value.description.trim(),
+    priority: incidentForm.value.priority,
+    companyId,
+  }).then(created => {
+    incidents.value = [created, ...incidents.value];
+    incidentForm.value.description = '';
+    successMessage.value = t('alerts.messages.incidentCreated');
+  }).catch(error => {
+    console.error(error);
+    errorMessage.value = t('alerts.messages.incidentCreateError');
+  }).finally(() => {
+    saving.value = false;
+  });
+}
+
+function closeIncident(incidentId) {
+  alertsApi.closeIncident(incidentId)
+      .then(updated => {
+        incidents.value = incidents.value.map(incident => incident.id === updated.id ? updated : incident);
+        successMessage.value = t('alerts.messages.incidentClosed');
+      })
+      .catch(error => {
+        console.error(error);
+        errorMessage.value = t('alerts.messages.incidentCloseError');
+      });
+}
+
 function sensorLabel(sensorId) {
   const sensor = devicesStore.devices.find(device => device.id === sensorId);
   return sensor ? sensor.name : `${t('alerts.form.sensor')} ${sensorId}`;
@@ -139,6 +204,7 @@ watch(() => iamStore.sessionLoading, ensureData);
         <div><strong>{{ alerts.length }}</strong><span>{{ t('alerts.metrics.total') }}</span></div>
         <div><strong>{{ openAlerts }}</strong><span>{{ t('alerts.metrics.open') }}</span></div>
         <div><strong>{{ criticalAlerts }}</strong><span>{{ t('alerts.metrics.critical') }}</span></div>
+        <div><strong>{{ openIncidents }}</strong><span>{{ t('alerts.metrics.incidents') }}</span></div>
       </div>
     </header>
 
@@ -175,6 +241,29 @@ watch(() => iamStore.sessionLoading, ensureData);
       <p v-if="!devicesStore.devices.length" class="hint">{{ t('alerts.form.noDevices') }}</p>
     </section>
 
+    <section class="panel">
+      <h2>{{ t('alerts.incidents.title') }}</h2>
+      <form class="incident-form" @submit.prevent="createIncident">
+        <label>
+          {{ t('alerts.incidents.name') }}
+          <input v-model="incidentForm.title" type="text">
+        </label>
+        <label>
+          {{ t('alerts.incidents.priority') }}
+          <select v-model="incidentForm.priority">
+            <option value="LOW">{{ t('alerts.severities.low') }}</option>
+            <option value="MEDIUM">{{ t('alerts.severities.medium') }}</option>
+            <option value="HIGH">{{ t('alerts.severities.high') }}</option>
+          </select>
+        </label>
+        <label class="description-field">
+          {{ t('alerts.form.description') }}
+          <input v-model="incidentForm.description" :placeholder="t('alerts.incidents.descriptionPlaceholder')">
+        </label>
+        <button type="submit" :disabled="saving">{{ t('alerts.incidents.create') }}</button>
+      </form>
+    </section>
+
     <p v-if="errorMessage" class="message error">{{ errorMessage }}</p>
     <p v-if="successMessage" class="message success">{{ successMessage }}</p>
 
@@ -197,6 +286,28 @@ watch(() => iamStore.sessionLoading, ensureData);
             <button @click="updateAlert(alert.id, alertsApi.escalate.bind(alertsApi))">{{ t('alerts.actions.escalate') }}</button>
             <button @click="updateAlert(alert.id, alertsApi.flagAsFalseAlarm.bind(alertsApi))">{{ t('alerts.actions.falseAlarm') }}</button>
             <button @click="updateAlert(alert.id, alertsApi.resolve.bind(alertsApi))">{{ t('alerts.actions.resolve') }}</button>
+            <button @click="classify(alert, 'CRITICAL')">{{ t('alerts.actions.classifyCritical') }}</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>{{ t('alerts.incidents.listTitle') }}</h2>
+      <div v-if="!incidents.length" class="empty">{{ t('alerts.incidents.empty') }}</div>
+      <div v-else class="alerts-list">
+        <article v-for="incident in incidents" :key="incident.id" class="alert-card">
+          <div class="alert-main">
+            <span class="severity" :class="incident.priority.toLowerCase()">{{ incident.priority }}</span>
+            <h3>{{ incident.title }}</h3>
+            <p>{{ incident.description }}</p>
+            <small>{{ formatDate(incident.createdAt) }}</small>
+          </div>
+          <div class="alert-side">
+            <span class="status">{{ incident.status }}</span>
+            <button :disabled="incident.status === 'CLOSED'" @click="closeIncident(incident.id)">
+              {{ t('alerts.incidents.close') }}
+            </button>
           </div>
         </article>
       </div>
@@ -216,7 +327,7 @@ h1, h2, h3, p { margin-top: 0; }
 .metrics span { color: #94a3b8; font-size: 0.8rem; }
 .panel { background: #102035; border: 1px solid #1e2d42; border-radius: 8px; padding: 1.25rem; }
 .panel h2 { font-size: 1rem; margin-bottom: 1rem; }
-.alert-form { display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 0.9rem; align-items: end; }
+.alert-form, .incident-form { display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 0.9rem; align-items: end; }
 label { display: flex; flex-direction: column; gap: 0.35rem; color: #cbd5e1; font-size: 0.85rem; }
 input, select { background: #0a1726; border: 1px solid #1e2d42; color: #fff; border-radius: 6px; padding: 0.7rem 0.8rem; min-height: 42px; }
 .description-field { grid-column: span 2; }
@@ -239,7 +350,7 @@ button:disabled { opacity: 0.65; cursor: progress; }
 @media (max-width: 900px) {
   .page-header, .alert-card { flex-direction: column; }
   .metrics { flex-wrap: wrap; }
-  .alert-form { grid-template-columns: 1fr; }
+  .alert-form, .incident-form { grid-template-columns: 1fr; }
   .description-field { grid-column: auto; }
 }
 </style>

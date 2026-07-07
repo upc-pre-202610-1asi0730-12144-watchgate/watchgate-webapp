@@ -15,6 +15,14 @@ const loading = ref(false);
 const actionLoading = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
+const showPaymentDialog = ref(false);
+const selectedPlan = ref(null);
+const paymentForm = ref({
+    cardholder: '',
+    cardNumber: '4242 4242 4242 4242',
+    expiration: '12/28',
+    cvv: '123',
+});
 
 const activeSubscription = computed(() =>
     subscriptions.value.find(subscription => subscription.status === 'ACTIVE') ?? null
@@ -23,6 +31,15 @@ const activeSubscription = computed(() =>
 const currentPlan = computed(() =>
     plans.value.find(plan => plan.id === activeSubscription.value?.planId) ?? null
 );
+
+const nextBillingDate = computed(() => {
+    const latestInvoice = invoices.value[0];
+    const baseDate = latestInvoice?.issuedAt ?? activeSubscription.value?.startedAt;
+    if (!baseDate) return null;
+    const date = new Date(baseDate);
+    date.setMonth(date.getMonth() + 1);
+    return date;
+});
 
 function formatMoney(value) {
     return new Intl.NumberFormat(locale.value === 'es' ? 'es-PE' : 'en-US', {
@@ -60,22 +77,41 @@ function loadSubscriptionData() {
 }
 
 function selectPlan(plan) {
+    if (actionLoading.value) return;
+    selectedPlan.value = plan;
+    paymentForm.value.cardholder = iamStore.currentUser?.fullName ?? '';
+    showPaymentDialog.value = true;
+}
+
+function confirmPlanAndPayment() {
     const companyId = iamStore.currentUser?.companyId;
-    if (!companyId || actionLoading.value) return;
+    if (!companyId || !selectedPlan.value || actionLoading.value) return;
+    if (!paymentForm.value.cardholder.trim() || !paymentForm.value.cardNumber.trim() || !paymentForm.value.expiration.trim() || !paymentForm.value.cvv.trim()) {
+        errorMessage.value = t('subscription.messages.cardRequired');
+        return;
+    }
 
     actionLoading.value = true;
     errorMessage.value = '';
     successMessage.value = '';
 
     const request = activeSubscription.value
-        ? subscriptionApi.changePlan(activeSubscription.value.id, plan.id)
-        : subscriptionApi.createSubscription({ companyId, planId: plan.id });
+        ? subscriptionApi.changePlan(activeSubscription.value.id, selectedPlan.value.id)
+        : subscriptionApi.createSubscription({ companyId, planId: selectedPlan.value.id });
 
     request.then(subscription => {
         upsertSubscription(subscription);
-        successMessage.value = activeSubscription.value?.id === subscription.id
-            ? t('subscription.messages.planUpdated')
-            : t('subscription.messages.created');
+        return subscriptionApi.processPayment({
+            subscriptionId: subscription.id,
+            currency: 'USD',
+            providerReference: `SIM-${paymentForm.value.cardNumber.replace(/\s/g, '').slice(-4)}-${Date.now()}`,
+            simulateFailure: false,
+        }).then(invoice => {
+            invoices.value = [invoice, ...invoices.value];
+            successMessage.value = t('subscription.messages.paymentProcessed');
+            showPaymentDialog.value = false;
+            selectedPlan.value = null;
+        });
     }).catch(error => {
         console.error(error);
         errorMessage.value = t('subscription.messages.selectError');
@@ -106,6 +142,13 @@ function cancelCurrentSubscription() {
 }
 
 function processPayment() {
+    if (!activeSubscription.value || actionLoading.value) return;
+    selectedPlan.value = currentPlan.value;
+    paymentForm.value.cardholder = iamStore.currentUser?.fullName ?? '';
+    showPaymentDialog.value = true;
+}
+
+function processActiveSubscriptionPayment() {
     if (!activeSubscription.value || actionLoading.value) return;
 
     actionLoading.value = true;
@@ -175,6 +218,8 @@ watch(() => iamStore.sessionLoading, (loading) => {
         <span>{{ t('subscription.currentPlan') }}</span>
         <strong>{{ currentPlan?.name ?? t('subscription.noActivePlan') }}</strong>
         <small>{{ activeSubscription?.status ?? t('common.pendingUpper') }}</small>
+        <small>{{ t('subscription.account.user') }}: {{ iamStore.currentUser?.fullName }}</small>
+        <small>{{ t('subscription.account.nextBilling') }}: {{ formatDate(nextBillingDate) }}</small>
       </div>
     </header>
 
@@ -231,6 +276,44 @@ watch(() => iamStore.sessionLoading, (loading) => {
         </article>
       </div>
     </section>
+
+    <div v-if="showPaymentDialog" class="modal-backdrop">
+      <section class="payment-modal">
+        <header>
+          <div>
+            <h2>{{ t('subscription.payment.title') }}</h2>
+            <p>{{ selectedPlan?.name }} - {{ formatMoney(selectedPlan?.monthlyPrice) }}</p>
+          </div>
+          <button class="icon-button" type="button" @click="showPaymentDialog = false">×</button>
+        </header>
+        <div class="payment-grid">
+          <label>
+            {{ t('subscription.payment.cardholder') }}
+            <input v-model="paymentForm.cardholder" type="text">
+          </label>
+          <label>
+            {{ t('subscription.payment.cardNumber') }}
+            <input v-model="paymentForm.cardNumber" inputmode="numeric" type="text">
+          </label>
+          <label>
+            {{ t('subscription.payment.expiration') }}
+            <input v-model="paymentForm.expiration" type="text">
+          </label>
+          <label>
+            {{ t('subscription.payment.cvv') }}
+            <input v-model="paymentForm.cvv" inputmode="numeric" type="password">
+          </label>
+        </div>
+        <div class="payment-actions">
+          <button class="secondary" type="button" @click="showPaymentDialog = false">
+            {{ t('subscription.payment.cancel') }}
+          </button>
+          <button type="button" :disabled="actionLoading" @click="confirmPlanAndPayment">
+            {{ actionLoading ? t('common.saving') : t('subscription.payment.confirm') }}
+          </button>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -265,8 +348,20 @@ button.danger { background: #ef4444; }
 .message { border-radius: 8px; padding: 0.8rem 1rem; margin: 0; }
 .error { background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); }
 .success { background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.35); }
+.modal-backdrop { align-items: center; background: rgba(2, 6, 23, 0.74); display: flex; inset: 0; justify-content: center; padding: 1rem; position: fixed; z-index: 30; }
+.payment-modal { background: #102035; border: 1px solid #1e2d42; border-radius: 8px; color: #e5eefb; max-width: 560px; padding: 1.25rem; width: min(560px, 100%); }
+.payment-modal header { align-items: flex-start; display: flex; gap: 1rem; justify-content: space-between; margin-bottom: 1rem; }
+.payment-modal header p { color: #94a3b8; margin-bottom: 0; }
+.icon-button { align-items: center; background: transparent; border: 1px solid #334155; border-radius: 6px; color: #cbd5e1; display: inline-flex; font-size: 1.4rem; justify-content: center; min-height: 36px; padding: 0; width: 36px; }
+.payment-grid { display: grid; gap: 0.8rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.payment-grid label { color: #cbd5e1; display: flex; flex-direction: column; font-size: 0.85rem; gap: 0.4rem; }
+.payment-grid input { background: #0a1726; border: 1px solid #26364d; border-radius: 6px; color: #f8fafc; min-height: 40px; padding: 0.55rem 0.65rem; }
+.payment-actions { display: flex; gap: 0.7rem; justify-content: flex-end; margin-top: 1rem; }
+button.secondary { background: transparent; border: 1px solid #64748b; color: #cbd5e1; }
 @media (max-width: 900px) {
   .page-header, .actions-panel, .invoice-card { flex-direction: column; }
   .current-plan { width: 100%; }
+  .payment-grid { grid-template-columns: 1fr; }
+  .payment-actions { flex-direction: column; }
 }
 </style>

@@ -30,4 +30,20 @@ export class AlertsApi {
     flagAsFalseAlarm(alertId) {
         return http.patch(`${ALERTS_ENDPOINT}/${alertId}/false-alarm`).then(response => response.data);
     }
+
+    classifyPriority(alertId, severity) {
+        return http.patch(`${ALERTS_ENDPOINT}/${alertId}/priority`, { severity }).then(response => response.data);
+    }
+
+    createIncident(resource) {
+        return http.post(`${ALERTS_ENDPOINT}/incidents`, resource).then(response => response.data);
+    }
+
+    getIncidentsByCompanyId(companyId) {
+        return http.get(`${ALERTS_ENDPOINT}/incidents/company/${companyId}`).then(response => response.data);
+    }
+
+    closeIncident(incidentId) {
+        return http.patch(`${ALERTS_ENDPOINT}/incidents/${incidentId}/close`).then(response => response.data);
+    }
 }

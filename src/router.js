@@ -28,6 +28,12 @@ const routes = [
         children: [
             ...warehouseRoutes,
             ...devicesRoutes,
+            {
+                path: 'team-access',
+                name: 'team-access',
+                component: () => import('./iam/presentation/views/team-access.vue'),
+                meta: { title: 'Team & Access', requiresAuth: true }
+            },
             ...eventHistoryRoutes,
             ...alertsRoutes,
             ...reportsRoutes,

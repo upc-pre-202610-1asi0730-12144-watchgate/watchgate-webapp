@@ -49,6 +49,14 @@ export class WarehouseApi {
         return http.put(`${WAREHOUSES_ENDPOINT}/${id}`, warehouseResource);
     }
 
+    deactivateWarehouse(id) {
+        return http.patch(`${WAREHOUSES_ENDPOINT}/${id}/deactivate`);
+    }
+
+    deleteWarehouse(id) {
+        return http.delete(`${WAREHOUSES_ENDPOINT}/${id}`);
+    }
+
     /**
      * Create a new zone within a warehouse. resource must match
      * CreateWarehouseZoneResource: { name, area, riskLevel }

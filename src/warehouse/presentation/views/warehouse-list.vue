@@ -16,7 +16,7 @@ const router = useRouter();
 const store = useWarehouseStore();
 const iamStore = useIamStore();
 const { warehouses, warehousesLoaded, errors } = toRefs(store);
-const { fetchWarehouses } = store;
+const { fetchWarehouses, deactivateWarehouse, deleteWarehouse } = store;
 
 function tryFetchWarehouses() {
   if (!warehousesLoaded.value && !iamStore.sessionLoading && iamStore.currentUser?.companyId) {
@@ -37,6 +37,17 @@ function goToDetail(warehouseId) {
 function goToRegister() {
   router.push({ name: 'warehouse-register' });
 }
+
+function deactivate(warehouse) {
+  if (!window.confirm(t('warehouses.confirmDeactivate', { name: warehouse.name }))) return;
+  deactivateWarehouse(warehouse.id);
+}
+
+function remove(warehouse) {
+  if (!iamStore.isAdministrator) return;
+  if (!window.confirm(t('warehouses.confirmDelete', { name: warehouse.name }))) return;
+  deleteWarehouse(warehouse.id);
+}
 </script>
 
 <template>
@@ -52,7 +63,7 @@ function goToRegister() {
     </div>
 
     <div class="warehouse-list">
-      <p v-if="!warehousesLoaded" class="empty-msg">Cargando...</p>
+      <p v-if="!warehousesLoaded" class="empty-msg">{{ t('warehouses.loading') }}</p>
       <p v-else-if="warehouses.length === 0" class="empty-msg">
         {{ t('warehouses.no-warehouses') }}
       </p>
@@ -114,6 +125,22 @@ function goToRegister() {
               @click="goToDetail(warehouse.id)"
           >
             {{ t('warehouses.attend') }}
+          </button>
+          <button
+              v-if="iamStore.canManageOperations"
+              class="btn-muted"
+              type="button"
+              @click.stop="deactivate(warehouse)"
+          >
+            {{ t('warehouses.deactivate') }}
+          </button>
+          <button
+              v-if="iamStore.isAdministrator"
+              class="btn-delete"
+              type="button"
+              @click.stop="remove(warehouse)"
+          >
+            {{ t('warehouses.delete') }}
           </button>
         </div>
       </div>
@@ -235,6 +262,10 @@ function goToRegister() {
 }
 
 .warehouse-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
   flex-shrink: 0;
 }
 
@@ -266,5 +297,36 @@ function goToRegister() {
 
 .btn-attend:hover {
   background-color: #c0392b;
+}
+
+.btn-muted {
+  background-color: transparent;
+  border: 1px solid #64748b;
+  color: #cbd5e1;
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-delete {
+  background-color: #991b1b;
+  border: none;
+  color: #fff;
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .warehouse-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .warehouse-actions {
+    justify-content: flex-start;
+  }
 }
 </style>

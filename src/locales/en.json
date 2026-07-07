@@ -3,7 +3,8 @@
     "activeUpper": "ACTIVE",
     "inactiveUpper": "INACTIVE",
     "pendingUpper": "PENDING",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "loading": "Loading..."
   },
   "errors": {
     "occurred": "An error occurred"
@@ -85,6 +86,11 @@
   "warehouses": {
     "title": "My Warehouses",
     "register": "Register Warehouse",
+    "loading": "Loading warehouses...",
+    "deactivate": "Deactivate",
+    "delete": "Delete",
+    "confirmDeactivate": "Deactivate {name}? Historical data will be preserved.",
+    "confirmDelete": "Delete {name}? This action is intended only for administrator accounts.",
     "no-warehouses": "No warehouses found.",
     "last-event": "Last event",
     "incident-detected": "Incident detected",
@@ -171,6 +177,13 @@
     "sectionCameras": "CCTV Cameras",
     "empty": "No devices registered yet.",
     "menu": "Options",
+    "actions": {
+      "recordReading": "Record reading",
+      "toggleStatus": "Toggle status",
+      "unlink": "Unlink device",
+      "readingPrompt": "Enter simulated reading value",
+      "unlinkConfirm": "Unlink {name} from its zone?"
+    },
     "dialog": {
       "title": "Link Device",
       "sectionTitle": "IoT Device Details",
@@ -195,7 +208,7 @@
     },
     "limitDialog": {
       "title": "Device Limit Reached",
-      "description": "Your current plan has reached the limit of 5 connected IoT devices.",
+      "description": "Your current plan has reached the limit of {limit} connected IoT devices.",
       "upgrade": "Upgrade to Premium",
       "dismiss": "Close"
     },
@@ -205,13 +218,70 @@
       "confirm": "Got it"
     }
   },
+  "team": {
+    "title": "Team & Access",
+    "subtitle": "Create operational users, assign roles, restrict zones and manage notification preferences.",
+    "currentUser": "Signed in as",
+    "roles": {
+      "administrator": "Administrator",
+      "operationsManager": "Operations Manager",
+      "securityOperator": "Security Operator",
+      "viewer": "Viewer"
+    },
+    "permissions": {
+      "warehouses": "Manage warehouses",
+      "sensors": "Manage sensors",
+      "alerts": "Manage alerts",
+      "reports": "View reports",
+      "billing": "Manage billing"
+    },
+    "create": {
+      "title": "Create team user",
+      "fullName": "Full name",
+      "email": "Email",
+      "password": "Temporary password",
+      "role": "Role",
+      "zone": "Zone restriction",
+      "permissions": "Permissions",
+      "submit": "Create user"
+    },
+    "table": {
+      "title": "Access profiles",
+      "loading": "Loading team access...",
+      "empty": "No access profiles have been created yet.",
+      "status": "Status",
+      "allZones": "All zones"
+    },
+    "actions": {
+      "enableEmail": "Enable email",
+      "disableEmail": "Disable email",
+      "revoke": "Revoke access"
+    },
+    "invitations": {
+      "title": "Pending invitations",
+      "empty": "No pending invitations."
+    },
+    "messages": {
+      "loadError": "Team access could not be loaded.",
+      "required": "Complete name, email and password.",
+      "created": "Team user created successfully.",
+      "createError": "The team user could not be created.",
+      "updated": "Access profile updated.",
+      "updateError": "Access profile could not be updated.",
+      "zoneRestricted": "Zone access restricted.",
+      "preferencesUpdated": "Notification preferences updated.",
+      "revokeConfirm": "Revoke this user's access?",
+      "revoked": "User access revoked."
+    }
+  },
   "alerts": {
     "title": "Security Alerts",
     "subtitle": "Register, attend and resolve backend security alerts.",
     "metrics": {
       "total": "Total",
       "open": "Open",
-      "critical": "Critical"
+      "critical": "Critical",
+      "incidents": "Incidents"
     },
     "types": {
       "doorOpen": "Door open",
@@ -246,7 +316,18 @@
       "attend": "Mark attended",
       "escalate": "Escalate",
       "falseAlarm": "False alarm",
-      "resolve": "Resolve"
+      "resolve": "Resolve",
+      "classifyCritical": "Classify critical"
+    },
+    "incidents": {
+      "title": "Incident follow-up",
+      "name": "Incident name",
+      "priority": "Priority",
+      "descriptionPlaceholder": "e.g. Restricted zone motion required manual follow-up",
+      "create": "Create incident",
+      "listTitle": "Registered incidents",
+      "empty": "There are no incidents yet.",
+      "close": "Close incident"
     },
     "messages": {
       "loadError": "Alerts could not be loaded.",
@@ -254,7 +335,13 @@
       "created": "Alert registered successfully.",
       "createError": "The alert could not be registered.",
       "updated": "Alert updated.",
-      "updateError": "The alert could not be updated."
+      "updateError": "The alert could not be updated.",
+      "incidentsLoadError": "Incidents could not be loaded.",
+      "incidentRequired": "Complete incident name and description.",
+      "incidentCreated": "Incident created successfully.",
+      "incidentCreateError": "The incident could not be created.",
+      "incidentClosed": "Incident closed.",
+      "incidentCloseError": "The incident could not be closed."
     }
   },
   "reports": {
@@ -327,6 +414,19 @@
       "title": "Billing",
       "subtitle": "Process a simulated payment for the active subscription."
     },
+    "account": {
+      "user": "User",
+      "nextBilling": "Next billing"
+    },
+    "payment": {
+      "title": "Simulated card payment",
+      "cardholder": "Cardholder",
+      "cardNumber": "Card number",
+      "expiration": "Expiration",
+      "cvv": "CVV",
+      "cancel": "Cancel",
+      "confirm": "Confirm payment"
+    },
     "invoices": {
       "title": "Receipts",
       "empty": "There are no issued receipts yet."
@@ -346,6 +446,7 @@
       "cancelled": "Subscription cancelled.",
       "cancelError": "The subscription could not be cancelled.",
       "paymentProcessed": "Payment processed and receipt generated.",
+      "cardRequired": "Complete the simulated card information.",
       "paymentError": "The payment could not be processed.",
       "receiptError": "The receipt could not be downloaded."
     }

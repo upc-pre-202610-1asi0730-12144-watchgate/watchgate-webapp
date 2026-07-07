@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { IamApi } from "../infrastructure/iam-api.js";
 import { UserAssembler } from "../infrastructure/user.assembler.js";
 import { setAuthToken, setUserId, getAuthToken, getUserId, clearSession } from "../../shared/infrastructure/http.api.js";
@@ -18,6 +18,15 @@ export const useIamStore = defineStore('iam', () => {
     // being rehydrated into currentUser. Views that depend on
     // currentUser?.companyId should wait for this to be false before fetching.
     const sessionLoading = ref(false);
+    const currentRole = computed(() => currentUser.value?.role ?? 'Visitor');
+    const isAdministrator = computed(() => currentRole.value === 'Administrator');
+    const canManageOperations = computed(() =>
+        ['Administrator', 'OperationsManager'].includes(currentRole.value)
+    );
+    const canManageSecurity = computed(() =>
+        ['Administrator', 'OperationsManager', 'SecurityOperator'].includes(currentRole.value)
+    );
+    const canManageBilling = computed(() => currentRole.value === 'Administrator');
 
     /**
      * Loads the authenticated user's companyId from the backend (the
@@ -131,6 +140,11 @@ export const useIamStore = defineStore('iam', () => {
         currentUser,
         errors,
         sessionLoading,
+        currentRole,
+        isAdministrator,
+        canManageOperations,
+        canManageSecurity,
+        canManageBilling,
         signIn,
         signUp,
         checkEmailExists,

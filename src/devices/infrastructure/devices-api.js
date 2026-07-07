@@ -28,4 +28,19 @@ export class DevicesApi {
         const response = await http.post(SENSORS_ENDPOINT, resource);
         return response.data;
     }
+
+    async updateStatus(sensorId, status) {
+        const response = await http.patch(`${SENSORS_ENDPOINT}/${sensorId}/status`, { status });
+        return response.data;
+    }
+
+    async recordReading(sensorId, value) {
+        const response = await http.post(`${SENSORS_ENDPOINT}/${sensorId}/readings`, { value });
+        return response.data;
+    }
+
+    async unlink(sensorId) {
+        const response = await http.patch(`${SENSORS_ENDPOINT}/${sensorId}/unlink`);
+        return response.data;
+    }
 }

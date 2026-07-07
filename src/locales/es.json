@@ -3,7 +3,8 @@
     "activeUpper": "ACTIVO",
     "inactiveUpper": "INACTIVO",
     "pendingUpper": "PENDIENTE",
-    "saving": "Guardando..."
+    "saving": "Guardando...",
+    "loading": "Cargando..."
   },
   "errors": {
     "occurred": "Ocurrió un error"
@@ -85,6 +86,11 @@
   "warehouses": {
     "title": "Mis almacenes",
     "register": "Registrar almacén",
+    "loading": "Cargando almacenes...",
+    "deactivate": "Desactivar",
+    "delete": "Eliminar",
+    "confirmDeactivate": "¿Desactivar {name}? Se conservará la información histórica.",
+    "confirmDelete": "¿Eliminar {name}? Esta acción está pensada solo para cuentas administradoras.",
     "no-warehouses": "No se encontraron almacenes.",
     "last-event": "Último evento",
     "incident-detected": "Incidente detectado",
@@ -171,6 +177,13 @@
     "sectionCameras": "Cámaras CCTV",
     "empty": "Aún no hay dispositivos registrados.",
     "menu": "Opciones",
+    "actions": {
+      "recordReading": "Registrar lectura",
+      "toggleStatus": "Cambiar estado",
+      "unlink": "Desvincular dispositivo",
+      "readingPrompt": "Ingresa el valor de lectura simulada",
+      "unlinkConfirm": "¿Desvincular {name} de su zona?"
+    },
     "dialog": {
       "title": "Vincular dispositivo",
       "sectionTitle": "Datos del dispositivo IoT",
@@ -195,7 +208,7 @@
     },
     "limitDialog": {
       "title": "Límite de dispositivos alcanzado",
-      "description": "Tu plan actual alcanzó el límite de 5 dispositivos IoT conectados.",
+      "description": "Tu plan actual alcanzó el límite de {limit} dispositivos IoT conectados.",
       "upgrade": "Mejorar a Premium",
       "dismiss": "Cerrar"
     },
@@ -205,13 +218,70 @@
       "confirm": "Entendido"
     }
   },
+  "team": {
+    "title": "Equipo y accesos",
+    "subtitle": "Crea usuarios operativos, asigna roles, restringe zonas y administra preferencias de notificación.",
+    "currentUser": "Sesión actual",
+    "roles": {
+      "administrator": "Administrador",
+      "operationsManager": "Jefe de operaciones",
+      "securityOperator": "Operador de seguridad",
+      "viewer": "Solo lectura"
+    },
+    "permissions": {
+      "warehouses": "Gestionar almacenes",
+      "sensors": "Gestionar sensores",
+      "alerts": "Gestionar alertas",
+      "reports": "Ver reportes",
+      "billing": "Gestionar facturación"
+    },
+    "create": {
+      "title": "Crear usuario del equipo",
+      "fullName": "Nombre completo",
+      "email": "Correo",
+      "password": "Contraseña temporal",
+      "role": "Rol",
+      "zone": "Restricción de zona",
+      "permissions": "Permisos",
+      "submit": "Crear usuario"
+    },
+    "table": {
+      "title": "Perfiles de acceso",
+      "loading": "Cargando accesos...",
+      "empty": "Aún no hay perfiles de acceso.",
+      "status": "Estado",
+      "allZones": "Todas las zonas"
+    },
+    "actions": {
+      "enableEmail": "Activar correo",
+      "disableEmail": "Desactivar correo",
+      "revoke": "Revocar acceso"
+    },
+    "invitations": {
+      "title": "Invitaciones pendientes",
+      "empty": "No hay invitaciones pendientes."
+    },
+    "messages": {
+      "loadError": "No se pudo cargar el acceso del equipo.",
+      "required": "Completa nombre, correo y contraseña.",
+      "created": "Usuario del equipo creado correctamente.",
+      "createError": "No se pudo crear el usuario del equipo.",
+      "updated": "Perfil de acceso actualizado.",
+      "updateError": "No se pudo actualizar el perfil de acceso.",
+      "zoneRestricted": "Acceso restringido por zona.",
+      "preferencesUpdated": "Preferencias de notificación actualizadas.",
+      "revokeConfirm": "¿Revocar el acceso de este usuario?",
+      "revoked": "Acceso revocado."
+    }
+  },
   "alerts": {
     "title": "Alertas de seguridad",
     "subtitle": "Registra, atiende y resuelve alertas reales del backend.",
     "metrics": {
       "total": "Total",
       "open": "Abiertas",
-      "critical": "Críticas"
+      "critical": "Críticas",
+      "incidents": "Incidentes"
     },
     "types": {
       "doorOpen": "Puerta abierta",
@@ -246,7 +316,18 @@
       "attend": "Marcar atendida",
       "escalate": "Escalar",
       "falseAlarm": "Falsa alarma",
-      "resolve": "Resolver"
+      "resolve": "Resolver",
+      "classifyCritical": "Clasificar crítica"
+    },
+    "incidents": {
+      "title": "Seguimiento de incidentes",
+      "name": "Nombre del incidente",
+      "priority": "Prioridad",
+      "descriptionPlaceholder": "Ej. Movimiento en zona restringida requiere seguimiento manual",
+      "create": "Crear incidente",
+      "listTitle": "Incidentes registrados",
+      "empty": "Aún no hay incidentes.",
+      "close": "Cerrar incidente"
     },
     "messages": {
       "loadError": "No se pudieron cargar las alertas.",
@@ -254,7 +335,13 @@
       "created": "Alerta registrada correctamente.",
       "createError": "No se pudo registrar la alerta.",
       "updated": "Alerta actualizada.",
-      "updateError": "No se pudo actualizar la alerta."
+      "updateError": "No se pudo actualizar la alerta.",
+      "incidentsLoadError": "No se pudieron cargar los incidentes.",
+      "incidentRequired": "Completa nombre y descripción del incidente.",
+      "incidentCreated": "Incidente creado correctamente.",
+      "incidentCreateError": "No se pudo crear el incidente.",
+      "incidentClosed": "Incidente cerrado.",
+      "incidentCloseError": "No se pudo cerrar el incidente."
     }
   },
   "reports": {
@@ -327,6 +414,19 @@
       "title": "Facturación",
       "subtitle": "Procesa un pago simulado para la suscripción activa."
     },
+    "account": {
+      "user": "Usuario",
+      "nextBilling": "Próxima facturación"
+    },
+    "payment": {
+      "title": "Pago simulado con tarjeta",
+      "cardholder": "Titular de la tarjeta",
+      "cardNumber": "Número de tarjeta",
+      "expiration": "Vencimiento",
+      "cvv": "CVV",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar pago"
+    },
     "invoices": {
       "title": "Comprobantes",
       "empty": "Aún no hay comprobantes emitidos."
@@ -346,6 +446,7 @@
       "cancelled": "Suscripción cancelada.",
       "cancelError": "No se pudo cancelar la suscripción.",
       "paymentProcessed": "Pago procesado y comprobante generado.",
+      "cardRequired": "Completa la información simulada de la tarjeta.",
       "paymentError": "No se pudo procesar el pago.",
       "receiptError": "No se pudo descargar el comprobante."
     }

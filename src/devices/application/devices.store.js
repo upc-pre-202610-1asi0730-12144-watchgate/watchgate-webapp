@@ -20,10 +20,10 @@ export const useDevicesStore = defineStore('devices', () => {
     const devicesLoaded = ref(false);
 
     /** Maximum devices allowed by the current plan. */
-    const DEVICE_LIMIT = 4;
+    const deviceLimit = ref(4);
 
     const deviceCount   = computed(() => devices.value.length);
-    const isAtLimit     = computed(() => deviceCount.value >= DEVICE_LIMIT);
+    const isAtLimit     = computed(() => deviceCount.value >= deviceLimit.value);
 
     /** Groups devices by type (e.g. MOTION, DOOR, TEMPERATURE) for the monitoring view. */
     const devicesByType = computed(() => {
@@ -77,6 +77,32 @@ export const useDevicesStore = defineStore('devices', () => {
         return entity;
     }
 
+    async function updateDeviceStatus(deviceId, status) {
+        const updated = await devicesApi.updateStatus(deviceId, status);
+        const entity = DeviceAssembler.toEntity(updated);
+        devices.value = devices.value.map(device => device.id === entity.id ? entity : device);
+        return entity;
+    }
+
+    async function recordDeviceReading(deviceId, value) {
+        const updated = await devicesApi.recordReading(deviceId, value);
+        const entity = DeviceAssembler.toEntity(updated);
+        devices.value = devices.value.map(device => device.id === entity.id ? entity : device);
+        return entity;
+    }
+
+    async function unlinkDevice(deviceId) {
+        const updated = await devicesApi.unlink(deviceId);
+        const entity = DeviceAssembler.toEntity(updated);
+        devices.value = devices.value.map(device => device.id === entity.id ? entity : device);
+        return entity;
+    }
+
+    function setDeviceLimit(limit) {
+        const parsedLimit = Number(limit);
+        deviceLimit.value = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 4;
+    }
+
     return {
         devices,
         loading,
@@ -85,8 +111,12 @@ export const useDevicesStore = defineStore('devices', () => {
         deviceCount,
         isAtLimit,
         devicesByType,
-        DEVICE_LIMIT,
+        deviceLimit,
+        setDeviceLimit,
         fetchDevices,
         addDevice,
+        updateDeviceStatus,
+        recordDeviceReading,
+        unlinkDevice,
     };
 });

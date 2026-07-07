@@ -93,6 +93,28 @@ export const useWarehouseStore = defineStore('warehouse', () => {
         });
     }
 
+    function deactivateWarehouse(warehouseId) {
+        return warehouseApi.deactivateWarehouse(warehouseId).then(response => {
+            const updated = WarehouseAssembler.toEntityFromResource(response.data);
+            warehouses.value = warehouses.value.map(warehouse =>
+                warehouse.id === updated.id ? updated : warehouse
+            );
+            return updated;
+        }).catch(error => {
+            errors.value.push(error);
+            throw error;
+        });
+    }
+
+    function deleteWarehouse(warehouseId) {
+        return warehouseApi.deleteWarehouse(warehouseId).then(() => {
+            warehouses.value = warehouses.value.filter(warehouse => warehouse.id !== Number(warehouseId));
+        }).catch(error => {
+            errors.value.push(error);
+            throw error;
+        });
+    }
+
     return {
         warehouses,
         errors,
@@ -101,6 +123,8 @@ export const useWarehouseStore = defineStore('warehouse', () => {
         fetchWarehouses,
         getWarehouseById,
         createWarehouse,
-        createZone
+        createZone,
+        deactivateWarehouse,
+        deleteWarehouse
     };
 });

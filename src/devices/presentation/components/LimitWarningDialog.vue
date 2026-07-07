@@ -6,6 +6,7 @@
  */
 const props = defineProps({
   visible: { type: Boolean, default: false },
+  limit: { type: Number, default: 4 },
 });
 
 const emit = defineEmits(['update:visible', 'upgrade']);
@@ -33,7 +34,7 @@ function onUpgrade() { emit('upgrade'); }
       <p class="limit-dialog-title">{{ $t('devices.limitDialog.title') }}</p>
 
       <p class="limit-dialog-description">
-        {{ $t('devices.limitDialog.description') }}
+        {{ $t('devices.limitDialog.description', { limit }) }}
       </p>
 
       <pv-button
