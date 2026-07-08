@@ -39,4 +39,8 @@ export class UserAccessApi {
     updateNotificationPreferences(userId, resource) {
         return http.patch(`${USER_ACCESS_ENDPOINT}/users/${userId}/notification-preferences`, resource).then(response => response.data);
     }
+
+    getUserAccessProfile(userId) {
+        return http.get(`${USER_ACCESS_ENDPOINT}/users/${userId}`).then(response => response.data);
+    }
 }

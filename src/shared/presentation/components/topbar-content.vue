@@ -5,7 +5,6 @@ import { useRouter } from 'vue-router';
 import LanguageSwitcher from "./language-switcher.vue";
 import { PlatformApi } from '../../infrastructure/platform-api.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
-import { clearSession } from '../../infrastructure/http.api.js';
 
 const router = useRouter();
 const { t } = useI18n();
@@ -17,8 +16,7 @@ const apiVersion = ref('');
 const welcomeName = computed(() => iamStore.currentUser?.fullName || t('topbar.guest'));
 
 const onLogout = () => {
-  clearSession();
-  iamStore.currentUser = null;
+  iamStore.logout();
   router.push({ path: '/iam/sign-in' });
 };
 

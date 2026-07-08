@@ -1,10 +1,20 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { IamApi } from "../infrastructure/iam-api.js";
+import { UserAccessApi } from "../infrastructure/user-access-api.js";
 import { UserAssembler } from "../infrastructure/user.assembler.js";
 import { setAuthToken, setUserId, getAuthToken, getUserId, clearSession } from "../../shared/infrastructure/http.api.js";
 
 const iamApi = new IamApi();
+const userAccessApi = new UserAccessApi();
+
+const ROLE_PERMISSIONS = {
+    Administrator: ['WAREHOUSES_MANAGE', 'SENSORS_MANAGE', 'ALERTS_MANAGE', 'REPORTS_VIEW', 'BILLING_MANAGE', 'TEAM_MANAGE'],
+    OperationsManager: ['WAREHOUSES_MANAGE', 'SENSORS_MANAGE', 'ALERTS_MANAGE', 'REPORTS_VIEW'],
+    SecurityOperator: ['ALERTS_MANAGE', 'REPORTS_VIEW'],
+    Viewer: ['REPORTS_VIEW'],
+    Visitor: []
+};
 
 /**
  * IAM store
@@ -13,20 +23,42 @@ const iamApi = new IamApi();
  */
 export const useIamStore = defineStore('iam', () => {
     const currentUser = ref(null);
+    const currentAccessProfile = ref(null);
     const errors = ref([]);
     // True while an existing session (token + user id from localStorage) is
     // being rehydrated into currentUser. Views that depend on
     // currentUser?.companyId should wait for this to be false before fetching.
     const sessionLoading = ref(false);
-    const currentRole = computed(() => currentUser.value?.role ?? 'Visitor');
+    const currentRole = computed(() => currentAccessProfile.value?.role ?? currentUser.value?.role ?? 'Visitor');
+    const permissions = computed(() => {
+        if (currentAccessProfile.value?.permissions) {
+            return currentAccessProfile.value.permissions
+                .split(',')
+                .map(permission => permission.trim())
+                .filter(Boolean);
+        }
+
+        return ROLE_PERMISSIONS[currentRole.value] ?? [];
+    });
+    const restrictedZoneId = computed(() => currentAccessProfile.value?.restrictedZoneId ?? null);
+    const isAccessRevoked = computed(() => currentAccessProfile.value?.status === 'REVOKED');
     const isAdministrator = computed(() => currentRole.value === 'Administrator');
+    const canManageWarehouses = computed(() => !isAccessRevoked.value && hasPermission('WAREHOUSES_MANAGE'));
+    const canManageSensors = computed(() => !isAccessRevoked.value && hasPermission('SENSORS_MANAGE'));
+    const canManageAlerts = computed(() => !isAccessRevoked.value && hasPermission('ALERTS_MANAGE'));
+    const canViewReports = computed(() => !isAccessRevoked.value && hasPermission('REPORTS_VIEW'));
+    const canManageTeam = computed(() => !isAccessRevoked.value && hasPermission('TEAM_MANAGE'));
     const canManageOperations = computed(() =>
-        ['Administrator', 'OperationsManager'].includes(currentRole.value)
+        canManageWarehouses.value || canManageSensors.value
     );
     const canManageSecurity = computed(() =>
-        ['Administrator', 'OperationsManager', 'SecurityOperator'].includes(currentRole.value)
+        canManageAlerts.value
     );
-    const canManageBilling = computed(() => currentRole.value === 'Administrator');
+    const canManageBilling = computed(() => !isAccessRevoked.value && hasPermission('BILLING_MANAGE'));
+
+    function hasPermission(permission) {
+        return permissions.value.includes(permission);
+    }
 
     /**
      * Loads the authenticated user's companyId from the backend (the
@@ -39,6 +71,24 @@ export const useIamStore = defineStore('iam', () => {
         return iamApi.getUserById(user.id).then(response => {
             user.companyId = response.data.companyId;
         });
+    }
+
+    function loadAccessProfile(user) {
+        currentAccessProfile.value = null;
+
+        if (!user?.id) return Promise.resolve();
+
+        return userAccessApi.getUserAccessProfile(user.id)
+            .then(profile => {
+                currentAccessProfile.value = profile;
+            })
+            .catch(() => {
+                currentAccessProfile.value = null;
+            });
+    }
+
+    function loadUserContext(user) {
+        return loadCompanyId(user).then(() => loadAccessProfile(user));
     }
 
     /**
@@ -54,7 +104,7 @@ export const useIamStore = defineStore('iam', () => {
             setAuthToken(user.token);
             setUserId(user.id);
             currentUser.value = user;
-            return loadCompanyId(user).then(() => true);
+            return loadUserContext(user).then(() => true);
         }).catch(error => {
             errors.value.push(error);
             return false;
@@ -81,7 +131,7 @@ export const useIamStore = defineStore('iam', () => {
             setAuthToken(user.token);
             setUserId(user.id);
             currentUser.value = user;
-            return loadCompanyId(user).then(() => true);
+            return loadUserContext(user).then(() => true);
         }).catch(error => {
             errors.value.push(error);
             return false;
@@ -101,20 +151,31 @@ export const useIamStore = defineStore('iam', () => {
 
         if (!token || !userId) {
             currentUser.value = null;
+            currentAccessProfile.value = null;
             return Promise.resolve();
         }
 
         sessionLoading.value = true;
         return iamApi.getUserById(userId).then(response => {
-            currentUser.value = UserAssembler.toEntityFromResource(response.data);
+            const user = UserAssembler.toEntityFromResource(response.data);
+            currentUser.value = user;
+            return loadAccessProfile(user);
         }).catch(error => {
             // Token expired/invalid, or user no longer exists: drop the stale session.
             clearSession();
             currentUser.value = null;
+            currentAccessProfile.value = null;
             errors.value.push(error);
         }).finally(() => {
             sessionLoading.value = false;
         });
+    }
+
+    function logout() {
+        clearSession();
+        currentUser.value = null;
+        currentAccessProfile.value = null;
+        errors.value = [];
     }
 
     /**
@@ -138,16 +199,27 @@ export const useIamStore = defineStore('iam', () => {
 
     return {
         currentUser,
+        currentAccessProfile,
         errors,
         sessionLoading,
         currentRole,
+        permissions,
+        restrictedZoneId,
+        isAccessRevoked,
         isAdministrator,
+        canManageWarehouses,
+        canManageSensors,
+        canManageAlerts,
+        canViewReports,
+        canManageTeam,
         canManageOperations,
         canManageSecurity,
         canManageBilling,
+        hasPermission,
         signIn,
         signUp,
         checkEmailExists,
-        restoreSession
+        restoreSession,
+        logout
     };
 });
