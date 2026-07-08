@@ -6,11 +6,14 @@
  */
 export class Warehouse {
     constructor({ id = 0, name = '', location = '', capacity = 0, status = 'ACTIVE',
-                    companyId = 0, zones = [], lastEventMessage = 'No recent events' }) {
+                    operationStart = null, operationEnd = null, companyId = 0,
+                    zones = [], lastEventMessage = 'No recent events' }) {
         this.id = id;
         this.name = name;
         this.location = location;
         this.capacity = capacity;
+        this.operationStart = operationStart;
+        this.operationEnd = operationEnd;
         this.companyId = companyId;
         // Real WarehouseZone resources from the backend: { id, name, area, riskLevel, warehouseId }
         this.zones = zones;

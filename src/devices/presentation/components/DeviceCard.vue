@@ -6,9 +6,10 @@ const props = defineProps({
   warehouseLabel: { type: String, default: '' },
   zoneLabel: { type: String, default: '' },
   canManage: { type: Boolean, default: true },
+  canDelete: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['toggle-status', 'record-reading', 'unlink']);
+const emit = defineEmits(['toggle-status', 'record-reading', 'unlink', 'delete']);
 
 const TYPE_ICONS = {
   MOTION: 'pi-directions',
@@ -73,6 +74,16 @@ const readingLabel = computed(() => {
           @click="emit('unlink', device)"
       >
         <i class="pi pi-times" />
+      </button>
+      <button
+          v-if="canDelete"
+          type="button"
+          class="danger"
+          :title="$t('devices.actions.deleteHint')"
+          :aria-label="$t('devices.actions.delete')"
+          @click="emit('delete', device)"
+      >
+        <i class="pi pi-trash" />
       </button>
     </div>
     <span v-else class="read-only-pill">{{ $t('common.readOnly') }}</span>
@@ -164,6 +175,16 @@ const readingLabel = computed(() => {
 
 .device-actions button:hover {
   border-color: #3b82f6;
+  color: #fff;
+}
+
+.device-actions button.danger {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+.device-actions button.danger:hover {
+  border-color: #ef4444;
   color: #fff;
 }
 

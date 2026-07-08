@@ -143,6 +143,15 @@
   "warehouse-detail": {
     "back": "Volver a la lista",
     "active": "Activo",
+    "notSpecified": "No especificado",
+    "info": {
+      "location": "Ubicacion",
+      "capacity": "Area total",
+      "usedArea": "Area usada",
+      "availableArea": "Area disponible",
+      "operationHours": "Horario de atencion",
+      "zoneCount": "Zonas registradas"
+    },
     "latest-events": "Últimos eventos",
     "sensor-status": "Estado de sensores",
     "main-door": "Puerta principal",
@@ -207,8 +216,11 @@
       "toggleStatusHint": "Cambia el sensor entre en línea y fuera de línea.",
       "unlink": "Desvincular dispositivo",
       "unlinkHint": "Desvincula este dispositivo IoT de su zona asignada.",
+      "delete": "Eliminar dispositivo",
+      "deleteHint": "Elimina permanentemente este dispositivo IoT. Solo administradores.",
       "readingPrompt": "Ingresa el valor de lectura simulada",
-      "unlinkConfirm": "¿Desvincular {name} de su zona?"
+      "unlinkConfirm": "¿Desvincular {name} de su zona?",
+      "deleteConfirm": "¿Eliminar {name}? Esta accion no se puede deshacer."
     },
     "dialog": {
       "title": "Vincular dispositivo",
@@ -508,6 +520,20 @@
       "empty": "Registra un almacén antes de consultar el historial.",
       "noLocation": "Sin ubicación",
       "zoneCount": "{count} zonas"
+    }
+  },
+  "liveMonitoring": {
+    "back": "Volver a almacenes",
+    "title": "Monitoreo en tiempo real",
+    "warehouseFallback": "Almacen seleccionado",
+    "emptySensors": "No hay sensores registrados en esta zona.",
+    "consoleTitle": "Consola de eventos en vivo",
+    "emptyEvents": "No hay eventos recientes para este almacen.",
+    "emptyZones": "Este almacen aun no tiene zonas para monitorear.",
+    "relative": {
+      "seconds": "Hace {count}s",
+      "minutes": "Hace {count}m",
+      "hours": "Hace {count}h"
     }
   }
 }

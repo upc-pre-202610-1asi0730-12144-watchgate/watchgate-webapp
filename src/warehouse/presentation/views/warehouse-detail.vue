@@ -21,6 +21,15 @@ const warehouseId = computed(() => route.params.id);
 const warehouse = computed(() => {
   return store.getWarehouseById(warehouseId.value);
 });
+const totalZoneArea = computed(() => {
+  return warehouse.value?.zones?.reduce((total, zone) => total + Number(zone.area || 0), 0) ?? 0;
+});
+const availableArea = computed(() => Math.max(Number(warehouse.value?.capacity || 0) - totalZoneArea.value, 0));
+const operationHours = computed(() => {
+  const start = warehouse.value?.operationStart;
+  const end = warehouse.value?.operationEnd;
+  return start && end ? `${start} - ${end}` : t('warehouse-detail.notSpecified');
+});
 
 function loadWarehouses() {
   const companyId = iamStore.currentUser?.companyId;
@@ -110,6 +119,33 @@ function goToHistory() {
     <div class="status-container">
       <span class="status-badge">● {{ t('warehouse-detail.active') }}</span>
     </div>
+
+    <section class="summary-grid">
+      <article class="summary-item">
+        <span>{{ t('warehouse-detail.info.location') }}</span>
+        <strong>{{ warehouse?.location || t('warehouse-detail.notSpecified') }}</strong>
+      </article>
+      <article class="summary-item">
+        <span>{{ t('warehouse-detail.info.capacity') }}</span>
+        <strong>{{ warehouse?.capacity ?? 0 }} m2</strong>
+      </article>
+      <article class="summary-item">
+        <span>{{ t('warehouse-detail.info.usedArea') }}</span>
+        <strong>{{ totalZoneArea }} m2</strong>
+      </article>
+      <article class="summary-item">
+        <span>{{ t('warehouse-detail.info.availableArea') }}</span>
+        <strong>{{ availableArea }} m2</strong>
+      </article>
+      <article class="summary-item">
+        <span>{{ t('warehouse-detail.info.operationHours') }}</span>
+        <strong>{{ operationHours }}</strong>
+      </article>
+      <article class="summary-item">
+        <span>{{ t('warehouse-detail.info.zoneCount') }}</span>
+        <strong>{{ warehouse?.zones?.length ?? 0 }}</strong>
+      </article>
+    </section>
 
     <div class="panels">
       <div class="panel">
@@ -260,6 +296,34 @@ function goToHistory() {
   padding: 0.3rem 0.85rem;
   border-radius: 20px;
   font-size: 0.82rem;
+}
+
+.summary-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.summary-item {
+  background: #102035;
+  border: 1px solid #1e2d42;
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+}
+
+.summary-item span {
+  color: #8a9bb0;
+  display: block;
+  font-size: 0.76rem;
+  margin-bottom: 0.35rem;
+}
+
+.summary-item strong {
+  color: #fff;
+  display: block;
+  font-size: 0.95rem;
+  line-height: 1.3;
 }
 
 .panels {

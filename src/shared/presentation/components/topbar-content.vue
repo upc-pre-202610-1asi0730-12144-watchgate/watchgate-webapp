@@ -57,9 +57,6 @@ onMounted(() => {
 
     <template #end>
       <div class="flex align-items-center gap-3">
-        <div class="welcome-status">
-          <span>{{ t('topbar.welcome', { name: welcomeName }) }}</span>
-        </div>
         <div class="release-status" :class="apiStatus">
           <span class="status-dot"></span>
           <span>Web v{{ appVersion }}</span>
@@ -145,26 +142,6 @@ onMounted(() => {
   gap: 0.45rem;
   min-height: 38px;
   padding: 0.4rem 0.65rem;
-}
-
-.welcome-status {
-  align-items: center;
-  background: #0f172a;
-  border: 1px solid #334155;
-  border-radius: 8px;
-  color: #e5eefb;
-  display: flex;
-  min-height: 38px;
-  max-width: 280px;
-  padding: 0.4rem 0.65rem;
-}
-
-.welcome-status span {
-  font-size: 0.78rem;
-  font-weight: 800;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .release-status span:not(.status-dot) {
@@ -298,10 +275,6 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .release-status {
-    display: none;
-  }
-
-  .welcome-status {
     display: none;
   }
 

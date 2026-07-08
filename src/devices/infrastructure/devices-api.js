@@ -43,4 +43,8 @@ export class DevicesApi {
         const response = await http.patch(`${SENSORS_ENDPOINT}/${sensorId}/unlink`);
         return response.data;
     }
+
+    async delete(sensorId) {
+        await http.delete(`${SENSORS_ENDPOINT}/${sensorId}`);
+    }
 }

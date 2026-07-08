@@ -143,6 +143,15 @@
   "warehouse-detail": {
     "back": "Back to list",
     "active": "Active",
+    "notSpecified": "Not specified",
+    "info": {
+      "location": "Location",
+      "capacity": "Total area",
+      "usedArea": "Used area",
+      "availableArea": "Available area",
+      "operationHours": "Operation hours",
+      "zoneCount": "Registered zones"
+    },
     "latest-events": "Latest Events",
     "sensor-status": "Sensor Status",
     "main-door": "Main Door",
@@ -207,8 +216,11 @@
       "toggleStatusHint": "Switch the sensor between online and offline.",
       "unlink": "Unlink device",
       "unlinkHint": "Detach this IoT device from its assigned zone.",
+      "delete": "Delete device",
+      "deleteHint": "Permanently remove this IoT device. Administrators only.",
       "readingPrompt": "Enter simulated reading value",
-      "unlinkConfirm": "Unlink {name} from its zone?"
+      "unlinkConfirm": "Unlink {name} from its zone?",
+      "deleteConfirm": "Delete {name}? This action cannot be undone."
     },
     "dialog": {
       "title": "Link Device",
@@ -508,6 +520,20 @@
       "empty": "Register a warehouse before checking event history.",
       "noLocation": "No location",
       "zoneCount": "{count} zones"
+    }
+  },
+  "liveMonitoring": {
+    "back": "Back to warehouses",
+    "title": "Real-Time Monitoring",
+    "warehouseFallback": "Selected warehouse",
+    "emptySensors": "No sensors registered in this zone.",
+    "consoleTitle": "Live event console",
+    "emptyEvents": "No recent events for this warehouse.",
+    "emptyZones": "This warehouse has no zones to monitor yet.",
+    "relative": {
+      "seconds": "{count}s ago",
+      "minutes": "{count}m ago",
+      "hours": "{count}h ago"
     }
   }
 }

@@ -98,6 +98,11 @@ export const useDevicesStore = defineStore('devices', () => {
         return entity;
     }
 
+    async function deleteDevice(deviceId) {
+        await devicesApi.delete(deviceId);
+        devices.value = devices.value.filter(device => device.id !== deviceId);
+    }
+
     function setDeviceLimit(limit) {
         const parsedLimit = Number(limit);
         deviceLimit.value = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 4;
@@ -126,6 +131,7 @@ export const useDevicesStore = defineStore('devices', () => {
         updateDeviceStatus,
         recordDeviceReading,
         unlinkDevice,
+        deleteDevice,
         reset,
     };
 });

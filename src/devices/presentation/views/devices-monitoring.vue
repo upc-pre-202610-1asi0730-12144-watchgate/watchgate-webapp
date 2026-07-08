@@ -56,6 +56,7 @@ const devicesByWarehouse = computed(() => {
 });
 
 const canManageSensors = computed(() => iamStore.canManageSensors);
+const canDeleteSensors = computed(() => String(iamStore.currentRole).toLowerCase() === 'administrator');
 
 function zoneFor(zoneId) {
   return allZones.value.find(z => Number(z.id) === Number(zoneId));
@@ -139,6 +140,16 @@ async function unlinkDevice(device) {
   }
 }
 
+async function deleteDevice(device) {
+  if (!canDeleteSensors.value) return;
+  if (!window.confirm(t('devices.actions.deleteConfirm', { name: device.name }))) return;
+  try {
+    await store.deleteDevice(device.id);
+  } catch (error) {
+    console.error('[DevicesMonitoring] delete error:', error);
+  }
+}
+
 onMounted(() => {
   if (!iamStore.sessionLoading) loadData();
 });
@@ -192,9 +203,11 @@ watch(() => iamStore.sessionLoading, (loading) => {
                 :warehouse-label="warehouseLabelFor(d.zoneId)"
                 :zone-label="zoneLabelFor(d.zoneId)"
                 :can-manage="canManageSensors"
+                :can-delete="canDeleteSensors"
                 @toggle-status="toggleDeviceStatus"
                 @record-reading="recordReading"
                 @unlink="unlinkDevice"
+                @delete="deleteDevice"
             />
           </div>
         </section>

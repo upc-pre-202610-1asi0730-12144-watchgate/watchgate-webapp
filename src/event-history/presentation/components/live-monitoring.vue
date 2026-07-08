@@ -1,30 +1,23 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { eventHistoryStore } from '../../application/event-history.store.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useWarehouseStore } from '../../../warehouse/application/warehouse.store.js';
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const iamStore = useIamStore();
 const warehouseStore = useWarehouseStore();
 
-const zoomLevel = ref(1);
 const warehouseId = computed(() => route.params.id);
 const warehouse = computed(() => warehouseStore.getWarehouseById(warehouseId.value));
 const zones = computed(() => warehouse.value?.zones ?? []);
 
-function goToDetail() {
-  router.push({ name: 'warehouse-detail-events', params: { id: warehouseId.value } });
-}
-
-function zoomIn() {
-  if (zoomLevel.value < 1.5) zoomLevel.value = +(zoomLevel.value + 0.1).toFixed(1);
-}
-
-function zoomOut() {
-  if (zoomLevel.value > 0.8) zoomLevel.value = +(zoomLevel.value - 0.1).toFixed(1);
+function goBack() {
+  router.push({ name: 'warehouse-list' });
 }
 
 function zoneSensors(zoneId) {
@@ -44,9 +37,9 @@ function secondsAgo(date) {
 }
 
 function relativeTime(seconds) {
-  if (seconds < 60) return `Hace ${seconds}s`;
-  if (seconds < 3600) return `Hace ${Math.floor(seconds / 60)}m`;
-  return `Hace ${Math.floor(seconds / 3600)}h`;
+  if (seconds < 60) return t('liveMonitoring.relative.seconds', { count: seconds });
+  if (seconds < 3600) return t('liveMonitoring.relative.minutes', { count: Math.floor(seconds / 60) });
+  return t('liveMonitoring.relative.hours', { count: Math.floor(seconds / 3600) });
 }
 
 function sensorPosition(sensor, index) {
@@ -76,22 +69,17 @@ onMounted(async () => {
 
 <template>
   <div class="live-page">
-    <button class="back-link" type="button" @click="goToDetail">
-      Volver al detalle del almacen
+    <button class="back-link" type="button" @click="goBack">
+      {{ t('liveMonitoring.back') }}
     </button>
 
     <header class="live-header">
       <div>
-        <h1>Monitoreo en Vivo</h1>
-        <p>{{ warehouse?.name ?? eventHistoryStore.currentWarehouse?.nombre ?? 'Almacen' }}</p>
+        <h1>{{ t('liveMonitoring.title') }}</h1>
+        <p>{{ warehouse?.name ?? eventHistoryStore.currentWarehouse?.nombre ?? t('liveMonitoring.warehouseFallback') }}</p>
       </div>
       <span class="live-badge">LIVE</span>
     </header>
-
-    <div class="zoom-controls">
-      <button type="button" @click="zoomIn">+</button>
-      <button type="button" @click="zoomOut">-</button>
-    </div>
 
     <section v-if="zones.length" class="zone-list">
       <article v-for="zone in zones" :key="zone.id" class="zone-card">
@@ -102,7 +90,7 @@ onMounted(async () => {
 
         <div class="zone-content">
           <div class="map-panel">
-            <div class="map" :style="{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }">
+            <div class="map">
               <div class="map-grid" />
               <div
                   v-for="(sensor, index) in zoneSensors(zone.id)"
@@ -114,13 +102,13 @@ onMounted(async () => {
                 <span class="sensor-label">{{ sensor.getEtiquetaMapa() }}</span>
               </div>
               <p v-if="!zoneSensors(zone.id).length" class="map-empty">
-                Sin sensores asignados.
+                {{ t('liveMonitoring.emptySensors') }}
               </p>
             </div>
           </div>
 
           <aside class="log-panel">
-            <h3>Console Log - Live</h3>
+            <h3>{{ t('liveMonitoring.consoleTitle') }}</h3>
             <ul>
               <li v-for="(entry, index) in zoneEvents(zone.id)" :key="entry.key" :class="{ latest: index === 0 }">
                 <span>{{ relativeTime(secondsAgo(entry.occurredAt)) }}</span>
@@ -130,7 +118,7 @@ onMounted(async () => {
                 </div>
               </li>
               <li v-if="!zoneEvents(zone.id).length" class="empty-log">
-                Sin eventos reales para esta zona.
+                {{ t('liveMonitoring.emptyEvents') }}
               </li>
             </ul>
           </aside>
@@ -138,7 +126,7 @@ onMounted(async () => {
       </article>
     </section>
 
-    <p v-else class="empty-state">Este almacen todavia no tiene zonas registradas.</p>
+    <p v-else class="empty-state">{{ t('liveMonitoring.emptyZones') }}</p>
   </div>
 </template>
 
@@ -200,22 +188,6 @@ onMounted(async () => {
   50% { opacity: 0.65; }
 }
 
-.zoom-controls {
-  display: flex;
-  gap: 6px;
-  justify-content: flex-end;
-}
-
-.zoom-controls button {
-  background: #1c2230;
-  border: 1px solid #30363d;
-  border-radius: 6px;
-  color: #e6edf3;
-  cursor: pointer;
-  height: 32px;
-  width: 32px;
-}
-
 .zone-list {
   display: flex;
   flex-direction: column;
@@ -265,7 +237,6 @@ onMounted(async () => {
 .map {
   height: 260px;
   position: relative;
-  transition: transform 0.2s ease;
 }
 
 .map-grid {
