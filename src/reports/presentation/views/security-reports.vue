@@ -31,7 +31,6 @@ const form = ref({
   from: previousWeek,
   to: today,
   warehouseId: '',
-  format: 'PDF',
 });
 
 const scheduleForm = ref({
@@ -102,7 +101,7 @@ function generateReport() {
     warehouseId: form.value.warehouseId ? Number(form.value.warehouseId) : null,
     from: `${form.value.from}T00:00:00`,
     to: `${form.value.to}T23:59:59`,
-    format: form.value.format,
+    format: 'PDF',
   }).then(report => {
     reports.value = [report, ...reports.value];
     successMessage.value = t('reports.messages.generated');
@@ -220,13 +219,6 @@ watch(() => iamStore.sessionLoading, (loading) => {
             </option>
           </select>
         </label>
-        <label>
-          {{ t('reports.form.format') }}
-          <select v-model="form.format">
-            <option value="PDF">PDF</option>
-            <option value="TXT">TXT</option>
-          </select>
-        </label>
         <button type="submit" :disabled="generating">{{ generating ? t('reports.actions.generating') : t('reports.actions.generate') }}</button>
       </form>
     </section>
@@ -335,7 +327,8 @@ h1, h2, h3, p { margin-top: 0; }
 .metrics strong { display: block; color: #fff; font-size: 1.6rem; }
 .metrics span { color: #94a3b8; font-size: 0.8rem; }
 .panel h2 { font-size: 1rem; margin-bottom: 1rem; }
-.report-form, .schedule-form { display: grid; grid-template-columns: repeat(5, minmax(130px, 1fr)); gap: 0.9rem; align-items: end; }
+.report-form { display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)); gap: 0.9rem; align-items: end; }
+.schedule-form { display: grid; grid-template-columns: repeat(5, minmax(130px, 1fr)); gap: 0.9rem; align-items: end; }
 label { display: flex; flex-direction: column; gap: 0.35rem; color: #cbd5e1; font-size: 0.85rem; }
 input, select { background: #0a1726; border: 1px solid #1e2d42; color: #fff; border-radius: 6px; min-height: 42px; padding: 0.65rem 0.75rem; }
 button { background: #3b82f6; border: 0; border-radius: 6px; color: #fff; cursor: pointer; font-weight: 700; min-height: 42px; padding: 0.65rem 0.85rem; }

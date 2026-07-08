@@ -15,7 +15,6 @@ import { useIamStore } from "./iam/application/iam.store.js";
 
 const app = createApp(App)
     .use(i18n)
-    .use(router)
     .use(pinia)
     .use(PrimeVue, { ripple: true, theme: { preset: Material }})
     .component('pv-button', Button)
@@ -37,5 +36,6 @@ const app = createApp(App)
 // warehouse-list) would race against this async call and never load.
 const iamStore = useIamStore(pinia);
 iamStore.restoreSession().finally(() => {
+    app.use(router);
     app.mount('#app');
 });

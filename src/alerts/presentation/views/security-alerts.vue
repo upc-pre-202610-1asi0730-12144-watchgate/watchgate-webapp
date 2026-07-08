@@ -18,6 +18,7 @@ const loading = ref(false);
 const saving = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
+const actionLog = ref({});
 
 const form = ref({
   type: 'DOOR_OPEN',
@@ -130,6 +131,7 @@ function createAlert() {
     companyId,
   }).then(created => {
     alerts.value = [created, ...alerts.value];
+    appendLog(`alert-${created.id}`, `Alert created with severity ${created.severity}`);
     form.value.description = '';
     incidentForm.value.relatedAlertId = created.id;
     successMessage.value = t('alerts.messages.created');
@@ -141,13 +143,14 @@ function createAlert() {
   });
 }
 
-function updateAlert(alertId, action) {
+function updateAlert(alertId, action, actionLabel = 'Updated') {
   if (!iamStore.canManageAlerts) return;
   errorMessage.value = '';
   successMessage.value = '';
   action(alertId)
       .then(updated => {
         alerts.value = alerts.value.map(alert => alert.id === updated.id ? updated : alert);
+        appendLog(`alert-${updated.id}`, `${actionLabel}: status ${updated.status}, severity ${updated.severity}`);
         successMessage.value = t('alerts.messages.updated');
       })
       .catch(error => {
@@ -157,7 +160,7 @@ function updateAlert(alertId, action) {
 }
 
 function classify(alert, severity) {
-  updateAlert(alert.id, () => alertsApi.classifyPriority(alert.id, severity));
+  updateAlert(alert.id, () => alertsApi.classifyPriority(alert.id, severity), `Classified as ${severity}`);
 }
 
 function createIncident() {
@@ -180,6 +183,7 @@ function createIncident() {
     relatedAlertId: incidentForm.value.relatedAlertId ? Number(incidentForm.value.relatedAlertId) : null,
   }).then(created => {
     incidents.value = [created, ...incidents.value];
+    appendLog(`incident-${created.id}`, `Incident created with priority ${created.priority}`);
     incidentForm.value.description = '';
     successMessage.value = t('alerts.messages.incidentCreated');
   }).catch(error => {
@@ -195,6 +199,7 @@ function closeIncident(incidentId) {
   alertsApi.closeIncident(incidentId)
       .then(updated => {
         incidents.value = incidents.value.map(incident => incident.id === updated.id ? updated : incident);
+        appendLog(`incident-${updated.id}`, `Incident closed with status ${updated.status}`);
         successMessage.value = t('alerts.messages.incidentClosed');
       })
       .catch(error => {
@@ -208,6 +213,126 @@ function sensorLabel(sensorId) {
   if (!sensor) return `${t('alerts.form.sensor')} ${sensorId}`;
   const zone = allZones.value.find(item => item.id === sensor.zoneId);
   return zone ? `${sensor.name} - ${zone.warehouseName} / ${zone.name}` : sensor.name;
+}
+
+function sensorInfo(sensorId) {
+  const sensor = devicesStore.devices.find(device => device.id === sensorId);
+  if (!sensor) {
+    return {
+      sensorName: `${t('alerts.form.sensor')} ${sensorId}`,
+      warehouseName: '-',
+      zoneName: '-'
+    };
+  }
+
+  const zone = allZones.value.find(item => Number(item.id) === Number(sensor.zoneId));
+  return {
+    sensorName: sensor.name,
+    warehouseName: zone?.warehouseName ?? '-',
+    zoneName: zone?.name ?? '-'
+  };
+}
+
+function appendLog(key, message) {
+  const entry = `${new Date().toLocaleString()} - ${message}`;
+  actionLog.value = {
+    ...actionLog.value,
+    [key]: [...(actionLog.value[key] ?? []), entry]
+  };
+}
+
+function buildAlertLog(alert) {
+  const info = sensorInfo(alert.sensorId);
+  const lines = [
+    'LockSight Alert Trace',
+    `Alert ID: ${alert.id}`,
+    `Type: ${alert.type}`,
+    `Severity: ${alert.severity}`,
+    `Status: ${alert.status}`,
+    `Warehouse: ${info.warehouseName}`,
+    `Zone: ${info.zoneName}`,
+    `Sensor: ${info.sensorName}`,
+    `Description: ${alert.description}`,
+    `Triggered at: ${formatDate(alert.triggeredAt)}`,
+    '',
+    'Actions',
+    ...(actionLog.value[`alert-${alert.id}`] ?? ['No session actions recorded.'])
+  ];
+  return lines.join('\n');
+}
+
+function buildIncidentLog(incident) {
+  const relatedAlert = alerts.value.find(alert => Number(alert.id) === Number(incident.relatedAlertId));
+  const lines = [
+    'LockSight Incident Trace',
+    `Incident ID: ${incident.id}`,
+    `Title: ${incident.title}`,
+    `Priority: ${incident.priority}`,
+    `Status: ${incident.status}`,
+    `Related alert: ${relatedAlert ? `${relatedAlert.type} #${relatedAlert.id}` : '-'}`,
+    `Description: ${incident.description}`,
+    `Created at: ${formatDate(incident.createdAt)}`,
+    '',
+    'Actions',
+    ...(actionLog.value[`incident-${incident.id}`] ?? ['No session actions recorded.'])
+  ];
+  return lines.join('\n');
+}
+
+function downloadText(filename, content) {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadAlertTxt(alert) {
+  downloadText(`alert-${alert.id}-trace.txt`, buildAlertLog(alert));
+}
+
+function downloadIncidentTxt(incident) {
+  downloadText(`incident-${incident.id}-trace.txt`, buildIncidentLog(incident));
+}
+
+function printLog(title, content) {
+  const win = window.open('', '_blank', 'width=820,height=900');
+  if (!win) return;
+  win.document.write(`
+    <html>
+      <head>
+        <title>${title}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 32px; color: #111827; }
+          h1 { margin-top: 0; }
+          pre { white-space: pre-wrap; font-size: 14px; line-height: 1.55; }
+        </style>
+      </head>
+      <body>
+        <h1>${title}</h1>
+        <pre>${content.replace(/[&<>"']/g, value => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[value]))}</pre>
+      </body>
+    </html>
+  `);
+  win.document.close();
+  win.focus();
+  win.print();
+}
+
+function downloadAlertPdf(alert) {
+  printLog(`Alert ${alert.id} trace`, buildAlertLog(alert));
+}
+
+function downloadIncidentPdf(incident) {
+  printLog(`Incident ${incident.id} trace`, buildIncidentLog(incident));
 }
 
 function formatDate(value) {
@@ -311,16 +436,32 @@ watch(() => iamStore.sessionLoading, ensureData);
             <span class="severity" :class="alert.severity.toLowerCase()">{{ alert.severity }}</span>
             <h3>{{ alert.type }}</h3>
             <p>{{ alert.description }}</p>
-            <small>{{ sensorLabel(alert.sensorId) }} - {{ formatDate(alert.triggeredAt) }}</small>
+            <dl class="alert-details">
+              <div>
+                <dt>Warehouse</dt>
+                <dd>{{ sensorInfo(alert.sensorId).warehouseName }}</dd>
+              </div>
+              <div>
+                <dt>Zone</dt>
+                <dd>{{ sensorInfo(alert.sensorId).zoneName }}</dd>
+              </div>
+              <div>
+                <dt>Sensor</dt>
+                <dd>{{ sensorInfo(alert.sensorId).sensorName }}</dd>
+              </div>
+            </dl>
+            <small>{{ formatDate(alert.triggeredAt) }}</small>
           </div>
           <div class="alert-side">
             <span class="status">{{ alert.status }}</span>
-            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.acknowledge.bind(alertsApi))">{{ t('alerts.actions.acknowledge') }}</button>
-            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.markAsAttended.bind(alertsApi))">{{ t('alerts.actions.attend') }}</button>
-            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.escalate.bind(alertsApi))">{{ t('alerts.actions.escalate') }}</button>
-            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.flagAsFalseAlarm.bind(alertsApi))">{{ t('alerts.actions.falseAlarm') }}</button>
-            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.resolve.bind(alertsApi))">{{ t('alerts.actions.resolve') }}</button>
+            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.acknowledge.bind(alertsApi), t('alerts.actions.acknowledge'))">{{ t('alerts.actions.acknowledge') }}</button>
+            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.markAsAttended.bind(alertsApi), t('alerts.actions.attend'))">{{ t('alerts.actions.attend') }}</button>
+            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.escalate.bind(alertsApi), t('alerts.actions.escalate'))">{{ t('alerts.actions.escalate') }}</button>
+            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.flagAsFalseAlarm.bind(alertsApi), t('alerts.actions.falseAlarm'))">{{ t('alerts.actions.falseAlarm') }}</button>
+            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.resolve.bind(alertsApi), t('alerts.actions.resolve'))">{{ t('alerts.actions.resolve') }}</button>
             <button v-if="iamStore.canManageAlerts" @click="classify(alert, 'CRITICAL')">{{ t('alerts.actions.classifyCritical') }}</button>
+            <button @click="downloadAlertTxt(alert)">TXT log</button>
+            <button @click="downloadAlertPdf(alert)">PDF log</button>
           </div>
         </article>
       </div>
@@ -342,6 +483,8 @@ watch(() => iamStore.sessionLoading, ensureData);
             <button v-if="iamStore.canManageAlerts" :disabled="incident.status === 'CLOSED'" @click="closeIncident(incident.id)">
               {{ t('alerts.incidents.close') }}
             </button>
+            <button @click="downloadIncidentTxt(incident)">TXT log</button>
+            <button @click="downloadIncidentPdf(incident)">PDF log</button>
           </div>
         </article>
       </div>
@@ -374,6 +517,10 @@ button:disabled { opacity: 0.65; cursor: progress; }
 .alert-card { display: flex; justify-content: space-between; gap: 1rem; background: #0a1726; border: 1px solid #1e2d42; border-radius: 8px; padding: 1rem; }
 .alert-main h3 { margin: 0.4rem 0; font-size: 1rem; }
 .alert-main p { margin-bottom: 0.45rem; color: #cbd5e1; }
+.alert-details { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 0.55rem; margin: 0.75rem 0; }
+.alert-details div { background: rgba(15, 23, 42, 0.75); border: 1px solid #1e2d42; border-radius: 6px; padding: 0.55rem; }
+.alert-details dt { color: #94a3b8; font-size: 0.7rem; text-transform: uppercase; font-weight: 800; }
+.alert-details dd { margin: 0.15rem 0 0; color: #e5eefb; font-size: 0.82rem; }
 .severity { display: inline-block; border-radius: 999px; padding: 0.15rem 0.55rem; font-size: 0.72rem; font-weight: 800; }
 .severity.low { background: #12351f; color: #4ade80; }
 .severity.medium { background: #3a2f10; color: #fbbf24; }

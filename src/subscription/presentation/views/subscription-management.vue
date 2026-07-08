@@ -19,9 +19,9 @@ const showPaymentDialog = ref(false);
 const selectedPlan = ref(null);
 const paymentForm = ref({
     cardholder: '',
-    cardNumber: '4242 4242 4242 4242',
-    expiration: '12/28',
-    cvv: '123',
+    cardNumber: '',
+    expiration: '',
+    cvv: '',
 });
 
 const activeSubscription = computed(() =>
@@ -79,8 +79,17 @@ function loadSubscriptionData() {
 function selectPlan(plan) {
     if (actionLoading.value) return;
     selectedPlan.value = plan;
-    paymentForm.value.cardholder = iamStore.currentUser?.fullName ?? '';
+    resetPaymentForm();
     showPaymentDialog.value = true;
+}
+
+function resetPaymentForm() {
+    paymentForm.value = {
+        cardholder: '',
+        cardNumber: '',
+        expiration: '',
+        cvv: '',
+    };
 }
 
 function confirmPlanAndPayment() {
@@ -144,7 +153,7 @@ function cancelCurrentSubscription() {
 function processPayment() {
     if (!activeSubscription.value || actionLoading.value) return;
     selectedPlan.value = currentPlan.value;
-    paymentForm.value.cardholder = iamStore.currentUser?.fullName ?? '';
+    resetPaymentForm();
     showPaymentDialog.value = true;
 }
 
@@ -158,7 +167,7 @@ function processActiveSubscriptionPayment() {
     subscriptionApi.processPayment({
         subscriptionId: activeSubscription.value.id,
         currency: 'USD',
-        providerReference: `STRIPE-${Date.now()}`,
+            providerReference: `SIM-${Date.now()}`,
         simulateFailure: false,
     }).then(invoice => {
         invoices.value = [invoice, ...invoices.value];

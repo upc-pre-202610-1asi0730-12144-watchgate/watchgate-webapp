@@ -9,6 +9,8 @@ import { eventHistoryRoutes } from "./event-history/presentation/event-history.r
 import alertsRoutes from "./alerts/presentation/alerts.routes.js";
 import reportsRoutes from "./reports/presentation/reports.routes.js";
 import subscriptionRoutes from "./subscription/presentation/subscription.routes.js";
+import pinia from "./pinia.js";
+import { useIamStore } from "./iam/application/iam.store.js";
 
 const routes = [
     {
@@ -32,7 +34,7 @@ const routes = [
                 path: 'team-access',
                 name: 'team-access',
                 component: () => import('./iam/presentation/views/team-access.vue'),
-                meta: { title: 'Team & Access', requiresAuth: true }
+                meta: { title: 'Team & Access', requiresAuth: true, requiredPermission: 'TEAM_MANAGE' }
             },
             ...eventHistoryRoutes,
             ...alertsRoutes,
@@ -54,8 +56,22 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from) => {
+    const iamStore = useIamStore(pinia);
     console.log(`Navigating from ${String(from.name)} to ${String(to.name)}`);
     document.title = `LockSight - ${to.meta['title'] || 'App'}`;
+
+    if (to.meta.requiresAuth && !iamStore.currentUser && !iamStore.sessionLoading) {
+        return { path: '/iam/sign-in' };
+    }
+
+    if (to.meta.requiredPermission && !iamStore.hasPermission(to.meta.requiredPermission)) {
+        return { path: '/layout/warehouses' };
+    }
+
+    if (to.meta.requiredAnyPermission) {
+        const hasAnyPermission = to.meta.requiredAnyPermission.some(permission => iamStore.hasPermission(permission));
+        if (!hasAnyPermission) return { path: '/layout/warehouses' };
+    }
 });
 
 export default router;
