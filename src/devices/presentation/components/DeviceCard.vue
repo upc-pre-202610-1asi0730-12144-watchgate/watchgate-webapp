@@ -3,7 +3,9 @@ import { computed } from 'vue';
 
 const props = defineProps({
   device: { type: Object, required: true },
+  warehouseLabel: { type: String, default: '' },
   zoneLabel: { type: String, default: '' },
+  canManage: { type: Boolean, default: true },
 });
 
 const emit = defineEmits(['toggle-status', 'record-reading', 'unlink']);
@@ -19,7 +21,10 @@ const TYPE_ICONS = {
 const deviceIcon = computed(() => TYPE_ICONS[props.device.type] ?? 'pi-wifi');
 const statusColor = computed(() => props.device.isOnline ? '#22C55E' : '#EF4444');
 const statusLabel = computed(() => props.device.isOnline ? 'Online' : 'Offline');
-const subtitle = computed(() => props.zoneLabel || `Zone #${props.device.zoneId}`);
+const subtitle = computed(() => {
+  const zone = props.zoneLabel || `Zone #${props.device.zoneId}`;
+  return props.warehouseLabel ? `${props.warehouseLabel} - ${zone}` : zone;
+});
 const readingLabel = computed(() => {
   if (props.device.lastReading === null || props.device.lastReading === undefined) return '';
   return `${props.device.lastReading}${props.device.unit ? ' ' + props.device.unit : ''}`;
@@ -44,17 +49,33 @@ const readingLabel = computed(() => {
       <span :style="{ color: statusColor }">{{ statusLabel }}</span>
     </div>
 
-    <div class="device-actions">
-      <button type="button" :title="$t('devices.actions.recordReading')" @click="emit('record-reading', device)">
+    <div v-if="canManage" class="device-actions">
+      <button
+          type="button"
+          :title="$t('devices.actions.recordReadingHint')"
+          :aria-label="$t('devices.actions.recordReading')"
+          @click="emit('record-reading', device)"
+      >
         <i class="pi pi-chart-line" />
       </button>
-      <button type="button" :title="$t('devices.actions.toggleStatus')" @click="emit('toggle-status', device)">
+      <button
+          type="button"
+          :title="$t('devices.actions.toggleStatusHint')"
+          :aria-label="$t('devices.actions.toggleStatus')"
+          @click="emit('toggle-status', device)"
+      >
         <i class="pi pi-power-off" />
       </button>
-      <button type="button" :title="$t('devices.actions.unlink')" @click="emit('unlink', device)">
+      <button
+          type="button"
+          :title="$t('devices.actions.unlinkHint')"
+          :aria-label="$t('devices.actions.unlink')"
+          @click="emit('unlink', device)"
+      >
         <i class="pi pi-times" />
       </button>
     </div>
+    <span v-else class="read-only-pill">{{ $t('common.readOnly') }}</span>
   </div>
 </template>
 
@@ -144,5 +165,17 @@ const readingLabel = computed(() => {
 .device-actions button:hover {
   border-color: #3b82f6;
   color: #fff;
+}
+
+.read-only-pill {
+  background: rgba(148, 163, 184, 0.14);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+  color: #cbd5e1;
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.25rem 0.55rem;
+  text-transform: uppercase;
 }
 </style>

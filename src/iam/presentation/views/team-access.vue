@@ -43,9 +43,9 @@ const zoneOptions = computed(() => allZones.value.map(zone => ({
 })));
 
 const form = reactive({
-  fullName: 'Bardales Tejada, Luis Alexis',
-  email: 'luis.bardales@locksight.com',
-  password: 'Bardales_24',
+  fullName: '',
+  email: '',
+  password: '',
   role: 'SecurityOperator',
   permissions: ['ALERTS_MANAGE', 'REPORTS_VIEW'],
   zoneId: null,

@@ -108,14 +108,14 @@ export const eventHistoryStore = reactive({
             }
 
             const warehouse = warehouseStore.getWarehouseById(warehouseId)
-            const zoneIds = warehouse?.zones?.map(zone => zone.id) ?? []
+            const zoneIds = warehouse?.zones?.map(zone => Number(zone.id)) ?? []
             if (zoneIds.length === 0) {
                 this.sensors = []
                 return
             }
 
             const sensorResources = await devicesApi.getAllByCompanyId(companyId)
-            const sensorsInWarehouse = sensorResources.filter(sensor => zoneIds.includes(sensor.zoneId))
+            const sensorsInWarehouse = sensorResources.filter(sensor => zoneIds.includes(Number(sensor.zoneId)))
             this.sensors = sensorsInWarehouse.map(SensorAssembler.toEntityFromResource)
         } catch (error) {
             console.error('[eventHistoryStore] Error al cargar sensores:', error)

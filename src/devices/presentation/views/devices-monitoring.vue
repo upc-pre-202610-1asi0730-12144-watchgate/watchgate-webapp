@@ -42,16 +42,40 @@ const zoneOptions = computed(() => allZones.value.map(zone => ({
   value: zone.id,
 })));
 
+const devicesByWarehouse = computed(() => {
+  return store.devices.reduce((groups, device) => {
+    const warehouseName = warehouseLabelFor(device.zoneId) || t('devices.unassignedWarehouse');
+    const type = device.type || 'UNKNOWN';
+
+    if (!groups[warehouseName]) groups[warehouseName] = {};
+    if (!groups[warehouseName][type]) groups[warehouseName][type] = [];
+
+    groups[warehouseName][type].push(device);
+    return groups;
+  }, {});
+});
+
+const canManageSensors = computed(() => iamStore.canManageSensors);
+
+function zoneFor(zoneId) {
+  return allZones.value.find(z => Number(z.id) === Number(zoneId));
+}
+
+function warehouseLabelFor(zoneId) {
+  return zoneFor(zoneId)?.warehouseName ?? '';
+}
+
 function zoneLabelFor(zoneId) {
-  const zone = allZones.value.find(z => z.id === zoneId);
-  return zone ? `${zone.warehouseName} - ${zone.name}` : '';
+  return zoneFor(zoneId)?.name ?? '';
 }
 
 function onLinkClick() {
+  if (!canManageSensors.value) return;
   store.isAtLimit ? (showLimitDialog.value = true) : (showDeviceDialog.value = true);
 }
 
 async function onDeviceSubmit(payload) {
+  if (!canManageSensors.value) return;
   linkLoading.value = true;
   try {
     const device = await store.addDevice(payload);
@@ -82,6 +106,7 @@ function loadData() {
 }
 
 async function toggleDeviceStatus(device) {
+  if (!canManageSensors.value) return;
   const nextStatus = device.isOnline ? 'INACTIVE' : 'ACTIVE';
   try {
     await store.updateDeviceStatus(device.id, nextStatus);
@@ -91,6 +116,7 @@ async function toggleDeviceStatus(device) {
 }
 
 async function recordReading(device) {
+  if (!canManageSensors.value) return;
   const defaultValue = device.type === 'MOTION' || device.type === 'DOOR' ? '1' : '24';
   const value = window.prompt(t('devices.actions.readingPrompt'), defaultValue);
   if (value === null) return;
@@ -104,6 +130,7 @@ async function recordReading(device) {
 }
 
 async function unlinkDevice(device) {
+  if (!canManageSensors.value) return;
   if (!window.confirm(t('devices.actions.unlinkConfirm', { name: device.name }))) return;
   try {
     await store.unlinkDevice(device.id);
@@ -128,7 +155,8 @@ watch(() => iamStore.sessionLoading, (loading) => {
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <h1 style="margin:0;color:#fff;font-size:1.2rem;font-weight:700;">{{ t('devices.title') }}</h1>
-      <button @click="onLinkClick"
+      <button v-if="canManageSensors"
+              @click="onLinkClick"
               style="background:#3B82F6;color:#fff;border:none;border-radius:8px;
                        padding:8px 18px;font-size:0.85rem;font-weight:600;cursor:pointer;">
         + {{ t('devices.linkNew') }}
@@ -146,22 +174,30 @@ watch(() => iamStore.sessionLoading, (loading) => {
     </div>
 
     <template v-else>
-      <!-- Sensors grouped by type -->
-      <section v-for="(group, type) in store.devicesByType" :key="type" v-show="group.length">
-        <h2 style="color:#CBD5E1;font-size:0.8rem;font-weight:600;margin:0 0 12px;text-transform:uppercase;">
-          {{ type }} ({{ group.length }})
+      <!-- Sensors grouped by warehouse and type -->
+      <section v-for="(typeGroups, warehouseName) in devicesByWarehouse" :key="warehouseName">
+        <h2 style="color:#E2E8F0;font-size:0.92rem;font-weight:700;margin:0 0 12px;text-transform:uppercase;">
+          {{ warehouseName }}
         </h2>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
-          <DeviceCard
-              v-for="d in group"
-              :key="d.id"
-              :device="d"
-              :zone-label="zoneLabelFor(d.zoneId)"
-              @toggle-status="toggleDeviceStatus"
-              @record-reading="recordReading"
-              @unlink="unlinkDevice"
-          />
-        </div>
+
+        <section v-for="(group, type) in typeGroups" :key="`${warehouseName}-${type}`" v-show="group.length">
+          <h3 style="color:#94A3B8;font-size:0.75rem;font-weight:600;margin:0 0 10px;text-transform:uppercase;">
+            {{ type }} ({{ group.length }})
+          </h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:16px;">
+            <DeviceCard
+                v-for="d in group"
+                :key="d.id"
+                :device="d"
+                :warehouse-label="warehouseLabelFor(d.zoneId)"
+                :zone-label="zoneLabelFor(d.zoneId)"
+                :can-manage="canManageSensors"
+                @toggle-status="toggleDeviceStatus"
+                @record-reading="recordReading"
+                @unlink="unlinkDevice"
+            />
+          </div>
+        </section>
       </section>
 
       <!-- Empty -->
@@ -176,6 +212,6 @@ watch(() => iamStore.sessionLoading, (loading) => {
     <!-- Dialogs -->
     <DeviceDialog v-model:visible="showDeviceDialog" :zone-options="zoneOptions" :loading="linkLoading" @submit="onDeviceSubmit" />
     <LimitWarningDialog v-model:visible="showLimitDialog" :limit="store.deviceLimit" @upgrade="showLimitDialog = false" />
-    <SuccessDialog v-model:visible="showSuccessDialog" :zone="zoneLabelFor(lastLinkedDevice?.zoneId)" />
+    <SuccessDialog v-model:visible="showSuccessDialog" :zone="`${warehouseLabelFor(lastLinkedDevice?.zoneId)} - ${zoneLabelFor(lastLinkedDevice?.zoneId)}`" />
   </div>
 </template>

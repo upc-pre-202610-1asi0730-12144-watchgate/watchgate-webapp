@@ -1,219 +1,396 @@
-<script setup lang="js">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { eventHistoryStore } from '../../application/event-history.store.js'
+<script setup>
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { eventHistoryStore } from '../../application/event-history.store.js';
+import { useIamStore } from '../../../iam/application/iam.store.js';
+import { useWarehouseStore } from '../../../warehouse/application/warehouse.store.js';
 
-const router = useRouter()
-const route = useRoute()
+const route = useRoute();
+const router = useRouter();
+const iamStore = useIamStore();
+const warehouseStore = useWarehouseStore();
 
-const zoomLevel = ref(1)
-const liveLog = ref([])
-let liveInterval = null
+const zoomLevel = ref(1);
+const warehouseId = computed(() => route.params.id);
+const warehouse = computed(() => warehouseStore.getWarehouseById(warehouseId.value));
+const zones = computed(() => warehouse.value?.zones ?? []);
 
-const MENSAJES_LIVE = [
-  { titulo: 'Movimiento en Zona de Carga', desc: 'Sensor S3 disparado', tipo: 'alerta' },
-  { titulo: 'Cámara Zxxd-01 Activada', desc: 'Grabación automática iniciada', tipo: 'advertencia' },
-  { titulo: 'Sensor S1 (Puerta) Cerrado', desc: 'Lectura normal', tipo: 'normal' },
-  { titulo: 'Sistema inicializado', desc: 'Ping de red exitoso (12ms)', tipo: 'normal' },
-  { titulo: 'Acceso detectado - Zona Inv.', desc: 'Verificando credenciales', tipo: 'advertencia' },
-  { titulo: 'Alerta: Temperatura elevada', desc: 'Zona de carga, sensor T2', tipo: 'alerta' },
-]
+function goToDetail() {
+  router.push({ name: 'warehouse-detail-events', params: { id: warehouseId.value } });
+}
 
-const tiempoRelativo = (segundos) => {
-  if (segundos < 60) return `Hace ${segundos}s`
-  return `Hace ${Math.floor(segundos / 60)}m`
+function zoomIn() {
+  if (zoomLevel.value < 1.5) zoomLevel.value = +(zoomLevel.value + 0.1).toFixed(1);
+}
+
+function zoomOut() {
+  if (zoomLevel.value > 0.8) zoomLevel.value = +(zoomLevel.value - 0.1).toFixed(1);
+}
+
+function zoneSensors(zoneId) {
+  return eventHistoryStore.sensors.filter(sensor => Number(sensor.zoneId) === Number(zoneId));
+}
+
+function zoneEvents(zoneId) {
+  const sensorIds = new Set(zoneSensors(zoneId).map(sensor => Number(sensor.id)));
+  return eventHistoryStore.events
+      .filter(event => !event.sensorId || sensorIds.has(Number(event.sensorId)))
+      .slice(0, 6);
+}
+
+function secondsAgo(date) {
+  const value = date instanceof Date ? date : new Date(date);
+  return Math.max(1, Math.floor((Date.now() - value.getTime()) / 1000));
+}
+
+function relativeTime(seconds) {
+  if (seconds < 60) return `Hace ${seconds}s`;
+  if (seconds < 3600) return `Hace ${Math.floor(seconds / 60)}m`;
+  return `Hace ${Math.floor(seconds / 3600)}h`;
+}
+
+function sensorPosition(sensor, index) {
+  const seed = Number(sensor.id) || index + 1;
+  return {
+    left: `${12 + (seed * 31) % 76}%`,
+    top: `${16 + (seed * 47) % 68}%`,
+  };
+}
+
+function dotClass(sensor) {
+  return sensor.status === 'ACTIVE' ? 'dot-green' : 'dot-red';
 }
 
 onMounted(async () => {
-  const warehouseId = route.params.id
+  const companyId = iamStore.currentUser?.companyId;
+  if (!warehouseStore.warehousesLoaded && companyId) {
+    await warehouseStore.fetchWarehouses(companyId);
+  }
+
   await Promise.all([
-    eventHistoryStore.loadEvents(warehouseId),
-    eventHistoryStore.loadSensors(warehouseId),
-  ])
-
-  liveLog.value = MENSAJES_LIVE.map((m, i) => ({
-    id: Date.now() + i,
-    titulo: m.titulo,
-    desc: m.desc,
-    tipo: m.tipo,
-    segundos: [2, 45, 180, 720, 1800, 3600][i] ?? i * 60,
-  }))
-
-  liveInterval = setInterval(() => {
-    const msg = MENSAJES_LIVE[Math.floor(Math.random() * MENSAJES_LIVE.length)]
-    liveLog.value.unshift({ id: Date.now(), titulo: msg.titulo, desc: msg.desc, tipo: msg.tipo, segundos: 1 })
-    if (liveLog.value.length > 10) liveLog.value.pop()
-  }, 8000)
-})
-
-onUnmounted(() => { if (liveInterval) clearInterval(liveInterval) })
-
-const zoomIn  = () => { if (zoomLevel.value < 1.6) zoomLevel.value = +(zoomLevel.value + 0.1).toFixed(1) }
-const zoomOut = () => { if (zoomLevel.value > 0.7) zoomLevel.value = +(zoomLevel.value - 0.1).toFixed(1) }
-
-const irADetalle = () => {
-  router.push({ name: 'warehouse-detail-events', params: { id: route.params.id } })
-}
-
-const dotClass = (sensor) => {
-  const color = sensor.getColorEstado()
-  if (color === '#ef4444') return 'dot-rojo'
-  if (color === '#f59e0b') return 'dot-amarillo'
-  return 'dot-verde'
-}
-
-const bloquearPuertas = () => {
-  liveLog.value.unshift({ id: Date.now(), titulo: '🔒 Bloqueo de puertas activado', desc: 'Todas las puertas bloqueadas por operador', tipo: 'alerta', segundos: 0 })
-}
+    eventHistoryStore.loadEvents(warehouseId.value),
+    eventHistoryStore.loadSensors(warehouseId.value),
+  ]);
+});
 </script>
 
 <template>
-  <div class="lm-page">
-    <a class="lm-back-link" @click="irADetalle">← Volver al detalle del almacén</a>
+  <div class="live-page">
+    <button class="back-link" type="button" @click="goToDetail">
+      Volver al detalle del almacen
+    </button>
 
-    <div class="lm-heading">
-      <h1 class="lm-title">Monitoreo en Vivo</h1>
-      <span class="lm-badge-live">LIVE</span>
+    <header class="live-header">
+      <div>
+        <h1>Monitoreo en Vivo</h1>
+        <p>{{ warehouse?.name ?? eventHistoryStore.currentWarehouse?.nombre ?? 'Almacen' }}</p>
+      </div>
+      <span class="live-badge">LIVE</span>
+    </header>
+
+    <div class="zoom-controls">
+      <button type="button" @click="zoomIn">+</button>
+      <button type="button" @click="zoomOut">-</button>
     </div>
-    <p class="lm-subtitle">{{ eventHistoryStore.currentWarehouse?.nombre ?? 'Almacén' }}</p>
 
-    <div class="lm-body">
-      <!-- Panel mapa -->
-      <div class="lm-map-panel">
-        <div class="lm-map-wrapper">
-          <div class="lm-map" :style="{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }">
-            <div class="map-grid" />
-            <div class="map-zone zone-carga">ZONA DE CARGA</div>
-            <div class="map-zone zone-inventario">INVENTARIO</div>
-            <div
-                v-for="sensor in eventHistoryStore.sensors"
-                :key="sensor.id"
-                class="sensor-pin"
-                :style="{ left: sensor.posicion.x + '%', top: sensor.posicion.y + '%' }"
-            >
-              <span :class="['sensor-pin-dot', dotClass(sensor)]" />
-              <span class="sensor-pin-label">{{ sensor.getEtiquetaMapa() }}</span>
+    <section v-if="zones.length" class="zone-list">
+      <article v-for="zone in zones" :key="zone.id" class="zone-card">
+        <div class="zone-title">
+          <h2>{{ zone.name }}</h2>
+          <span>{{ zone.riskLevel }}</span>
+        </div>
+
+        <div class="zone-content">
+          <div class="map-panel">
+            <div class="map" :style="{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }">
+              <div class="map-grid" />
+              <div
+                  v-for="(sensor, index) in zoneSensors(zone.id)"
+                  :key="sensor.id"
+                  class="sensor-pin"
+                  :style="sensorPosition(sensor, index)"
+              >
+                <span :class="['sensor-dot', dotClass(sensor)]" />
+                <span class="sensor-label">{{ sensor.getEtiquetaMapa() }}</span>
+              </div>
+              <p v-if="!zoneSensors(zone.id).length" class="map-empty">
+                Sin sensores asignados.
+              </p>
             </div>
           </div>
-        </div>
-        <div class="zoom-controls">
-          <button class="zoom-btn" @click="zoomIn">+</button>
-          <button class="zoom-btn" @click="zoomOut">−</button>
-        </div>
-      </div>
 
-      <!-- Console Log -->
-      <div class="lm-log-panel">
-        <h3 class="log-title">Console Log - Live</h3>
-        <ul class="log-list">
-          <li v-for="(entry, idx) in liveLog" :key="entry.id" :class="['log-entry', { 'log-entry--latest': idx === 0 }]">
-            <span class="log-tiempo">{{ tiempoRelativo(entry.segundos) }}</span>
-            <div class="log-body">
-              <span class="log-titulo">{{ entry.titulo }}</span>
-              <span class="log-desc">{{ entry.desc }}</span>
-            </div>
-          </li>
-        </ul>
-        <button class="btn-lockdown" @click="bloquearPuertas">🔒 Bloquear Todas las Puertas</button>
-      </div>
-    </div>
+          <aside class="log-panel">
+            <h3>Console Log - Live</h3>
+            <ul>
+              <li v-for="(entry, index) in zoneEvents(zone.id)" :key="entry.key" :class="{ latest: index === 0 }">
+                <span>{{ relativeTime(secondsAgo(entry.occurredAt)) }}</span>
+                <div>
+                  <strong>{{ entry.heading }}</strong>
+                  <small>{{ entry.description || entry.status }}</small>
+                </div>
+              </li>
+              <li v-if="!zoneEvents(zone.id).length" class="empty-log">
+                Sin eventos reales para esta zona.
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </article>
+    </section>
+
+    <p v-else class="empty-state">Este almacen todavia no tiene zonas registradas.</p>
   </div>
 </template>
 
 <style scoped>
-.lm-page {
+.live-page {
   color: #e6edf3;
-  width: 100%;
-  height: calc(100vh - 140px); /* altura fija restando topbar + padding del layout */
   display: flex;
   flex-direction: column;
-}
-
-.lm-back-link { display: inline-block; color: #8b949e; font-size: 0.82rem; cursor: pointer; margin-bottom: 10px; transition: color 0.15s; }
-.lm-back-link:hover { color: #2d8cff; }
-
-.lm-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
-.lm-title { font-size: 1.8rem; font-weight: 700; margin: 0; color: #e6edf3; }
-.lm-badge-live { background-color: #ef4444; color: white; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 4px; animation: pulse-live 1.5s ease-in-out infinite; }
-@keyframes pulse-live { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-
-.lm-subtitle { font-size: 0.9rem; color: #8b949e; margin: 0 0 20px 0; }
-
-.lm-body {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 20px;
-  flex: 1;        /* ← ocupa el espacio restante */
-  min-height: 0;  /* ← clave para que flex respete el overflow */
-  overflow: hidden;
-}
-
-.lm-map-panel {
+  gap: 16px;
+  min-height: calc(100vh - 140px);
   position: relative;
-  background-color: #161b22;
+  width: 100%;
+}
+
+.back-link {
+  align-self: flex-start;
+  background: transparent;
+  border: 0;
+  color: #8b949e;
+  cursor: pointer;
+  font-size: 0.84rem;
+  padding: 0;
+}
+
+.back-link:hover {
+  color: #2d8cff;
+}
+
+.live-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.live-header h1 {
+  color: #e6edf3;
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.live-header p {
+  color: #8b949e;
+  margin: 4px 0 0;
+}
+
+.live-badge {
+  animation: pulse 1.6s infinite;
+  background: #ef4444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 6px 12px;
+}
+
+@keyframes pulse {
+  50% { opacity: 0.65; }
+}
+
+.zoom-controls {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.zoom-controls button {
+  background: #1c2230;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #e6edf3;
+  cursor: pointer;
+  height: 32px;
+  width: 32px;
+}
+
+.zone-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.zone-card {
+  background: #0f172a;
   border: 1px solid #21262d;
   border-radius: 10px;
+  padding: 16px;
+}
+
+.zone-title {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.zone-title h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.zone-title span {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.zone-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+}
+
+.map-panel,
+.log-panel {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 10px;
+  min-height: 260px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
-.lm-map-wrapper { flex: 1; overflow: hidden; padding: 20px; }
-.lm-map { position: relative; width: 100%; height: 100%; min-height: 320px; transition: transform 0.2s ease; }
-.map-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(45,140,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(45,140,255,0.06) 1px, transparent 1px); background-size: 40px 40px; }
-.map-zone { position: absolute; border: 1.5px solid rgba(45,140,255,0.4); border-radius: 4px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; color: #2d8cff; padding: 6px 10px; }
-.zone-carga { top: 20%; left: 10%; width: 40%; height: 55%; }
-.zone-inventario { top: 20%; left: 52%; width: 35%; height: 55%; }
-
-.sensor-pin { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 10; }
-.sensor-pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); display: block; }
-.dot-rojo { background-color: #ef4444; animation: pulse-sensor 1.2s infinite; }
-.dot-amarillo { background-color: #f59e0b; animation: pulse-sensor-yellow 1.2s infinite; }
-.dot-verde { background-color: #22c55e; }
-@keyframes pulse-sensor { 0%, 100% { box-shadow: 0 0 6px #ef4444; } 50% { box-shadow: 0 0 16px #ef4444; } }
-@keyframes pulse-sensor-yellow { 0%, 100% { box-shadow: 0 0 6px #f59e0b; } 50% { box-shadow: 0 0 16px #f59e0b; } }
-.sensor-pin-label { background-color: rgba(13,17,23,0.85); color: #e6edf3; font-size: 0.68rem; padding: 2px 6px; border-radius: 3px; white-space: nowrap; border: 1px solid #21262d; }
-
-.zoom-controls { position: absolute; top: 16px; right: 16px; display: flex; flex-direction: column; gap: 2px; }
-.zoom-btn { width: 32px; height: 32px; background-color: #1c2230; border: 1px solid #30363d; border-radius: 4px; color: #e6edf3; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.zoom-btn:hover { background-color: #2d8cff; }
-
-.lm-log-panel {
-  background-color: #1c2230;
-  border: 1px solid #21262d;
-  border-radius: 10px;
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 0;   /* ← clave */
-  overflow: hidden; /* ← no crece */
+.map {
+  height: 260px;
+  position: relative;
+  transition: transform 0.2s ease;
 }
 
-.log-title { font-size: 0.9rem; font-weight: 600; color: #e6edf3; margin: 0; flex-shrink: 0; }
+.map-grid {
+  background-image:
+      linear-gradient(rgba(45, 140, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(45, 140, 255, 0.08) 1px, transparent 1px);
+  background-size: 38px 38px;
+  inset: 0;
+  position: absolute;
+}
 
-.log-list {
+.sensor-pin {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.sensor-dot {
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  height: 16px;
+  width: 16px;
+}
+
+.dot-green {
+  background: #22c55e;
+}
+
+.dot-red {
+  animation: alertPulse 1.2s infinite;
+  background: #ef4444;
+}
+
+@keyframes alertPulse {
+  50% { box-shadow: 0 0 18px #ef4444; }
+}
+
+.sensor-label {
+  background: rgba(13, 17, 23, 0.88);
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #e6edf3;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+.map-empty {
+  color: #8b949e;
+  left: 50%;
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.log-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+}
+
+.log-panel h3 {
+  font-size: 0.9rem;
+  margin: 0 0 10px;
+}
+
+.log-panel ul {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
   list-style: none;
   margin: 0;
+  overflow-y: auto;
   padding: 0;
-  flex: 1;          /* ← ocupa espacio disponible */
-  min-height: 0;    /* ← clave para scroll interno */
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  overflow-y: auto; /* ← scroll solo aquí adentro */
 }
 
-.log-entry { display: flex; gap: 10px; padding: 8px 10px; border-radius: 6px; border-bottom: 1px solid #21262d; flex-shrink: 0; }
-.log-entry:last-child { border-bottom: none; }
-.log-entry--latest { background-color: rgba(45,140,255,0.12); border-left: 3px solid #2d8cff; }
-.log-tiempo { font-size: 0.72rem; color: #6e7681; white-space: nowrap; padding-top: 2px; min-width: 52px; }
-.log-body { display: flex; flex-direction: column; gap: 2px; }
-.log-titulo { font-size: 0.84rem; font-weight: 600; color: #e6edf3; }
-.log-desc { font-size: 0.76rem; color: #8b949e; }
+.log-panel li {
+  border-bottom: 1px solid #21262d;
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+}
 
-.btn-lockdown { background-color: #ef4444; color: white; border: none; border-radius: 6px; padding: 12px; font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%; flex-shrink: 0; }
-.btn-lockdown:hover { background-color: #dc2626; }
+.log-panel li.latest {
+  background: rgba(45, 140, 255, 0.12);
+  border-left: 3px solid #2d8cff;
+}
 
-@media (max-width: 900px) { .lm-body { grid-template-columns: 1fr; } }
+.log-panel li > span {
+  color: #6e7681;
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  min-width: 56px;
+}
+
+.log-panel strong,
+.log-panel small {
+  display: block;
+}
+
+.log-panel strong {
+  color: #e6edf3;
+  font-size: 0.82rem;
+}
+
+.log-panel small {
+  color: #8b949e;
+  font-size: 0.75rem;
+}
+
+.empty-log,
+.empty-state {
+  color: #8b949e;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .zone-content {
+    grid-template-columns: 1fr;
+  }
+}
 </style>

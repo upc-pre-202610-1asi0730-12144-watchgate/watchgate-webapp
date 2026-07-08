@@ -12,6 +12,7 @@ const { signIn } = store;
 
 const email = ref('');
 const password = ref('');
+const showPassword = ref(false);
 const isSubmitting = ref(false);
 const errorMessage = ref('');
 
@@ -69,10 +70,14 @@ const onSignIn = () => {
             <label>{{ t('iam.signIn.passwordLabel') }}</label>
             <pv-input-text
                 v-model="password"
-                type="password"
+                :type="showPassword ? 'text' : 'password'"
                 placeholder="••••••••"
                 class="custom-input"
             />
+            <button type="button" class="password-toggle-inline" @click="showPassword = !showPassword">
+              <i :class="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" />
+              {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+            </button>
           </div>
 
           <transition name="fade">
@@ -200,6 +205,24 @@ const onSignIn = () => {
 
 :deep(.custom-input::placeholder) {
   color: #64748B;
+}
+
+.password-toggle-inline {
+  align-items: center;
+  align-self: flex-end;
+  background: transparent;
+  border: 0;
+  color: #3B82F6;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.78rem;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+  padding: 0;
+}
+
+.password-toggle-inline:hover {
+  color: #93c5fd;
 }
 
 .error-message {
