@@ -8,11 +8,11 @@ const iamStore = useIamStore();
 
 const items = computed(() => [
   { key: 'nav.warehouses', to: '/layout/warehouses', visible: true },
-  { key: 'nav.devices', to: '/layout/devices', visible: true },
-  { key: 'nav.team', to: '/layout/team-access', visible: iamStore.isAdministrator || iamStore.canManageOperations },
+  { key: 'nav.devices', to: '/layout/devices', visible: iamStore.canManageSensors || iamStore.canManageAlerts },
+  { key: 'nav.team', to: '/layout/team-access', visible: iamStore.canManageTeam },
   { key: 'nav.events', to: '/layout/history', visible: true },
-  { key: 'nav.alerts', to: '/layout/alerts', visible: iamStore.canManageSecurity },
-  { key: 'nav.reports', to: '/layout/reports', visible: true },
+  { key: 'nav.alerts', to: '/layout/alerts', visible: iamStore.canManageAlerts },
+  { key: 'nav.reports', to: '/layout/reports', visible: iamStore.canViewReports },
   { key: 'nav.subscription', to: '/layout/subscription', visible: iamStore.canManageBilling }
 ].filter(item => item.visible));
 </script>

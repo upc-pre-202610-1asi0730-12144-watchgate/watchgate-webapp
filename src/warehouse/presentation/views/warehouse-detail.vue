@@ -51,6 +51,11 @@ const zoneErrorMessage = ref('');
 function onCreateZone() {
   zoneErrorMessage.value = '';
 
+  if (!iamStore.canManageWarehouses) {
+    zoneErrorMessage.value = t('warehouse-detail.zones.errors.forbidden');
+    return;
+  }
+
   if (!zoneForm.value.name || !zoneForm.value.area) {
     zoneErrorMessage.value = t('warehouse-detail.zones.errors.required');
     return;
@@ -166,7 +171,11 @@ function goToHistory() {
         </div>
       </div>
 
-      <form class="zone-form" @submit.prevent="onCreateZone">
+      <p v-if="!iamStore.canManageWarehouses" class="empty-msg">
+        {{ t('warehouse-detail.zones.readOnly') }}
+      </p>
+
+      <form v-else class="zone-form" @submit.prevent="onCreateZone">
         <div class="field">
           <label>{{ t('warehouse-detail.zones.nameLabel') }}</label>
           <pv-input-text

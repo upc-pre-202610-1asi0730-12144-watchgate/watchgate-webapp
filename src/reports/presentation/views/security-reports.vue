@@ -2,17 +2,22 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ReportsApi } from '../../infrastructure/reports-api.js';
+import { AlertsApi } from '../../../alerts/infrastructure/alerts-api.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useWarehouseStore } from '../../../warehouse/application/warehouse.store.js';
+import { useDevicesStore } from '../../../devices/application/devices.store.js';
 
 const reportsApi = new ReportsApi();
+const alertsApi = new AlertsApi();
 const { t } = useI18n();
 const iamStore = useIamStore();
 const warehouseStore = useWarehouseStore();
+const devicesStore = useDevicesStore();
 
 const dashboard = ref(null);
 const reports = ref([]);
 const scheduledReports = ref([]);
+const activeAlerts = ref([]);
 const loading = ref(false);
 const generating = ref(false);
 const scheduling = ref(false);
@@ -43,6 +48,10 @@ const warehouseOptions = computed(() => [
   ...warehouseStore.warehouses.map(warehouse => ({ value: warehouse.id, label: warehouse.name })),
 ]);
 
+const allZones = computed(() => warehouseStore.warehouses.flatMap(warehouse =>
+    warehouse.zones.map(zone => ({ ...zone, warehouseName: warehouse.name }))
+));
+
 function loadReports() {
   const companyId = iamStore.currentUser?.companyId;
   if (!companyId) return Promise.resolve();
@@ -56,11 +65,17 @@ function loadReports() {
 
   return warehousesPromise
       .then(() => Promise.all([
+        devicesStore.devicesLoaded ? Promise.resolve(devicesStore.devices) : devicesStore.fetchDevices(companyId),
+        alertsApi.getByCompanyId(companyId),
         reportsApi.getDashboard(companyId),
         reportsApi.getReportsByCompanyId(companyId),
         reportsApi.getScheduledByCompanyId(companyId),
       ]))
-      .then(([dashboardData, reportData, scheduledData]) => {
+      .then(([, alertsData, dashboardData, reportData, scheduledData]) => {
+        activeAlerts.value = alertsData
+            .filter(alert => !['RESOLVED', 'FALSE_ALARM'].includes(alert.status))
+            .sort((a, b) => new Date(b.triggeredAt) - new Date(a.triggeredAt))
+            .slice(0, 5);
         dashboard.value = dashboardData;
         reports.value = reportData.sort((a, b) => new Date(b.generatedAt) - new Date(a.generatedAt));
         scheduledReports.value = scheduledData.sort((a, b) => new Date(b.startsAt) - new Date(a.startsAt));
@@ -153,6 +168,14 @@ function formatDate(value) {
   return value ? new Date(value).toLocaleString() : '-';
 }
 
+function alertLocation(alert) {
+  const sensor = devicesStore.devices.find(device => device.id === alert.sensorId);
+  const zone = allZones.value.find(item => item.id === sensor?.zoneId);
+  if (!sensor) return t('reports.alertSnapshot.unknownSensor');
+  if (!zone) return sensor.name;
+  return `${sensor.name} - ${zone.warehouseName} / ${zone.name}`;
+}
+
 onMounted(() => {
   if (!iamStore.sessionLoading) loadReports();
 });
@@ -206,6 +229,21 @@ watch(() => iamStore.sessionLoading, (loading) => {
         </label>
         <button type="submit" :disabled="generating">{{ generating ? t('reports.actions.generating') : t('reports.actions.generate') }}</button>
       </form>
+    </section>
+
+    <section class="panel">
+      <h2>{{ t('reports.alertSnapshot.title') }}</h2>
+      <div v-if="!activeAlerts.length" class="empty">{{ t('reports.alertSnapshot.empty') }}</div>
+      <div v-else class="alerts-snapshot">
+        <article v-for="alert in activeAlerts" :key="alert.id" class="snapshot-card">
+          <div>
+            <strong>{{ alert.type }}</strong>
+            <p>{{ alert.description }}</p>
+            <small>{{ alertLocation(alert) }} - {{ formatDate(alert.triggeredAt) }}</small>
+          </div>
+          <span>{{ alert.severity }} / {{ alert.status }}</span>
+        </article>
+      </div>
     </section>
 
     <p v-if="errorMessage" class="message error">{{ errorMessage }}</p>
@@ -305,6 +343,11 @@ button:disabled { opacity: 0.65; cursor: progress; }
 .message { border-radius: 8px; padding: 0.8rem 1rem; margin: 0; }
 .error { background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); }
 .success { background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.35); }
+.alerts-snapshot { display: flex; flex-direction: column; gap: 0.75rem; }
+.snapshot-card { background: #0a1726; border: 1px solid #1e2d42; border-radius: 8px; display: flex; justify-content: space-between; gap: 1rem; padding: 1rem; }
+.snapshot-card strong { color: #fff; }
+.snapshot-card p { color: #cbd5e1; margin: 0.35rem 0; }
+.snapshot-card span { align-self: flex-start; background: #1e293b; border-radius: 999px; color: #93c5fd; font-size: 0.76rem; font-weight: 800; padding: 0.2rem 0.55rem; white-space: nowrap; }
 .reports-list { display: flex; flex-direction: column; gap: 0.75rem; }
 .report-card { display: flex; justify-content: space-between; gap: 1rem; background: #0a1726; border: 1px solid #1e2d42; border-radius: 8px; padding: 1rem; }
 .report-card h3 { margin-bottom: 0.4rem; font-size: 1rem; }
@@ -314,7 +357,7 @@ button:disabled { opacity: 0.65; cursor: progress; }
 .actions button { background: transparent; border: 1px solid #334155; }
 @media (max-width: 900px) {
   .metrics, .report-form, .schedule-form { grid-template-columns: 1fr; }
-  .report-card { flex-direction: column; }
+  .report-card, .snapshot-card { flex-direction: column; }
   .actions { justify-content: flex-start; }
 }
 </style>

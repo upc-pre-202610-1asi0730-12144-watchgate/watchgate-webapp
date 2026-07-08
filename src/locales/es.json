@@ -4,7 +4,8 @@
     "inactiveUpper": "INACTIVO",
     "pendingUpper": "PENDIENTE",
     "saving": "Guardando...",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "readOnly": "Solo lectura"
   },
   "errors": {
     "occurred": "Ocurrió un error"
@@ -91,6 +92,16 @@
     "apiOnline": "API en línea",
     "apiOffline": "API sin conexión"
   },
+  "profile": {
+    "guest": "Invitado",
+    "role": "Rol",
+    "company": "Empresa",
+    "permissions": "Permisos",
+    "noPermissions": "Sin permisos",
+    "subscription": "Plan y facturación",
+    "settingsSoon": "Configuración próximamente",
+    "logout": "Cerrar sesión"
+  },
   "warehouses": {
     "title": "Mis almacenes",
     "register": "Registrar almacén",
@@ -124,7 +135,8 @@
       "cancel": "Cancelar",
       "errors": {
         "required": "El nombre, la ubicación y la capacidad son obligatorios.",
-        "creationFailed": "Ocurrió un error al crear el almacén."
+        "creationFailed": "Ocurrió un error al crear el almacén.",
+        "forbidden": "Tu rol no puede crear almacenes."
       }
     }
   },
@@ -155,9 +167,11 @@
         "high": "Alto"
       },
       "submit": "Agregar zona",
+      "readOnly": "Tu rol puede revisar zonas, pero no puede crearlas ni editarlas.",
       "errors": {
         "required": "El nombre y el área son obligatorios.",
-        "creationFailed": "Ocurrió un error al crear la zona."
+        "creationFailed": "Ocurrió un error al crear la zona.",
+        "forbidden": "Tu rol no puede crear zonas de almacén."
       }
     }
   },
@@ -183,12 +197,16 @@
     "usageUnit": "disp.",
     "sectionSensors": "Sensores de acceso",
     "sectionCameras": "Cámaras CCTV",
+    "unassignedWarehouse": "Almacén sin asignar",
     "empty": "Aún no hay dispositivos registrados.",
     "menu": "Opciones",
     "actions": {
       "recordReading": "Registrar lectura",
+      "recordReadingHint": "Registra una lectura simulada del sensor.",
       "toggleStatus": "Cambiar estado",
+      "toggleStatusHint": "Cambia el sensor entre en línea y fuera de línea.",
       "unlink": "Desvincular dispositivo",
+      "unlinkHint": "Desvincula este dispositivo IoT de su zona asignada.",
       "readingPrompt": "Ingresa el valor de lectura simulada",
       "unlinkConfirm": "¿Desvincular {name} de su zona?"
     },
@@ -331,6 +349,8 @@
       "title": "Seguimiento de incidentes",
       "name": "Nombre del incidente",
       "priority": "Prioridad",
+      "relatedAlert": "Alerta relacionada",
+      "noRelatedAlert": "Sin alerta relacionada",
       "descriptionPlaceholder": "Ej. Movimiento en zona restringida requiere seguimiento manual",
       "create": "Crear incidente",
       "listTitle": "Incidentes registrados",
@@ -368,6 +388,11 @@
       "warehouse": "Almacén",
       "format": "Formato",
       "allWarehouses": "Todos los almacenes"
+    },
+    "alertSnapshot": {
+      "title": "Resumen de alertas activas",
+      "empty": "No hay alertas activas para incluir en el reporte.",
+      "unknownSensor": "Sensor desconocido"
     },
     "schedule": {
       "title": "Programar reporte periódico",

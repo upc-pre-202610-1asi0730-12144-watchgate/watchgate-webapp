@@ -4,7 +4,8 @@
     "inactiveUpper": "INACTIVE",
     "pendingUpper": "PENDING",
     "saving": "Saving...",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "readOnly": "Read-only"
   },
   "errors": {
     "occurred": "An error occurred"
@@ -91,6 +92,16 @@
     "apiOnline": "API online",
     "apiOffline": "API offline"
   },
+  "profile": {
+    "guest": "Guest",
+    "role": "Role",
+    "company": "Company",
+    "permissions": "Permissions",
+    "noPermissions": "No permissions",
+    "subscription": "Plan and billing",
+    "settingsSoon": "Settings soon",
+    "logout": "Logout"
+  },
   "warehouses": {
     "title": "My Warehouses",
     "register": "Register Warehouse",
@@ -124,7 +135,8 @@
       "cancel": "Cancel",
       "errors": {
         "required": "Name, location and capacity are required.",
-        "creationFailed": "An error occurred while creating the warehouse."
+        "creationFailed": "An error occurred while creating the warehouse.",
+        "forbidden": "Your role cannot create warehouses."
       }
     }
   },
@@ -155,9 +167,11 @@
         "high": "High"
       },
       "submit": "Add Zone",
+      "readOnly": "Your role can review zones, but cannot create or edit them.",
       "errors": {
         "required": "Name and area are required.",
-        "creationFailed": "An error occurred while creating the zone."
+        "creationFailed": "An error occurred while creating the zone.",
+        "forbidden": "Your role cannot create warehouse zones."
       }
     }
   },
@@ -183,12 +197,16 @@
     "usageUnit": "dev.",
     "sectionSensors": "Access Sensors",
     "sectionCameras": "CCTV Cameras",
+    "unassignedWarehouse": "Unassigned warehouse",
     "empty": "No devices registered yet.",
     "menu": "Options",
     "actions": {
       "recordReading": "Record reading",
+      "recordReadingHint": "Register a simulated sensor reading.",
       "toggleStatus": "Toggle status",
+      "toggleStatusHint": "Switch the sensor between online and offline.",
       "unlink": "Unlink device",
+      "unlinkHint": "Detach this IoT device from its assigned zone.",
       "readingPrompt": "Enter simulated reading value",
       "unlinkConfirm": "Unlink {name} from its zone?"
     },
@@ -331,6 +349,8 @@
       "title": "Incident follow-up",
       "name": "Incident name",
       "priority": "Priority",
+      "relatedAlert": "Related alert",
+      "noRelatedAlert": "No related alert",
       "descriptionPlaceholder": "e.g. Restricted zone motion required manual follow-up",
       "create": "Create incident",
       "listTitle": "Registered incidents",
@@ -368,6 +388,11 @@
       "warehouse": "Warehouse",
       "format": "Format",
       "allWarehouses": "All warehouses"
+    },
+    "alertSnapshot": {
+      "title": "Active alert snapshot",
+      "empty": "There are no active alerts to include in the report.",
+      "unknownSensor": "Unknown sensor"
     },
     "schedule": {
       "title": "Schedule periodic report",

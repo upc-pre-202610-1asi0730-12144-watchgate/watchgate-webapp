@@ -115,6 +115,12 @@ export const useWarehouseStore = defineStore('warehouse', () => {
         });
     }
 
+    function reset() {
+        warehouses.value = [];
+        errors.value = [];
+        warehousesLoaded.value = false;
+    }
+
     return {
         warehouses,
         errors,
@@ -125,6 +131,7 @@ export const useWarehouseStore = defineStore('warehouse', () => {
         createWarehouse,
         createZone,
         deactivateWarehouse,
-        deleteWarehouse
+        deleteWarehouse,
+        reset
     };
 });

@@ -4,11 +4,13 @@ import { useI18n } from 'vue-i18n';
 import { AlertsApi } from '../../infrastructure/alerts-api.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useDevicesStore } from '../../../devices/application/devices.store.js';
+import { useWarehouseStore } from '../../../warehouse/application/warehouse.store.js';
 
 const alertsApi = new AlertsApi();
 const { t } = useI18n();
 const iamStore = useIamStore();
 const devicesStore = useDevicesStore();
+const warehouseStore = useWarehouseStore();
 
 const alerts = ref([]);
 const incidents = ref([]);
@@ -28,6 +30,7 @@ const incidentForm = ref({
   title: 'Restricted zone incident',
   description: '',
   priority: 'HIGH',
+  relatedAlertId: null,
 });
 
 const alertTypes = computed(() => [
@@ -47,6 +50,16 @@ const severities = computed(() => [
 const openAlerts = computed(() => alerts.value.filter(alert => alert.status !== 'RESOLVED').length);
 const criticalAlerts = computed(() => alerts.value.filter(alert => ['HIGH', 'CRITICAL'].includes(alert.severity)).length);
 const openIncidents = computed(() => incidents.value.filter(incident => incident.status !== 'CLOSED').length);
+const allZones = computed(() => warehouseStore.warehouses.flatMap(warehouse =>
+    warehouse.zones.map(zone => ({ ...zone, warehouseName: warehouse.name }))
+));
+const incidentAlertOptions = computed(() => alerts.value
+    .filter(alert => alert.status !== 'RESOLVED')
+    .map(alert => ({
+      value: alert.id,
+      label: `${alert.type} - ${sensorLabel(alert.sensorId)}`
+    }))
+);
 
 function loadAlerts() {
   const companyId = iamStore.currentUser?.companyId;
@@ -82,10 +95,14 @@ function loadIncidents() {
 
 function loadDevices() {
   const companyId = iamStore.currentUser?.companyId;
-  if (companyId && !devicesStore.devicesLoaded) {
-    return devicesStore.fetchDevices(companyId);
+  if (!companyId) return Promise.resolve();
+  const warehousesPromise = warehouseStore.warehousesLoaded
+      ? Promise.resolve()
+      : warehouseStore.fetchWarehouses(companyId);
+  if (!devicesStore.devicesLoaded) {
+    return warehousesPromise.then(() => devicesStore.fetchDevices(companyId));
   }
-  return Promise.resolve();
+  return warehousesPromise;
 }
 
 function ensureData() {
@@ -94,6 +111,7 @@ function ensureData() {
 }
 
 function createAlert() {
+  if (!iamStore.canManageAlerts) return;
   const companyId = iamStore.currentUser?.companyId;
   if (!companyId || !form.value.sensorId || !form.value.description.trim()) {
     errorMessage.value = t('alerts.messages.required');
@@ -113,6 +131,7 @@ function createAlert() {
   }).then(created => {
     alerts.value = [created, ...alerts.value];
     form.value.description = '';
+    incidentForm.value.relatedAlertId = created.id;
     successMessage.value = t('alerts.messages.created');
   }).catch(error => {
     console.error(error);
@@ -123,6 +142,7 @@ function createAlert() {
 }
 
 function updateAlert(alertId, action) {
+  if (!iamStore.canManageAlerts) return;
   errorMessage.value = '';
   successMessage.value = '';
   action(alertId)
@@ -141,6 +161,7 @@ function classify(alert, severity) {
 }
 
 function createIncident() {
+  if (!iamStore.canManageAlerts) return;
   const companyId = iamStore.currentUser?.companyId;
   if (!companyId || !incidentForm.value.title.trim() || !incidentForm.value.description.trim()) {
     errorMessage.value = t('alerts.messages.incidentRequired');
@@ -156,6 +177,7 @@ function createIncident() {
     description: incidentForm.value.description.trim(),
     priority: incidentForm.value.priority,
     companyId,
+    relatedAlertId: incidentForm.value.relatedAlertId ? Number(incidentForm.value.relatedAlertId) : null,
   }).then(created => {
     incidents.value = [created, ...incidents.value];
     incidentForm.value.description = '';
@@ -169,6 +191,7 @@ function createIncident() {
 }
 
 function closeIncident(incidentId) {
+  if (!iamStore.canManageAlerts) return;
   alertsApi.closeIncident(incidentId)
       .then(updated => {
         incidents.value = incidents.value.map(incident => incident.id === updated.id ? updated : incident);
@@ -182,7 +205,9 @@ function closeIncident(incidentId) {
 
 function sensorLabel(sensorId) {
   const sensor = devicesStore.devices.find(device => device.id === sensorId);
-  return sensor ? sensor.name : `${t('alerts.form.sensor')} ${sensorId}`;
+  if (!sensor) return `${t('alerts.form.sensor')} ${sensorId}`;
+  const zone = allZones.value.find(item => item.id === sensor.zoneId);
+  return zone ? `${sensor.name} - ${zone.warehouseName} / ${zone.name}` : sensor.name;
 }
 
 function formatDate(value) {
@@ -208,7 +233,7 @@ watch(() => iamStore.sessionLoading, ensureData);
       </div>
     </header>
 
-    <section class="panel">
+    <section v-if="iamStore.canManageAlerts" class="panel">
       <h2>{{ t('alerts.form.title') }}</h2>
       <form class="alert-form" @submit.prevent="createAlert">
         <label>
@@ -228,7 +253,7 @@ watch(() => iamStore.sessionLoading, ensureData);
           <select v-model="form.sensorId">
             <option :value="null">{{ t('alerts.form.sensorPlaceholder') }}</option>
             <option v-for="device in devicesStore.devices" :key="device.id" :value="device.id">
-              {{ device.name }} - {{ device.type }}
+              {{ sensorLabel(device.id) }} - {{ device.type }}
             </option>
           </select>
         </label>
@@ -241,7 +266,7 @@ watch(() => iamStore.sessionLoading, ensureData);
       <p v-if="!devicesStore.devices.length" class="hint">{{ t('alerts.form.noDevices') }}</p>
     </section>
 
-    <section class="panel">
+    <section v-if="iamStore.canManageAlerts" class="panel">
       <h2>{{ t('alerts.incidents.title') }}</h2>
       <form class="incident-form" @submit.prevent="createIncident">
         <label>
@@ -254,6 +279,15 @@ watch(() => iamStore.sessionLoading, ensureData);
             <option value="LOW">{{ t('alerts.severities.low') }}</option>
             <option value="MEDIUM">{{ t('alerts.severities.medium') }}</option>
             <option value="HIGH">{{ t('alerts.severities.high') }}</option>
+          </select>
+        </label>
+        <label>
+          {{ t('alerts.incidents.relatedAlert') }}
+          <select v-model="incidentForm.relatedAlertId">
+            <option :value="null">{{ t('alerts.incidents.noRelatedAlert') }}</option>
+            <option v-for="alert in incidentAlertOptions" :key="alert.value" :value="alert.value">
+              {{ alert.label }}
+            </option>
           </select>
         </label>
         <label class="description-field">
@@ -281,12 +315,12 @@ watch(() => iamStore.sessionLoading, ensureData);
           </div>
           <div class="alert-side">
             <span class="status">{{ alert.status }}</span>
-            <button @click="updateAlert(alert.id, alertsApi.acknowledge.bind(alertsApi))">{{ t('alerts.actions.acknowledge') }}</button>
-            <button @click="updateAlert(alert.id, alertsApi.markAsAttended.bind(alertsApi))">{{ t('alerts.actions.attend') }}</button>
-            <button @click="updateAlert(alert.id, alertsApi.escalate.bind(alertsApi))">{{ t('alerts.actions.escalate') }}</button>
-            <button @click="updateAlert(alert.id, alertsApi.flagAsFalseAlarm.bind(alertsApi))">{{ t('alerts.actions.falseAlarm') }}</button>
-            <button @click="updateAlert(alert.id, alertsApi.resolve.bind(alertsApi))">{{ t('alerts.actions.resolve') }}</button>
-            <button @click="classify(alert, 'CRITICAL')">{{ t('alerts.actions.classifyCritical') }}</button>
+            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.acknowledge.bind(alertsApi))">{{ t('alerts.actions.acknowledge') }}</button>
+            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.markAsAttended.bind(alertsApi))">{{ t('alerts.actions.attend') }}</button>
+            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.escalate.bind(alertsApi))">{{ t('alerts.actions.escalate') }}</button>
+            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.flagAsFalseAlarm.bind(alertsApi))">{{ t('alerts.actions.falseAlarm') }}</button>
+            <button v-if="iamStore.canManageAlerts" @click="updateAlert(alert.id, alertsApi.resolve.bind(alertsApi))">{{ t('alerts.actions.resolve') }}</button>
+            <button v-if="iamStore.canManageAlerts" @click="classify(alert, 'CRITICAL')">{{ t('alerts.actions.classifyCritical') }}</button>
           </div>
         </article>
       </div>
@@ -305,7 +339,7 @@ watch(() => iamStore.sessionLoading, ensureData);
           </div>
           <div class="alert-side">
             <span class="status">{{ incident.status }}</span>
-            <button :disabled="incident.status === 'CLOSED'" @click="closeIncident(incident.id)">
+            <button v-if="iamStore.canManageAlerts" :disabled="incident.status === 'CLOSED'" @click="closeIncident(incident.id)">
               {{ t('alerts.incidents.close') }}
             </button>
           </div>

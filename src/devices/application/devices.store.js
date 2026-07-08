@@ -103,6 +103,14 @@ export const useDevicesStore = defineStore('devices', () => {
         deviceLimit.value = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 4;
     }
 
+    function reset() {
+        devices.value = [];
+        loading.value = false;
+        error.value = null;
+        devicesLoaded.value = false;
+        deviceLimit.value = 4;
+    }
+
     return {
         devices,
         loading,
@@ -118,5 +126,6 @@ export const useDevicesStore = defineStore('devices', () => {
         updateDeviceStatus,
         recordDeviceReading,
         unlinkDevice,
+        reset,
     };
 });

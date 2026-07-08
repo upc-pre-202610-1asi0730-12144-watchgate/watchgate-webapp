@@ -6,14 +6,16 @@
  * On submit, creates the warehouse through the store and redirects back
  * to the warehouse list.
  */
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useWarehouseStore } from '../../application/warehouse.store.js';
+import { useIamStore } from '../../../iam/application/iam.store.js';
 
 const { t } = useI18n();
 const router = useRouter();
 const store = useWarehouseStore();
+const iamStore = useIamStore();
 const { createWarehouse } = store;
 
 const form = ref({
@@ -33,6 +35,11 @@ function goToList() {
 
 function onSubmit() {
   errorMessage.value = '';
+
+  if (!iamStore.canManageWarehouses) {
+    errorMessage.value = t('warehouses.registerForm.errors.forbidden');
+    return;
+  }
 
   if (!form.value.name || !form.value.location || !form.value.capacity) {
     errorMessage.value = t('warehouses.registerForm.errors.required');
@@ -61,6 +68,10 @@ function onSubmit() {
         isSubmitting.value = false;
       });
 }
+
+onMounted(() => {
+  if (!iamStore.canManageWarehouses) goToList();
+});
 </script>
 
 <template>

@@ -35,10 +35,12 @@ function goToDetail(warehouseId) {
 }
 
 function goToRegister() {
+  if (!iamStore.canManageWarehouses) return;
   router.push({ name: 'warehouse-register' });
 }
 
 function deactivate(warehouse) {
+  if (!iamStore.canManageWarehouses) return;
   if (!window.confirm(t('warehouses.confirmDeactivate', { name: warehouse.name }))) return;
   deactivateWarehouse(warehouse.id);
 }
@@ -54,7 +56,7 @@ function remove(warehouse) {
   <div class="warehouse-list-view">
     <h1 class="page-title">{{ t('warehouses.title') }}</h1>
 
-    <button class="btn-register" @click="goToRegister">
+    <button v-if="iamStore.canManageWarehouses" class="btn-register" @click="goToRegister">
       {{ t('warehouses.register') }}
     </button>
 
@@ -127,7 +129,7 @@ function remove(warehouse) {
             {{ t('warehouses.attend') }}
           </button>
           <button
-              v-if="iamStore.canManageOperations"
+              v-if="iamStore.canManageWarehouses"
               class="btn-muted"
               type="button"
               @click.stop="deactivate(warehouse)"
